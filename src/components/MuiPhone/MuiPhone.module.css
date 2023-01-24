@@ -1,0 +1,4 @@
+.CountryFlag:after {
+    content: attr(data-country-code);
+  }
+  

@@ -1,0 +1,454 @@
+/* @font-face {
+  font-family: 'Montserrat';
+  src: url(https://fonts.googleapis.com/css2?family=Montserrat:wght@200;400&display=swap);
+} */
+/* @import url(https://fonts.googleapis.com/css2?family=Montserrat:wght@200;400&display=swap); */
+
+* {
+  margin: 0;
+  padding: 0;
+  text-decoration: none;
+}
+.login_background{
+  background-image: url('/images/imgpsh_fullsize_anim.png');
+}
+
+body {
+  font-family: 'Montserrat' !important;
+  color: #393939;
+  /* font-variation-settings: "wght" 700; */
+  font-style: normal;
+
+  
+}
+/* .MuiToolbar-root, .MuiToolbar-gutters, .MuiToolbar-regular, .MuiTablePagination-toolbar, .css-78c6dr-MuiToolbar-root-MuiTablePagination-toolbar {
+  display: flex;
+  justify-content: left;
+} */
+.css-1ygcj2i-MuiTableCell-root {
+ padding-left: 28px;
+ text-transform: uppercase;
+}
+.MuiTypography-root, .MuiButtonBase-root, .css-1ygcj2i-MuiTableCell-root, .css-pdct74-MuiTablePagination-selectLabel, .css-1ex1afd-MuiTableCell-root, .MuiPaper-root, .MuiPaper-elevation, .MuiPaper-rounded, .MuiPaper-elevation1, .css-1633um2-MuiPaper-root  {
+  font-family: 'Montserrat' !important;
+}
+
+.page_header {
+  font-size: 45px;
+  font-weight: 700;
+}
+.page_header_two {
+  font-size: 36px;
+  font-weight: 700;
+}
+.page_sub_header{
+  font-size: 25px !important;
+  font-weight: 700 !important;
+}
+
+.page_sub_content_header{
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.page_sub_outlineless_text_btn{
+  font-size: 18px;
+  font-weight: 500;
+}
+.table_right_side_data{
+  /* font-size: 20px; */
+  font-size: 14px;
+  font-weight: 600;
+}
+.table_left_side_data{
+  font-size: 14px;
+  font-weight: 400;
+}
+
+.tbl_default_data_style {
+  font-size: 14;
+}
+
+.check_box_label{
+  font-size: 17px;
+  font-weight: 700;
+}
+.check_box_label_subtext{
+  font-size: 16px;
+  font-weight: 500;
+}
+.container {
+  display: flex;
+  width: 100%;
+}
+
+main {
+  width: 100%;
+  /* padding: 20px; */
+}
+
+.sidebar {
+  background: white;
+  color: #fff;
+  height: 100vh;
+  width: 200px;
+  transition: all 0.5s;
+}
+
+.top_section {
+  /* display: flex;
+  align-items:center;
+  padding:20px 15px; */
+  padding-top: 20px;
+  text-align: center;
+}
+
+.logo {
+  font-size: 30px;
+}
+
+.bars {
+  display: flex;
+  font-size: 25px;
+  margin-left: 50px;
+}
+
+.link {
+  display: flex;
+  color: #1478F1;
+  padding: 10px 15px;
+  gap: 15px;
+  transition: all 0.5s;
+}
+
+.link:hover {
+  background: #1478F1;
+  color: white;
+  transition: all 0.5s;
+  cursor: pointer;
+}
+
+.active {
+  background: lightskyblue;
+  color: #000;
+}
+
+.icon,
+.link_text {
+  font-size: 14px;
+}
+
+.pagecontainer {
+  background-color: #F0F7FF;
+  border-left: 1px solid #D3D3D3;
+}
+
+.logoimg:hover {
+  cursor: pointer;
+}
+
+.footer {
+  display: flex;
+}
+
+.footer_sidebar {
+  width: 300px;
+}
+
+.footer_content {
+  /* background-color: #F0F7FF;
+  border-left: 1px solid #D3D3D3;
+  width: 100%; */
+  padding-left: 40px;
+  font-size: 14px;
+  padding-top: 20px;
+  padding-bottom: 20px;
+  border-top: 1px solid #D3D3D3;
+}
+
+.gridroot {
+  /* background: linear-gradient(45deg, #9013FE 15%, #50E3C2 90%); */
+  background-color: #F0F7FF;
+  min-width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.edit_profile {
+  color: #1478F1;
+  font-size: 12px;
+  margin-top: 3px;
+}
+
+.capitalize {
+  text-transform: capitalize;
+}
+
+.name_font {
+  font-size: 20px;
+  text-transform: uppercase;
+}
+
+.topmargin {
+  border-bottom: 1px solid #D9D9D9;
+}
+
+.verified_label {
+  padding: 2px 8px;
+  background-color: lightgreen;
+  margin-left: 10px;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+.helpIcon{
+  position: relative;
+  top: 6px;
+  left: 6px;
+}
+
+.Typography{
+  font-size: 21;
+  font-weight: 700;
+}
+
+.MuiPaper-root, .MuiPaper-elevation, .MuiPaper-rounded, .MuiPaper-elevation1, .css-1633um2-MuiPaper-root {
+border: none;
+box-shadow: none;
+}
+
+.MuiGrid-root , .MuiGrid-item , .MuiGrid-grid-xs-3 , .css-1equabv-MuiGrid-root {
+  padding: 2px!important;
+}
+
+.MuiGrid-root, .css-f09aq2-MuiGrid-root {
+margin-bottom: 0px;
+}
+
+ .css-dxt3pg-MuiPaper-root-MuiCard-root {
+border: #000 1px dashed;
+}
+
+.MuiButtonBase-root, .MuiButton-root, .MuiButton-contained, .MuiButton-containedPrimary, .MuiButton-sizeMedium, .MuiButton-containedSizeMedium, .MuiButton-root, .MuiButton-contained, .MuiButton-containedPrimary, .MuiButton-sizeMedium, .MuiButton-containedSizeMedium, .check_box_label_subtext, .css-sghohy-MuiButtonBase-root-MuiButton-root {
+
+  text-transform: capitalize;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+ .hover_effect :hover{
+  background-color: #1478F1;
+  color: #fff !important;
+}
+
+.phon_number_field_border_effect{
+border: solid 1px !important;
+}
+
+ .css-gnya7v {
+ 
+  display: inline-flex;
+  justify-content: right;
+}
+
+.MuiAvatarGroup-root, .css-1ytufz-MuiAvatarGroup-root {
+ display: inline-flex;
+ justify-content: right;
+}
+
+.remove_x_padding {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+
+
+/* .MuiGrid-root, .MuiGrid-item, .MuiGrid-grid-xs-3, .css-1equabv-MuiGrid-root {
+padding: 0px;
+} */
+
+.MuiGrid-root, .MuiGrid-container, .css-10cbsmk-MuiGrid-root {
+  line-height: 25.2px;
+}
+
+.css-1l4n418-MuiAvatarGroup-root {
+  background-color: aqua;
+  margin-bottom: 10px;
+}
+
+.avatarPicSet {
+  position: absolute;
+  left:28;
+ 
+ padding-bottom: 35px;
+ 
+  /* padding-left: 105px;
+  padding-bottom: 10px; */
+}
+
+/* .css-4zd2u1-MuiStack-root {
+padding-left: 10px;
+} */
+
+.css-fjn2ef-MuiTypography-root {
+  font-weight: 700;
+}
+
+/* .MuiTableCell-root, .MuiTableCell-body, .MuiTableCell-alignLeft, .MuiTableCell-sizeMedium, .css-1ex1afd-MuiTableCell-root {
+  font-weight: 600;
+  font-size: 20;
+  }
+.MuiTableCell-root, .MuiTableCell-body, .MuiTableCell-sizeMedium, .css-1ex1afd-MuiTableCell-root, .table_left_data {
+  font-size: 20px;
+  font-weight: 400;
+} */
+
+.application_Contact_table_left_data {
+  font-size: 19px !important;
+  font-weight: 400 !important;
+}
+.application_Contact_table_right_data {
+  font-size: 19px !important;
+  font-weight: 600 !important;
+}
+
+.table_right_data{
+  font-weight: 600;
+}
+
+/* .hover_effects:hover {
+color: #fff;
+background-color: #1478F1;
+} */
+
+/* ifActive:active {
+  color: #fff;
+  background-color: #1478F1; 
+} */
+
+.nationwide-drag-drop {
+  min-height: 150px;;
+}
+.nationwide-drag-drop svg{
+  display: none;
+}
+
+.nationwide-drag-drop .file-types {
+  display: none;
+}
+
+.nationwide-drag-drop span {
+  width: 100%;
+  text-align: center;
+  font-size: 16px;
+}
+
+/* .MuiTableRow-root, .MuiTableRow-head, .css-1q1u3t4-MuiTableRow-root {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+} */
+
+/* .MuiTable-root, .css-quj9j6-MuiTable-root {
+padding-left: 0 !important;
+padding-right: 0 !important;
+} */
+/* Treeview sidebar styles */
+/* .MuiTreeView-root {
+  color: #1478F1;
+  overflow: visible;
+}
+
+.MuiTreeItem-content {
+  flex-direction: row-reverse;
+  padding: 10px 0;
+}
+
+.MuiTreeItem-content:hover {
+  background-color: #1478F1 !important;
+  color: white;
+}
+
+.MuiTreeItem-iconContainer {
+  margin-right: 10px;
+}
+
+.MuiTreeItem-label {
+  margin-left: 15px;
+}
+
+.Mui-selected {
+  background-color: #1478F1 !important;
+  color: white;
+} */
+
+/* /Treeview sidebar styles */
+
+.leftDataTeamAssignmen {
+  padding-left: 65px !important;
+}
+
+.MuiAvatarGroup-root, .css-1lx9n-MuiAvatarGroup-root, .teamAssignmentAvatarGroup {
+  padding-left: 55px !important;
+}
+
+.changeStatus_btn1, .css-1brn0l2-MuiButtonBase-root-MuiButton-root {
+background-color: #1478F1 !important;
+color: #fff !important;
+
+}
+
+.css-l9v9p6-MuiStack-root, #applicationDataRelatedSubHead {
+  padding-left: 0;
+}
+
+.contact-list-row:hover {
+  cursor: pointer;
+  background-color: #e6e6e6;
+}
+
+.nwInput input {
+  background-color: #fff!important;
+  padding: 10px;
+}
+
+.nwInput input:-webkit-autofill,
+.nwInput input:-webkit-autofill:hover,
+.nwInput input:-webkit-autofill:focus,
+.nwInput input:-webkit-autofill:active {
+    transition: background-color 5000s ease-in-out 0s;
+    /* -webkit-text-fill-color: #fff !important; */
+}
+
+.myButtonClzStyle {
+  font-size: 16px !important;
+  font-weight: 700 !important;
+  text-transform: capitalize !important;
+}
+
+.profileImg {
+  cursor: pointer;
+  position: relative;
+}
+.profileImg:hover > div::after {
+  position: absolute;
+  content: "";
+  text-align: center;
+  vertical-align: middle;
+  top: 0;
+  right: 0;
+  left: 0;
+  bottom: 0;
+  background-color: rgba(0,0,0,0.3);
+}
+.profileImg svg {
+  opacity: 0;
+  position: absolute;
+  top: 34%;
+  left: 28%;
+}
+.profileImg:hover svg {
+  opacity: 1;
+}

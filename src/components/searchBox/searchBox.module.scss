@@ -1,0 +1,17 @@
+.search {
+    position: relative;
+    .input {
+        width:100%;
+        label,input {
+           padding-left: 30px;
+           font-size: 12px;
+        }
+    }
+    .icon {
+        position: absolute;
+        left: 0;
+        transform: translate(0, 14px) scale(1);
+
+    }
+}
+

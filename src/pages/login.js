@@ -127,7 +127,7 @@ const Login = () => {
                         fontStyle: "normal",
                       }}
                     >
-                      Emai <span style={{ color: "#FF0000" }}>*</span>
+                      Email <span style={{ color: "#FF0000" }}>*</span>
                     </Typography>
                   </label>
 

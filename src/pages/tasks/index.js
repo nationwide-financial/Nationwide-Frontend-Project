@@ -98,8 +98,9 @@ const Tasks = () => {
   
   return (
     <div style={{ padding: 20 }}>
+      <Box>
       {loading ? <div style={{marginTop:40}}><CircularProgress /></div> : <div style={{marginTop:40}}>
-        <Box>
+        <Box style={{margin:20,padding:20}}>
           {error && <Snackbar open={error.type} autoHideDuration={6000} onClose={() => setError({})}>
             <Alert severity={error.type}>{error.message}</Alert>
           </Snackbar>}
@@ -111,7 +112,7 @@ const Tasks = () => {
                 </div>
               </Grid>
             </Grid>
-            <Grid container item spacing={3}>
+            <Grid container item spacing={3} mt={4}>
               <Grid item xs={4}>
                 <SearchBox />
                 {/* <TextField
@@ -146,24 +147,24 @@ const Tasks = () => {
               </Grid>
             </Grid>
           </Grid>
-          <Grid container spacing={1} mt={10}>
+          <Grid container spacing={2} mt={10}>
             <Grid container sx={{ height: 40 }}>
-              <Grid item xs={2}>
+              <Grid item xs={1}>
                 <Typography sx={{ color: '#858585', fontWeight: 'bold' }}>
                   Status
                 </Typography>
               </Grid>
-              <Grid item xs={2} style={{ display: "flex", justifyContent: "left" }}>
+              <Grid item xs={3}>
                 <Typography sx={{ color: '#858585', fontWeight: 'bold' }}>
                   Assigned to
                 </Typography>
               </Grid>
-              <Grid item xs={2} pl={1}>
+              <Grid item xs={2} >
                 <Typography sx={{ color: '#858585', fontWeight: 'bold' }}>
                   DESCRIPTION
                 </Typography>
               </Grid>
-              <Grid item xs={1}>
+              <Grid item xs={2}>
                 <Typography sx={{ color: '#858585', fontWeight: 'bold' }}>
                   APPLICATION
                 </Typography>
@@ -187,7 +188,7 @@ const Tasks = () => {
                 handleOpenModify()
               }} >
 
-                <Grid item xs={2} key={key}>
+                <Grid item xs={1} key={key}>
                 
                 <span
                     className="verified_label"
@@ -210,7 +211,7 @@ const Tasks = () => {
                   </span>
 
                 </Grid>
-                <Grid item xs={2}>
+                <Grid item xs={3}>
                   {/* <AvatarGroup max={3} sx={{ width: 30, height: 5 }}>
               <Avatar alt='avatar2' src='./images/avatar2.png ' />
               <Avatar alt='avatar1' src='./images/avatar1.png' />
@@ -226,9 +227,9 @@ const Tasks = () => {
                     {task?.description}
                   </Typography>
                 </Grid>
-                <Grid item xs={1}>
+                <Grid item xs={2}>
                   <Typography sx={{ color: '#858585' }}>
-                    {/* {task?.application} */}
+                    {task?.application}
                   </Typography>
                 </Grid>
                 <Grid item xs={2}>
@@ -278,6 +279,7 @@ const Tasks = () => {
           </Box>
         </Modal>
       </div>
+      </Box>
     </div>
   )
 }

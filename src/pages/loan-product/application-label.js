@@ -334,7 +334,7 @@ function ApplicationLabel() {
   };
   return (
     <>
-      <Box>
+      <Box style={{ padding: 40 }}>
         <Grid container p={6} mt={1} mb={4}>
           <Snackbar
             open={openSuccessMessage}

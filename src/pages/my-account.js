@@ -22,7 +22,7 @@ import { _upoadProfilePic } from '../services/authServices';
 import { s3URL } from "../utils/config";
 
 const MyAccount = () => {
-    const { state, dispatch } = useContext(Context);
+    const { state, dispatch} = useContext(Context);
 
     useEffect(() => {
         setProfileInfo({

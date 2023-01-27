@@ -443,7 +443,7 @@ function EditApplicationForm() {
     try {
       const res = await _getAllPlatformUserByAdmin(1, 100);
       if (res?.status == 200) {
-        return res.data?.users?.results;
+        return res.data?.users;
       }
     } catch (err) {
       console.log(err);

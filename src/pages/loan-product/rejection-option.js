@@ -20,8 +20,13 @@ import TableRow from "@mui/material/TableRow";
 import NoteAltOutlinedIcon from "@mui/icons-material/NoteAltOutlined";
 import Link from "@mui/material/Link";
 import Stack from "@mui/material/Stack";
+import CircularProgress from '@mui/material/CircularProgress';
+import { _updateRejections } from '../../services/applicationService'
 
-import { _gatReason } from "../../services/rejectionOptionService";
+
+
+import { _getApplications } from '../../services/applicationService'
+import { FastForward } from "@mui/icons-material";
 function topcreateData(leftData, rightData) {
   return { leftData, rightData };
 }
@@ -45,16 +50,72 @@ const downrows = [
 ];
 
 function RejectionOption() {
-  const [reason, setReson] = useState([]);
-  useEffect(() => {
-    async function getData() {
-      const data = await _gatReason();
+  const [applications, setApplications] = useState([]);
+  const [loading, setLoading] = useState('');
+  const [rejectionUpdateMsg, setRejectionUpdateMsg] = useState();
+  const [trigger,setTrigger] = useState(false)
+  const [appId,setAppId]=useState('');
+  const [days, setDays] = useState(0);
+  const [reason,setReason]=useState('');
+  const [checkedReasonAuto, setCheckedReasonAuto] = useState(false);
+  const [userInputs, setUserInputs] = useState({});
 
-      setReson(data.data.data.Items);
-      console.log(reason);
+  const [declineRejectionsUpdateSwitch, setdeclineRejectionsUpdateSwitch] = useState(false);
+  const [automatedRejectionsUpdateSwitch, setAutomatedRejectionsUpdateSwitch] = useState(false);
+
+  async function getData() {
+    try{
+      let inputs={}
+      const data = await _getApplications();
+      console.log("_getApplications",data) 
+      setApplications(data.data.data.Items);
+      data.data.data.Items.map((val)=>{
+       if(val?.applicationRejection){
+        inputs[`REASOIN_${val.PK}`] = val?.applicationRejection?.reason;
+        inputs[`DAYS_${val.PK}`] = val?.applicationRejection?.days;
+        inputs[`AUTO_${val.PK}`] = val?.applicationRejection?.auto;
+       }  
+      })
+      setUserInputs({...inputs})
+    }catch(err){
+      console.log(err)
     }
-    getData();
+  }
+  console.log("userInputs",userInputs)
+  const onChangeHandler = useCallback(({ target }) => {
+    setUserInputs((state) => ({ ...state, [target.name]: target.value }));
   }, []);
+  const updateRejection = async (id,days,auto,reason) =>{
+    console.log("id,days,auto,reason",id,"  ",days,"  ",auto,"  ",reason)
+    try{
+      let body = {
+          applicationRejection: {
+          auto: auto,
+          days: days,
+          reason: reason
+        }
+      }
+      setLoading(id)
+      const res = await _updateRejections(id,body)
+      setLoading("")
+      console.log("_updateRejections",res)
+      if(res?.status == 200){
+        handleCloseRejectionPopup();
+        setRejectionUpdateMsg({ severity: 'success', message: 'Rejection Reasion updated' })
+      }else{
+        setRejectionUpdateMsg({ severity: 'error', message: 'Rejection Reasion update failed' })
+      }
+      setDays(0);
+      setReason('');
+    }catch(err){
+      console.log(err)
+    }
+  }
+  useEffect(() => {
+    getData();
+  }, [trigger]);
+
+
   return (
     <Box
       style={{
@@ -76,18 +137,28 @@ function RejectionOption() {
             <Typography variant="h5" className=" page_sub_header">
               <span>Decline Reasons</span>
             </Typography>
-
-            <Link href="#" className="page_sub_outlineless_text_btn">
-              <Stack
-                direction="row"
-                spacing={1}
-                mt={1}
-                style={{ fontSize: 18, fontWeight: 500 }}
-              >
-                <NoteAltOutlinedIcon mt={1} />
-                <Typography> Edit Decline Reasons </Typography>
-              </Stack>
-            </Link>
+            {declineRejectionsUpdateSwitch
+              ? <Button variant="contained" onClick={() => {
+                setdeclineRejectionsUpdateSwitch((declineRejectionsUpdateSwitch) => !declineRejectionsUpdateSwitch)
+                setDays(0);
+                setReason('');
+              }}>Cancel</Button>
+              : <Link href="#" onClick={() => {
+                setdeclineRejectionsUpdateSwitch((declineRejectionsUpdateSwitch) => !declineRejectionsUpdateSwitch)
+                setDays(0);
+                setReason('');
+              }}
+                className="page_sub_outlineless_text_btn">
+                <Stack
+                  direction="row"
+                  spacing={1}
+                  mt={1}
+                  style={{ fontSize: 18, fontWeight: 500 }}
+                >
+                  <NoteAltOutlinedIcon mt={1} />
+                  <Typography> Edit Decline Reasons </Typography>
+                </Stack>
+              </Link>}
           </Stack>
         </Grid>
 
@@ -98,40 +169,71 @@ function RejectionOption() {
             </Grid>
             <Table aria-label="simple table">
               <TableBody>
-                {reason.map(
-                  (row, key) =>
-                    row.auto_ == false && (
-                      <TableRow
-                        key={key}
-                        sx={{
-                          "&:last-child td, &:last-child th": { border: 0 },
-                        }}
-                      >
-                        <TableCell
-                          component="th"
-                          scope="row"
-                          style={{
-                            fontSize: 16,
-                            fontWeight: 500,
-                            color: "#858585",
-                            paddingLeft: 0,
-                          }}
-                        >
-                          {row.label}
-                        </TableCell>
-                        <TableCell
-                          align="left"
-                          style={{
-                            fontSize: 16,
-                            fontWeight: 600,
-                            color: "#858585",
-                          }}
-                        >
-                          {row.description}
-                        </TableCell>
-                      </TableRow>
-                    )
-                )}
+               {applications && applications.map((application,key)=>{
+                if( application?.applicationRejection && application?.applicationRejection?.auto == false){
+                  return  ( <TableRow
+                    key={key}  
+                    sx={{
+                      "&:last-child td, &:last-child th": { border: 0 },
+                    }}
+                  >
+                    <TableCell
+                      component="th"
+                      scope="row"
+                      style={{
+                        fontSize: 16,
+                        fontWeight: 500,
+                        color: "#858585",
+                        paddingLeft: 0,
+                      }}
+                    >
+                      {"Decline Reason"}
+                    </TableCell>
+                    {declineRejectionsUpdateSwitch 
+                    ? <div>
+                      <TextField
+                        name={`REASOIN_${application.PK}`}
+                        type="text"
+                        onChange={onChangeHandler}
+                        value={(userInputs && userInputs[`REASOIN_${application.PK}`]) || ""}
+                        fullWidth
+                        size="small"
+                        margin="normal"
+                        id="outlined-basic"
+                        placeholder="reasion"
+                        variant="outlined"
+                        multiline
+                        rows={3}
+                        style={{width:500}}
+                      />
+                      <br />
+                      <Button variant="contained" onClick={ async () => {
+                       await updateRejection(application.PK,0,false,(userInputs && userInputs[`REASOIN_${application.PK}`]) )
+                       await setdeclineRejectionsUpdateSwitch(false)
+                       setTrigger((trigger)=>!trigger)
+                      }}>
+                        Save 
+                     {application.PK == loading && <CircularProgress style={{ height:20,width:20, marginLeft:10,color:"white" }}/>} 
+                      </Button>
+                    </div>
+                    : <TableCell
+                      align="left"
+                      style={{
+                        fontSize: 16,
+                        fontWeight: 600,
+                        color: "#858585",
+                      }}
+                    >
+                      {application?.applicationRejection?.reason}
+                    </TableCell>}
+                   
+                   
+                  </TableRow>)
+                }
+                
+               })}
+                     
+              
               </TableBody>
             </Table>
             <Grid item xs={8} sx={{ paddingTop: 1, paddingBottom: 1 }}>
@@ -151,12 +253,28 @@ function RejectionOption() {
             <Typography variant="h5" className=" page_sub_header">
               <span>Automated Rejections</span>
             </Typography>
-            <Link href="#" className="page_sub_outlineless_text_btn">
-              <Stack direction="row" spacing={1} mt={1}>
-                <NoteAltOutlinedIcon mt={4} />
-                <Typography>Edit Automated Rejections</Typography>
-              </Stack>
-            </Link>
+            {automatedRejectionsUpdateSwitch
+              ? <Button variant="contained" onClick={() => {
+                setAutomatedRejectionsUpdateSwitch((automatedRejectionsUpdateSwitch) => !automatedRejectionsUpdateSwitch)
+                setDays(0);
+                setReason('');
+              }}>Cancel</Button>
+              : <Link href="#" onClick={() => {
+                setAutomatedRejectionsUpdateSwitch((automatedRejectionsUpdateSwitch) => !automatedRejectionsUpdateSwitch)
+                setDays(0);
+                setReason('');
+              }}
+                className="page_sub_outlineless_text_btn">
+                <Stack
+                  direction="row"
+                  spacing={1}
+                  mt={1}
+                  style={{ fontSize: 18, fontWeight: 500 }}
+                >
+                  <NoteAltOutlinedIcon mt={1} />
+                  <Typography> Edit Automated Rejections </Typography>
+                </Stack>
+              </Link>}
           </Stack>
         </Grid>
 
@@ -167,71 +285,113 @@ function RejectionOption() {
             </Grid>
             <Table aria-label="simple table">
               <TableBody>
-                {reason.map(
-                  (row, key) =>
-                    row.auto_ == true && (
-                      <div key={key}>
-                        <TableRow
-                          sx={{
-                            "&:last-child td, &:last-child th": { border: 0 },
-                          }}
-                          style={{ fontSize: 16, fontWeight: 500 }}
-                        >
-                          <TableCell
-                            component="th"
-                            scope="row"
-                            style={{
-                              fontSize: 16,
-                              fontWeight: 500,
-                              color: "#858585",
-                              paddingLeft: 0,
-                            }}
-                          >
-                            {"Reject in Process Applications After"}
-                          </TableCell>
-                          <TableCell
-                            align="left"
-                            style={{
-                              fontSize: 16,
-                              fontWeight: 600,
-                              color: "#858585",
-                            }}
-                          >
-                            {`${row.days} days`}
-                          </TableCell>
-                        </TableRow>
-                        <TableRow
-                          sx={{
-                            "&:last-child td, &:last-child th": { border: 0 },
-                          }}
-                          style={{ fontSize: 16, fontWeight: 500 }}
-                        >
-                          <TableCell
-                            component="th"
-                            scope="row"
-                            style={{
-                              fontSize: 16,
-                              fontWeight: 500,
-                              color: "#858585",
-                              paddingLeft: 0,
-                            }}
-                          >
-                            {row.label}
-                          </TableCell>
-                          <TableCell
-                            align="left"
-                            style={{
-                              fontSize: 16,
-                              fontWeight: 600,
-                              color: "#858585",
-                            }}
-                          >
-                            {row.description}
-                          </TableCell>
-                        </TableRow>
-                      </div>
-                    )
-                )}
+              {applications && applications.map((application,key)=>{
+                if( application?.applicationRejection && application?.applicationRejection?.auto == true){
+                  return ( <div >
+                    <TableRow
+                      sx={{
+                        "&:last-child td, &:last-child th": { border: 0 },
+                      }}
+                      style={{ fontSize: 16, fontWeight: 500 }}
+                    >
+                      <TableCell
+                        component="th"
+                        scope="row"
+                        style={{
+                          fontSize: 16,
+                          fontWeight: 500,
+                          color: "#858585",
+                          paddingLeft: 0,
+                        }}
+                      >
+                        {"Reject in Process Applications After"}
+                      </TableCell>
+                      {automatedRejectionsUpdateSwitch ? <div>
+                        <TextField
+                        name={`DAYS_${application.PK}`}
+                        type="number"
+                        onChange={onChangeHandler}
+                        value={(userInputs && userInputs[`DAYS_${application.PK}`]) || ""}
+                        fullWidth
+                        size="small"
+                        margin="normal"
+                        id="outlined-basic"
+                        placeholder="days"
+                        variant="outlined"
+                        style={{width:500}}
+                      />
+                      </div>: <TableCell
+                        align="left"
+                        style={{
+                          fontSize: 16,
+                          fontWeight: 600,
+                          color: "#858585",
+                        }}
+                      >
+                        {`${application?.applicationRejection?.days} days`}
+                      </TableCell>}
+                     
+                    </TableRow>
+                    <TableRow
+                      sx={{
+                        "&:last-child td, &:last-child th": { border: 0 },
+                      }}
+                      style={{ fontSize: 16, fontWeight: 500 }}
+                    >
+                      <TableCell
+                        component="th"
+                        scope="row"
+                        style={{
+                          fontSize: 16,
+                          fontWeight: 500,
+                          color: "#858585",
+                          paddingLeft: 0,
+                        }}
+                      >
+                        {"Decline Reason"}
+                      </TableCell>
+
+                      {automatedRejectionsUpdateSwitch ? <div>
+                        <TextField
+                        name={`REASOIN_${application.PK}`}
+                        type="text"
+                        onChange={onChangeHandler}
+                        value={(userInputs && userInputs[`REASOIN_${application.PK}`]) || ""}
+                        fullWidth
+                        size="small"
+                        margin="normal"
+                        id="outlined-basic"
+                        placeholder="reasion"
+                        variant="outlined"
+                        multiline
+                        rows={3}
+                        style={{width:500}}
+                      />
+                      <br />
+                      <Button variant="contained" onClick={ async () => {
+                      setLoading(application.PK)
+                       await updateRejection(application.PK,userInputs && userInputs[`DAYS_${application.PK}`],true,userInputs && userInputs[`REASOIN_${application.PK}`])
+                       await setAutomatedRejectionsUpdateSwitch(false)
+                       setTrigger((trigger)=>!trigger)
+                      }}>
+                        Save 
+                     {application.PK == loading && <CircularProgress style={{ height:20,width:20, marginLeft:10,color:"white" }}/>} 
+                      </Button>
+                      </div>: 
+                      <TableCell
+                        align="left"
+                        style={{
+                          fontSize: 16,
+                          fontWeight: 600,
+                          color: "#858585",
+                        }}
+                      >
+                        {application?.applicationRejection?.reason}
+                      </TableCell>}
+                    </TableRow>
+                  </div>)
+                }})}
+                  
               </TableBody>
             </Table>
             <Grid item xs={8} sx={{ paddingTop: 1, paddingBottom: 1 }}>

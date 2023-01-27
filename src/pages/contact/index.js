@@ -415,19 +415,16 @@ function Contact() {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {(rowsPerPage > 0
-                      ? contactData.slice(
+                    {contactData?.filter((data) => {
+                        if (searchKey == "") {
+                          return data;
+                        } else {
+                          return data?.basicInformation?.email.toLowerCase().includes(searchKey.toLocaleLowerCase());
+                        }
+                      }).slice(
                         page * rowsPerPage,
                         page * rowsPerPage + rowsPerPage
-                      )
-                      : contactData?.filter((data)=>{
-                        if(searchKey == ''){
-                          return data;
-                        }else{
-                          return data?.basicInformation?.email?.toLowerCase().includes(searchKey.toLocaleLowerCase()) ;
-                        }
-                      })
-                    ).map((row) => {
+                      ).map((row) => {
                       const basicInfo = row.basicInformation;
                       return (
                         <TableRow className="contact-list-row" key={row.name} onClick={() => handleClickContact(row.PK)}>
@@ -443,11 +440,7 @@ function Contact() {
                       )
                     })}
 
-                    {emptyRows > 0 && (
-                      <TableRow style={{ height: 53 * emptyRows }}>
-                        <TableCell colSpan={6} />
-                      </TableRow>
-                    )}
+                    
                   </TableBody>
                   <TableFooter>
                     <TableRow>

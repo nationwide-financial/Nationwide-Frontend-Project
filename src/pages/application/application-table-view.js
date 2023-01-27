@@ -1,4 +1,4 @@
-import React from "react";
+import React ,{useState,useEffect}from "react";
 import {
   Avatar,
   Box,
@@ -45,6 +45,13 @@ import LoanApplicatioTable from "../../components/table/table";
 const label = { inputProps: { "aria-label": "Checkbox demo" } };
 import { useRouter } from "next/router";
 import LoanAppDialogFormController from "../../components/applicationTableDialogboxFormController/loanApplicationDialogFormController";
+import { s3URL } from '../../utils/config'
+import { _getAllPlatformUserByAdmin } from '../../services/authServices'
+import { _getApplications } from '../../services/applicationService';
+import { _listLabel } from '../../services/labelService'
+import { _fetchAllContacts } from '../../services/contactServices'
+
+
 
 const Item = styled(Paper)(({ theme }) => ({
   backgroundColor: theme.palette.mode === "dark" ? "#1A2027" : "#fff",
@@ -117,7 +124,8 @@ const card = (
 
 function ApplicationTableView() {
   // const [value, setValue] = useState("t");
-
+  const [tableData,setTableData]=useState([])
+  const [teamMembersArr, setTeamMembersArr] = useState([]);
   const [open, setOpen] = React.useState(false);
   const router = useRouter();
 
@@ -192,6 +200,99 @@ function ApplicationTableView() {
       }),
     },
   }));
+  async function getLabels() {
+    try{
+      const response = await _listLabel();
+      // console.log("_listLabel",response);
+      return  response.data.data.Items
+      
+    }catch(err){
+      console.log(err)
+    } 
+  }
+
+  async function getTableData(){
+    try{
+      const res = await _getApplications();
+     // console.log("resresresresresres",res)
+    //  console.log(res?.data?.data?.Items)
+      let tableDt = await res?.data?.data?.Items.sort((a,b) => (a.createTime < b.createTime) ? 1 : ((b.createTime < a.createTime) ? -1 : 0));
+     
+      console.log("_getApplications",tableDt)
+      mergeDocuments(tableDt)
+    }catch(err){
+      console.log(err)
+    }
+  }
+
+const mergeDocuments = async (tempApplications) =>{
+    try{
+      const res = await _getAllPlatformUserByAdmin()
+      const resContact = await _fetchAllContacts();
+      console.log("_fetchAllContacts",resContact?.data?.Items)
+      let tempUsers = res?.data?.users;
+      console.log("tempApplications",tempApplications)
+      console.log("tempUsers",tempUsers)
+      let userIds = [];
+      let teamMembers = [];
+      await tempApplications.map( async (tempApplications)=>{
+        console.log("tempApplications",tempApplications?.members)
+        if(tempApplications?.members){
+         await userIds.push(...tempApplications?.members)
+        }
+      })
+      let removedduplicatesUsers = [...new Set(userIds)];
+      console.log("removedduplicatesUsers",removedduplicatesUsers)
+      await removedduplicatesUsers.map( async (id)=>{
+        let tempU = await tempUsers.filter((user)=> user?.PK == 'USER#'+id)
+        teamMembers.push(...tempU)
+      })
+      console.log("teamMembers",teamMembers)
+      setTeamMembersArr([...teamMembers])
+
+      let labelsArr = await getLabels();
+      console.log("labels",labelsArr)
+
+      let tableDataArry =[];
+      await tempApplications.map((application) => {
+        let object ={}
+        let team=[];
+        let labels = [];
+        let contact = {};
+        object.application = application
+        if (application?.members){
+          application?.members.map((user)=>{
+            console.log("user",user)
+            team.push(...teamMembers.filter((member)=>{ return member?.PK == 'USER#'+user}));
+          })
+          object.teamArr = team;
+        }
+        
+        if (application?.appLabel){
+          application?.appLabel.map((applabel)=>{
+            console.log("label",label)
+            labels.push(...labelsArr.filter((label)=>{ return label?.PK == applabel}));
+          })
+          object.labelArr = labels;
+        }
+
+        if (application?.contactId){
+            console.log("contactId",application?.contactId)
+            object.contact= resContact?.data?.Items.filter((con)=>{ return con?.PK == application?.contactId[0]})[0]; 
+        }
+        tableDataArry.push(object)
+      })
+      console.log("tableDataArry",tableDataArry)
+      setTableData([...tableDataArry])
+    }catch(err){
+      console.log(err)
+    }
+  }
+
+ useEffect(() => {
+  getTableData();
+ }, []);
+
 
   return (
     <div>
@@ -268,14 +369,19 @@ function ApplicationTableView() {
           </Grid>
           {/* active-user-display-section */}
           <Grid item xs={12} md={1}>
-            <AvatarGroup total={9}>
+            <AvatarGroup total={teamMembersArr.length}>
+            {teamMembersArr && teamMembersArr.map((user)=>{
+                return(
+                  <Avatar alt={user?.PK.split("#")[1]} src={`${s3URL}/${user?.imageId}`} />
+                )
+              })}
               <Avatar alt="Remy Sharp" src="/static/images/avatar/1.jpg" />
-              <Avatar alt="Travis Howard" src="/static/images/avatar/2.jpg" />
+              {/* <Avatar alt="Travis Howard" src="/static/images/avatar/2.jpg" />
               <Avatar alt="Agnes Walker" src="/static/images/avatar/4.jpg" />
               <Avatar
                 alt="Trevor Henderson"
                 src="/static/images/avatar/5.jpg"
-              />
+              /> */}
             </AvatarGroup>
           </Grid>
           {/* other-icon-set */}
@@ -295,6 +401,9 @@ function ApplicationTableView() {
                         borderColor: "gray",
                         padding: 2,
                         marginRight: 2,
+                      }}
+                      onClick={()=>{
+                        router.push('/application/dashbord')
                       }}
                       aria-label="save"
                       style={{ transform: "rotate(360deg)" }}
@@ -361,7 +470,7 @@ function ApplicationTableView() {
         {/*body-content  */}
         <Grid container spacing={2} mt={2}>
           <Grid item xs={12}>
-            <LoanApplicatioTable />
+            <LoanApplicatioTable applications={tableData} />
           </Grid>
         </Grid>
       </Box>

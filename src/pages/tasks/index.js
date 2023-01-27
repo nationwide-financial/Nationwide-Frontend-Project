@@ -38,6 +38,7 @@ const Tasks = () => {
   const [taskData, setTaskData] = useState([]);
   const [error, setError] = useState({});
   const [loading, setLoading] = useState(false);
+  const [searchKey, setSearchKey] = useState("");
   
   const [selectTask,setSelectTask] = useState()
   const [openModify, setOpenModify] = useState(false);
@@ -114,12 +115,15 @@ const Tasks = () => {
             </Grid>
             <Grid container item spacing={3} mt={4}>
               <Grid item xs={4}>
-                <SearchBox />
-                {/* <TextField
+                {/* <SearchBox /> */}
+                <TextField
                   id='input-with-icon-textfield'
                   variant='standard'
                   fullWidth
-                  sx={{ width: 700 }}
+                  onChange={(e)=>{
+                    setSearchKey(e.target.value)
+                  }}
+                  sx={{ width: 300 }}
                   placeholder={'Search'}
                   InputProps={{
                     startAdornment: (
@@ -128,22 +132,22 @@ const Tasks = () => {
                       </InputAdornment>
                     ),
                   }}
-                /> */}
+                />
               </Grid>
               <Grid item xs={4}>
-                <div>
+                {/* <div>
                   <AvatarGroup max={4} sx={{ alignItems: 'flex-start' }}>
                     <Avatar alt='avatar2' src='./images/avatar2.png ' />
                     <Avatar alt='avatar1' src='./images/avatar1.png' />
                     <Avatar alt='avatar3' src='./images/avatar3.png' />
                     <Avatar alt='avatar4' src='./images/avatar4.png' />
                   </AvatarGroup>
-                </div>
+                </div> */}
               </Grid>
               <Grid item xs={4} alignItems='flex-end'>
-                <div style={{ paddingLeft: 20, marginLeft: 300 }}>
+                {/* <div style={{ paddingLeft: 20, marginLeft: 300 }}>
                   <TuneIcon />
-                </div>
+                </div> */}
               </Grid>
             </Grid>
           </Grid>
@@ -181,7 +185,13 @@ const Tasks = () => {
               </Grid>
              
             </Grid>
-            {taskData?.map((task, key) => {
+            {taskData?.filter((data) => {
+            if (searchKey == "") {
+              return data;
+            } else {
+              return data?.description.toLowerCase().includes(searchKey.toLocaleLowerCase());
+            }
+          }).map((task, key) => {
               return (<Grid key={key} container mt={1} onClick={()=>{
                 console.log(task)
                 setSelectTask(task)

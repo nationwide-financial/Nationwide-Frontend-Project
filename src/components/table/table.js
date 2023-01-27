@@ -20,8 +20,9 @@ import AvatarGroup from "@mui/material/AvatarGroup";
 import Stack from "@mui/material/Stack";
 import TableHead from "@mui/material/TableHead";
 import { useRouter } from "next/router";
+import { s3URL } from '../../utils/config'
 
-import { _getApplications } from '../../services/applicationService.js';
+
 
 import { useState, useEffect, useCallback } from "react";
 import {
@@ -33,6 +34,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import { Label } from "recharts";
 
 const nameAndBarSet = (
   <React.Fragment>
@@ -144,158 +146,158 @@ TablePaginationActions.propTypes = {
   rowsPerPage: PropTypes.number.isRequired,
 };
 
-function createData(
-  contact,
-  applicationId,
-  applicationDate,
-  status,
-  email,
-  teamMembers,
-  loanAmount
-) {
-  return {
-    contact,
-    applicationId,
-    applicationDate,
-    status,
-    email,
-    teamMembers,
-    loanAmount,
-  };
-}
+// function createData(
+//   contact,
+//   applicationId,
+//   applicationDate,
+//   status,
+//   email,
+//   teamMembers,
+//   loanAmount
+// ) {
+//   return {
+//     contact,
+//     applicationId,
+//     applicationDate,
+//     status,
+//     email,
+//     teamMembers,
+//     loanAmount,
+//   };
+// }
 
-const rows = [
-  createData(
-    nameAndBarSet,
-    "NF0120323",
-    <Stack direction="row" spacing={2}>
-      <span>Dec 19,2021 11.24 AM</span>
-    </Stack>,
-    "New Opportunities",
-    "janecooper@example.com",
-    avatarSet,
-    "$32,600 "
-  ),
-  createData(
-    nameAndBarSet,
-    "NF0120323",
-    <Stack direction="row" spacing={2}>
-      <span>Dec 19,2021 11.24 AM</span>
-    </Stack>,
-    "New Opportunities",
-    "janecooper@example.com",
-    avatarSet,
-    "$32,600 "
-  ),
-  createData(
-    nameAndBarSet,
-    "NF0120323",
-    <Stack direction="row" spacing={2}>
-      <span>Dec 19,2021 11.24 AM</span>
-    </Stack>,
-    "New Opportunities",
-    "janecooper@example.com",
-    avatarSet,
-    "$32,600 "
-  ),
-  createData(
-    nameAndBarSet,
-    "NF0120323",
-    <Stack direction="row" spacing={2}>
-      <span>Dec 19,2021 11.24 AM</span>
-    </Stack>,
-    "New Opportunities",
-    "janecooper@example.com",
-    avatarSet,
-    "$32,600 "
-  ),
-  createData(
-    nameAndBarSet,
-    "NF0120323",
-    <Stack direction="row" spacing={2}>
-      <span>Dec 19,2021 11.24 AM</span>
-    </Stack>,
-    "New Opportunities",
-    "janecooper@example.com",
-    avatarSet,
-    "$32,600 "
-  ),
-  createData(
-    nameAndBarSet,
-    "NF0120323",
-    <Stack direction="row" spacing={2}>
-      <span>Dec 19,2021 11.24 AM</span>
-    </Stack>,
-    "New Opportunities",
-    "janecooper@example.com",
-    avatarSet,
-    "$32,600 "
-  ),
-  createData(
-    nameAndBarSet,
-    "NF0120323",
-    <Stack direction="row" spacing={2}>
-      <span>Dec 19,2021 11.24 AM</span>
-    </Stack>,
-    "New Opportunities",
-    "janecooper@example.com",
-    avatarSet,
-    "$32,600 "
-  ),
-  createData(
-    nameAndBarSet,
-    "NF0120323",
-    <Stack direction="row" spacing={2}>
-      <span>Dec 19,2021 11.24 AM</span>
-    </Stack>,
-    "New Opportunities",
-    "janecooper@example.com",
-    avatarSet,
-    "$32,600 "
-  ),
-  createData(
-    nameAndBarSet,
-    "NF0120323",
-    <Stack direction="row" spacing={2}>
-      <span>Dec 19,2021 11.24 AM</span>
-    </Stack>,
-    "New Opportunities",
-    "janecooper@example.com",
-    avatarSet,
-    "$32,600 "
-  ),
-  createData(
-    nameAndBarSet,
-    "NF0120323",
-    <Stack direction="row" spacing={2}>
-      <span>Dec 19,2021 11.24 AM</span>
-    </Stack>,
-    "New Opportunities",
-    "janecooper@example.com",
-    avatarSet,
-    "$32,600 "
-  ),
-  createData(
-    nameAndBarSet,
-    "NF0120323",
-    <Stack direction="row" spacing={2}>
-      <span>Dec 19,2021 11.24 AM</span>
-    </Stack>,
-    "New Opportunities",
-    "janecooper@example.com",
-    avatarSet,
-    "$32,600 "
-  ),
-].sort((a, b) => (a.contact < b.contact ? -1 : 1));
+// const rows = [
+//   createData(
+//     nameAndBarSet,
+//     "NF0120323",
+//     <Stack direction="row" spacing={2}>
+//       <span>Dec 19,2021 11.24 AM</span>
+//     </Stack>,
+//     "New Opportunities",
+//     "janecooper@example.com",
+//     avatarSet,
+//     "$32,600 "
+//   ),
+//   createData(
+//     nameAndBarSet,
+//     "NF0120323",
+//     <Stack direction="row" spacing={2}>
+//       <span>Dec 19,2021 11.24 AM</span>
+//     </Stack>,
+//     "New Opportunities",
+//     "janecooper@example.com",
+//     avatarSet,
+//     "$32,600 "
+//   ),
+//   createData(
+//     nameAndBarSet,
+//     "NF0120323",
+//     <Stack direction="row" spacing={2}>
+//       <span>Dec 19,2021 11.24 AM</span>
+//     </Stack>,
+//     "New Opportunities",
+//     "janecooper@example.com",
+//     avatarSet,
+//     "$32,600 "
+//   ),
+//   createData(
+//     nameAndBarSet,
+//     "NF0120323",
+//     <Stack direction="row" spacing={2}>
+//       <span>Dec 19,2021 11.24 AM</span>
+//     </Stack>,
+//     "New Opportunities",
+//     "janecooper@example.com",
+//     avatarSet,
+//     "$32,600 "
+//   ),
+//   createData(
+//     nameAndBarSet,
+//     "NF0120323",
+//     <Stack direction="row" spacing={2}>
+//       <span>Dec 19,2021 11.24 AM</span>
+//     </Stack>,
+//     "New Opportunities",
+//     "janecooper@example.com",
+//     avatarSet,
+//     "$32,600 "
+//   ),
+//   createData(
+//     nameAndBarSet,
+//     "NF0120323",
+//     <Stack direction="row" spacing={2}>
+//       <span>Dec 19,2021 11.24 AM</span>
+//     </Stack>,
+//     "New Opportunities",
+//     "janecooper@example.com",
+//     avatarSet,
+//     "$32,600 "
+//   ),
+//   createData(
+//     nameAndBarSet,
+//     "NF0120323",
+//     <Stack direction="row" spacing={2}>
+//       <span>Dec 19,2021 11.24 AM</span>
+//     </Stack>,
+//     "New Opportunities",
+//     "janecooper@example.com",
+//     avatarSet,
+//     "$32,600 "
+//   ),
+//   createData(
+//     nameAndBarSet,
+//     "NF0120323",
+//     <Stack direction="row" spacing={2}>
+//       <span>Dec 19,2021 11.24 AM</span>
+//     </Stack>,
+//     "New Opportunities",
+//     "janecooper@example.com",
+//     avatarSet,
+//     "$32,600 "
+//   ),
+//   createData(
+//     nameAndBarSet,
+//     "NF0120323",
+//     <Stack direction="row" spacing={2}>
+//       <span>Dec 19,2021 11.24 AM</span>
+//     </Stack>,
+//     "New Opportunities",
+//     "janecooper@example.com",
+//     avatarSet,
+//     "$32,600 "
+//   ),
+//   createData(
+//     nameAndBarSet,
+//     "NF0120323",
+//     <Stack direction="row" spacing={2}>
+//       <span>Dec 19,2021 11.24 AM</span>
+//     </Stack>,
+//     "New Opportunities",
+//     "janecooper@example.com",
+//     avatarSet,
+//     "$32,600 "
+//   ),
+//   createData(
+//     nameAndBarSet,
+//     "NF0120323",
+//     <Stack direction="row" spacing={2}>
+//       <span>Dec 19,2021 11.24 AM</span>
+//     </Stack>,
+//     "New Opportunities",
+//     "janecooper@example.com",
+//     avatarSet,
+//     "$32,600 "
+//   ),
+// ].sort((a, b) => (a.contact < b.contact ? -1 : 1));
 
-function TableNW() {
+function TableNW({applications}) {
   const router = useRouter();
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
 
   // Avoid a layout jump when reaching the last page with empty rows.
-  const emptyRows =
-    page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
+  // const emptyRows =
+  //   page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -311,21 +313,7 @@ function TableNW() {
     return date.toDateString();
   }
 
-  const [tableData,setTableData]=useState([])
-  async function getTableData(){
-    try{
-      const res = await _getApplications();
-      console.log(res?.data?.data?.Items)
-      let tableDt = await res?.data?.data?.Items.sort((a,b) => (a.createTime < b.createTime) ? 1 : ((b.createTime < a.createTime) ? -1 : 0));
-      setTableData([...tableDt])
-      console.log("tableData",tableData)
-    }catch(err){
-      console.log(err)
-    }
-  }
-  useEffect(()=>{
-    getTableData();
-  },[])
+
   return (
     <div className={styles.tbl_default}>
       <TableContainer
@@ -412,12 +400,12 @@ function TableNW() {
             </TableRow>
           </TableHead>
           <TableBody>
-            {tableData.map((row,key) => (
+            {applications.map((row,key) => (
               <TableRow
                 key={key}
                 sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
-                onClick={(e)=>{
-                  router.push(`/application/applications-data?applicationId=${row.PK}`);
+                onClick={()=>{
+                  router.push(`/application/applications-data?applicationId=${row?.application?.PK}`);
                 }}
                 hover
               >
@@ -430,14 +418,19 @@ function TableNW() {
                   {" "}
                   <React.Fragment>
                     <div style={{ display: "flex", border: "none" }}>
-                      <div
-                        style={{
-                          backgroundColor: "#F86B6C",
-                          height: 5,
-                          width: 20,
-                        }}
-                      ></div>
-                      <div
+                      {row?.labelArr.map((label,key)=>{
+                        return ( <div key={key}
+                          style={{
+                            backgroundColor: label?.color,
+                            height: 5,
+                            width: 20,
+                            marginRight:5
+                          }}
+                        >
+                        </div>)
+                      })}
+                   
+                      {/* <div
                         style={{
                           backgroundColor: "#22CAB5",
                           height: 5,
@@ -452,51 +445,40 @@ function TableNW() {
                           width: 20,
                           marginLeft: 5,
                         }}
-                      ></div>
+                      ></div> */}
                     </div>
                     <Typography align="left" fontWeight={600}>
-                      {row.contact}
+                      {row?.contact?.basicInformation?.firstName || ""} {" "} {row?.contact?.basicInformation?.lastName || ""} 
                     </Typography>
                   </React.Fragment>
                 </TableCell>
 
                 <TableCell align="center" className="remove_x_padding">
-                  {row.PK}
+                  {row?.application?.PK}
                 </TableCell>
                 <TableCell
                   align="center"
                   style={{ paddingLeft: 25, paddingRight: 0 }}
                 >
                   <Stack direction="row" spacing={2}>
-                    <span> {getTime(row.createTime)}</span>
+                    <span> {getTime(row?.application?.createTime)}</span>
                   </Stack>
                 </TableCell>
                 <TableCell align="center" className="remove_x_padding">
-                  {row?.status_}
+                  {row?.application?.status_ || ""}
                 </TableCell>
                 <TableCell align="center" className="remove_x_padding">
-                  {row.email}
+                  {row?.contact?.basicInformation?.email || ""}
                 </TableCell>
                 <TableCell align="center" className="remove_x_padding">
                   <React.Fragment>
-                    <Grid item md={1} align="right" paddingLeft={14}>
-                      <AvatarGroup total={9}>
-                        <Avatar
-                          alt="Remy Sharp"
-                          src="/static/images/avatar/1.jpg"
-                        />
-                        <Avatar
-                          alt="Travis Howard"
-                          src="/static/images/avatar/2.jpg"
-                        />
-                        <Avatar
-                          alt="Agnes Walker"
-                          src="/static/images/avatar/4.jpg"
-                        />
-                        <Avatar
-                          alt="Trevor Henderson"
-                          src="/static/images/avatar/5.jpg"
-                        />
+                    <Grid item  align="right" style={{marginRight:20}}>
+                      <AvatarGroup total={row?.teamArr.length}>
+                      {row?.teamArr && row?.teamArr.map((user)=>{
+                        return(
+                          <Avatar alt={user?.PK.split("#")[1]} src={`${s3URL}/${user?.imageId}`} />
+                        )
+                      })}
                       </AvatarGroup>
                     </Grid>
                   </React.Fragment>
@@ -506,7 +488,7 @@ function TableNW() {
                   className="remove_x_padding"
                   style={{ fontWeight: 600 }}
                 >
-                  {row.loanAmount}
+                 $ {row?.application?.loanAmount || ""}
                 </TableCell>
               </TableRow>
             ))}

@@ -239,16 +239,11 @@ const PlatformUsers = () => {
   };
 
   const [searchKey, setSearchKey] = useState("");
-  //console.log(searchKey)
-
-  // const keys = ["role", "status", "PK"];
-  // const search = (data) => {
-  //   return data.filter((item) => keys.some((key) => item[key].toLowerCase().includes(searchKey)));
-  // };
 
   async function getTableData() {
-    const response = await _getAllPlatformUserByAdmin(1, 100);
-    let tableDt = await response?.data?.users?.results.sort((a,b) => (a.createTime < b.createTime) ? 1 : ((b.createTime < a.createTime) ? -1 : 0));
+    const response = await _getAllPlatformUserByAdmin();
+    //console.log("_getAllPlatformUserByAdmin",response)
+    let tableDt = await response?.data?.users?.sort((a,b) => (a.createTime < b.createTime) ? 1 : ((b.createTime < a.createTime) ? -1 : 0));
     setRows(
       tableDt?.map((row) => ({
         key: row.PK,
@@ -603,7 +598,7 @@ const PlatformUsers = () => {
         <Grid xs={12} md={2}></Grid>
         <Grid item xs={12} md={6}>
           <Box sx={{ textAlign: "right" }}>
-            <FormControlLabel
+            {/* <FormControlLabel
               control={<IOSSwitch sx={{ m: 1 }} />}
               label="Show inactive"
             />
@@ -619,7 +614,7 @@ const PlatformUsers = () => {
               aria-label="save"
             >
               <TuneOutlined sx={{ color: "gray" }} />
-            </IconButton>
+            </IconButton> */}
           </Box>
         </Grid>
       </Grid>

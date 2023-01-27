@@ -230,7 +230,7 @@ function ApplicationLabel() {
     const response = await _listLabel();
     console.log(response);
     setRows(
-      response.data.data.results.map((row) => {
+      response.data.data.Items.map((row) => {
         let uT = getTime(row.updateTime);
         let cT = getTime(row.createTime);
         let lightColor = newShade(row.color, 150);
@@ -569,7 +569,7 @@ function ApplicationLabel() {
           </Grid>
 
           <Grid item xs={12} md={12} mt={1}>
-            {/* <Grid container spacing={1} alignItems="flex-end">
+            <Grid container spacing={1} alignItems="flex-end">
               <Grid item>
                 <SearchOutlinedIcon fontSize="medium" />
               </Grid>
@@ -577,12 +577,12 @@ function ApplicationLabel() {
                 id="input-with-icon-textfield"
                 label="Search"
                 variant="standard"
+                style={{width:"100%"}}
                 onChange={(e) => {
                   setSearchKey(e.target.value);
                 }}
               />
-            </Grid> */}
-            <SearchBox />
+            </Grid>
           </Grid>
           <TableContainer
             style={{ backgroundColor: "transparent", marginTop: 25 }}

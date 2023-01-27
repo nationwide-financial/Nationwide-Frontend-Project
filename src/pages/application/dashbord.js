@@ -1,17 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  Alert,
-  Avatar,
-  Backdrop,
-  Box,
-  Button,
-  Chip,
-  CircularProgress,
-  FormControlLabel,
-  Grid,
-  IconButton,
-  Typography,
-} from "@mui/material";
+import {Alert,Avatar,Backdrop,Box,Button, Chip, CircularProgress, FormControlLabel, Grid, IconButton, Typography,} from "@mui/material";
 import Paper from "@mui/material/Paper";
 import { styled } from "@mui/material/styles";
 import AvatarGroup from "@mui/material/AvatarGroup";
@@ -39,10 +27,14 @@ import SearchBox from "../../components/searchBox/searchBox";
 import { useRouter } from "next/router";
 import { _gatLoanType, _getImage } from "../../services/loanTypeService.js";
 import { _fetchWorkflowStatuses } from "../../services/loanWorkflowStatusServices";
-import { _getApplications, _updateApplicationStatus } from "../../services/applicationService";
+import { _getApplications, _updateApplicationStatus, _updateRejections } from "../../services/applicationService";
+import { s3URL } from '../../utils/config'
 import { DragDropContext, Draggable, Droppable } from "react-beautiful-dnd";
 import moment from "moment";
 import { Snackbar } from "@material-ui/core";
+import DialogContentText from '@mui/material/DialogContentText';
+import TextField from '@mui/material/TextField';
+import { _getAllPlatformUserByAdmin } from '../../services/authServices'
 
 const Item = styled(Paper)(({ theme }) => ({
   backgroundColor: theme.palette.mode === "dark" ? "#1A2027" : "#fff",
@@ -87,6 +79,18 @@ function LoanApplication() {
   const [error, setError] = useState();
   const [trigger, setTrigger] = useState();
   const [apiStatus, setApiStatus] = useState();
+  const [rejectionUpdateMsg, setRejectionUpdateMsg] = useState();
+  const [teamMembersArr, setTeamMembersArr] = useState([]);
+
+
+  const [appId,setAppId]=useState('');
+  const [days, setDays] = useState(0);
+  const [reason,setReason]=useState('');
+  const [checkedReasonAuto, setCheckedReasonAuto] = useState(false);
+
+  const handleChangeReasonAuto = (event) => {
+    setCheckedReasonAuto(event.target.checked);
+  };
 
   useEffect(() => {
     getWorkflowStatus();
@@ -137,12 +141,58 @@ function LoanApplication() {
 
       if (response?.status === 200) {
         setApplications(response.data.data.Items.length > 0 && response.data.data.Items);
+        getTeamMembers(response.data.data.Items);
       }
     } catch (err) {
       console.log("Error ", err);
       setError(err);
     }
   }
+  const addRejection = async (id,days,auto,reason) =>{
+    console.log("id,days,auto,reason",id,"  ",days,"  ",auto,"  ",reason)
+    try{
+      let body = {
+          applicationRejection: {
+          auto: auto,
+          days: days,
+          reason: reason
+        }
+      }
+      const res = await _updateRejections(id,body)
+      if(res?.status == 200){
+        handleCloseRejectionPopup();
+        setRejectionUpdateMsg({ severity: 'success', message: 'Rejection Reasion updated' })
+      }else{
+        setRejectionUpdateMsg({ severity: 'error', message: 'Rejection Reasion update failed' })
+      }
+    }catch(err){
+      console.log(err)
+    }
+  }
+
+  const getTeamMembers = async (tempApplications) =>{
+    try{
+      const res = await _getAllPlatformUserByAdmin()
+      let tempUsers = res?.data?.users;
+      let userIds = [];
+      let teamMembers = [];
+      await tempApplications.map( async (tempApplications)=>{
+        if(tempApplications?.members){
+         await userIds.push(...tempApplications?.members)
+        }
+      })
+      let removedduplicatesUsers = [...new Set(userIds)];
+      await removedduplicatesUsers.map( async (id)=>{
+        let tempU = await tempUsers.filter((user)=> user?.PK == 'USER#'+id)
+        teamMembers.push(...tempU)
+      })
+      setTeamMembersArr([...teamMembers])
+    }catch(err){
+      console.log(err)
+    }
+  }
+
+  
 
   const onDragEnd = async (result) => {
     const { source, destination } = result;
@@ -152,16 +202,18 @@ function LoanApplication() {
       if (source.droppableId !== destination.droppableId) {
         const newStatus = destination.droppableId;
         const applicationId = result.draggableId;
+        setAppId(applicationId);
         const body = { status_: newStatus }
         const applicationCopy = [...applications];
         const updatedIndex = applicationCopy.findIndex(application => application.PK === applicationId);
         const updated = [...applications, applications[updatedIndex].status_ = newStatus];
+
         setLoading(true);
+        if (newStatus=="closed" ||newStatus=="won"){
+          handleClickOpenRejectionPopup()
+        }
         const response = await _updateApplicationStatus(applicationId, body);
         setLoading(false);
-
-
-
         if (response?.status === 200) {
           setApiStatus({ severity: 'success', message: 'Status updated' })
         } else {
@@ -259,6 +311,21 @@ function LoanApplication() {
     return { componentList: applicationList, total: total };
   }
 
+
+
+  const [openRejectionPopup, setOpenRejectionPopup] = useState(false);
+
+  const handleClickOpenRejectionPopup = () => {
+    setOpenRejectionPopup(true);
+  };
+
+  const handleCloseRejectionPopup = () => {
+    setDays(0);
+    setReason('');
+    setCheckedReasonAuto(false);
+    setAppId('');
+    setOpenRejectionPopup(false);
+  };
 
 
   const handleClickOpen = () => {
@@ -374,6 +441,12 @@ function LoanApplication() {
           {apiStatus.message}
         </Alert>
       </Snackbar>}
+      {rejectionUpdateMsg && <Snackbar anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }} open={rejectionUpdateMsg} autoHideDuration={3000} onClose={() => setRejectionUpdateMsg()}>
+        <Alert variant='filled' severity={rejectionUpdateMsg.severity}>
+          {rejectionUpdateMsg.message}
+        </Alert>
+      </Snackbar>}
+
       <Backdrop
         sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
         open={false}>
@@ -455,7 +528,7 @@ function LoanApplication() {
 
                       {loanTypeData.map((row, key) => (
                         <div key={key}>
-                          <Box sx={{ maxWidth: "100%" }} className="hover_effect">
+                          <Box sx={{ maxWidth: "100%" }} className="hover_effect" >
                             <Stack spacing={2} direction="row">
                               <Button
                                 fullWidth
@@ -488,7 +561,7 @@ function LoanApplication() {
                                     </Typography>
                                   </Grid>{" "}
                                   <Grid xs={6} align="right" color={"#393939"}>
-                                    {row.img != null && <img src={`data:image;base64,${row.img}`} height='20' width='20' />}
+                                    {row.img != null && <img src={`${s3URL}/${row.img}`} height='40' width='40' />}
                                   </Grid>
                                 </Grid>
                               </Button>
@@ -516,7 +589,7 @@ function LoanApplication() {
                       </Box>
                     </FormControl>
                   </DialogContent>
-                  <div style={{ marginBottom: 100 }}>
+                  <div style={{ marginBottom: 100 , marginLeft:16}}>
                     <DialogActions
                       style={{ display: "flex", justifyContent: "left" }}
                       mt={2}
@@ -544,14 +617,16 @@ function LoanApplication() {
           </Grid>
           {/* active-user-display-section */}
           <Grid item xs={12} md={2} pl={2}>
-            <AvatarGroup total={9}>
-              <Avatar alt="Remy Sharp" src="/static/images/avatar/1.jpg" />
-              <Avatar alt="Travis Howard" src="/static/images/avatar/2.jpg" />
+            <AvatarGroup total={teamMembersArr.length}>
+              {teamMembersArr && teamMembersArr.map((user)=>{
+                return(
+                  <Avatar alt={user?.PK.split("#")[1]} src={`${s3URL}/${user?.imageId}`} />
+                )
+              })}
+              
+              {/* <Avatar alt="Travis Howard" src="/static/images/avatar/2.jpg" />
               <Avatar alt="Agnes Walker" src="/static/images/avatar/4.jpg" />
-              <Avatar
-                alt="Trevor Henderson"
-                src="/static/images/avatar/5.jpg"
-              />
+              <Avatar alt="Trevor Henderson" src="/static/images/avatar/5.jpg" /> */}
             </AvatarGroup>
           </Grid>
           {/* other-icon-set */}
@@ -721,6 +796,62 @@ function LoanApplication() {
           </DragDropContext>
         </Grid>
       </Box>
+      <div>
+      <Dialog open={openRejectionPopup} >
+        <DialogTitle>Rejection</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+          please enter the reason
+          </DialogContentText>
+          <TextField
+            name="reason"
+            type="text"
+            onChange={(e)=>{
+              setReason(e.target.value)
+            }}
+           // value={}
+            fullWidth
+            size="small"
+            margin="normal"
+            id="outlined-basic"
+            placeholder="Reason"
+            variant="outlined"
+            style={{width:500}}
+            multiline
+            rows={4}
+            />
+          <FormControlLabel
+          style={{marginLeft:0}}
+          value="start"
+          control={<Switch color="primary" />}
+          label="Auto"
+          labelPlacement="start"
+          onChange={handleChangeReasonAuto}
+        />
+        {checkedReasonAuto && <TextField
+            name="days"
+            type="number"
+            onChange={(e)=>{
+              setDays(e.target.value)
+            }}
+           // value={}
+            fullWidth
+            size="small"
+            margin="normal"
+            id="outlined-basic"
+            placeholder="Days"
+            variant="outlined"
+            style={{width:500}}
+          /> }
+       
+        </DialogContent>
+        <DialogActions>
+          <Button variant="contained" onClick={()=>{
+             addRejection(appId,days,checkedReasonAuto,reason)
+          }}>Add Reason</Button>
+        </DialogActions>
+      </Dialog>
+      </div>
     </div>
   );
 }

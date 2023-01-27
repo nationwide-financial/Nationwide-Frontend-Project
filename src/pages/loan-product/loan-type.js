@@ -1,4 +1,4 @@
-import React, { useState , useEffect , useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { styled } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import TreeItem, { TreeItemProps, treeItemClasses } from "@mui/lab/TreeItem";
@@ -28,12 +28,16 @@ import Stack from "@mui/material/Stack";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import SearchBox from "../../components/searchBox/searchBox";
-import Snackbar from '@mui/material/Snackbar';
-import Alert from '@mui/material/Alert';
+import Snackbar from "@mui/material/Snackbar";
+import Alert from "@mui/material/Alert";
 import { s3URL } from "../../utils/config";
 import Image from 'next/image';
+//import styles from './searchBox.module.scss'
+import styles from '../../../src/components/searchBox/searchBox.module.scss'
+import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
 
-import { _gatLoanType, _addLoanType } from '../../services/loanTypeService';
+
+import { _gatLoanType, _addLoanType } from "../../services/loanTypeService";
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   "& .MuiDialogContent-root": {
@@ -244,6 +248,7 @@ const LoanType = () => {
   const [loanStatus, setLoanStatus] = useState("");
   const [inputError, setInputError] = useState("");
 
+  const [searchKey, setSearchKey] = useState("");
 
   function getTime(ts){
     let date = new Date(ts);
@@ -266,16 +271,16 @@ const LoanType = () => {
   }, []);
 
   const [openSuccessMessage, setOpenSuccessMessage] = useState(false);
-  const [message,setMessage] =useState('');
+  const [message, setMessage] = useState("");
   const handleSuccessMessage = () => {
     setOpenSuccessMessage(true);
   };
 
   const handleCloseSuccessMessage = (event, reason) => {
-    if (reason === 'clickaway') {
+    if (reason === "clickaway") {
       return;
     }
-    setMessage('')
+    setMessage("");
     setOpenSuccessMessage(false);
   };
 
@@ -290,26 +295,33 @@ const LoanType = () => {
       console.log("response", response);
       if (response?.status == 200) {
         //alert("you have successfully added");
-        handleSuccessMessage()
-        setMessage("you have successfully added")
+        handleSuccessMessage();
+        setMessage("you have successfully added");
         handleClose();
         getData();
       }
-     
     } catch (error) {
       console.log(error);
     }
   };
 
-  
   return (
     <div>
-      	<Snackbar open={openSuccessMessage} autoHideDuration={6000} onClose={handleCloseSuccessMessage}>
-        <Alert onClose={handleCloseSuccessMessage} severity="success" sx={{ width:"100%" }} style={{backgroundColor:'lightgreen'}}>
+      <Snackbar
+        open={openSuccessMessage}
+        autoHideDuration={6000}
+        onClose={handleCloseSuccessMessage}
+      >
+        <Alert
+          onClose={handleCloseSuccessMessage}
+          severity="success"
+          sx={{ width: "100%" }}
+          style={{ backgroundColor: "lightgreen" }}
+        >
           {message}
         </Alert>
-     </Snackbar>
-      <Box p={5}>
+      </Snackbar>
+      <Box p={5} mb={12}>
         <Grid container>
           <Grid item xs={12} md={6}>
             <h1 className="page_header">Loan Types</h1>
@@ -331,22 +343,22 @@ const LoanType = () => {
             </Box>
 
             <Dialog open={open} onClose={handleClose} fullWidth>
-                <Box sx={{ width: 1000, maxWidth: "100%" }}>
-                  <BootstrapDialogTitle
-                    id="customized-dialog-title"
-                    onClose={handleClose}
+              <Box sx={{ width: 1000, maxWidth: "100%" }}>
+                <BootstrapDialogTitle
+                  id="customized-dialog-title"
+                  onClose={handleClose}
+                >
+                  <Typography
+                    variant="h6"
+                    style={{ fontSize: 30 }}
+                    className="page_header"
                   >
-                    <Typography
-                      variant="h6"
-                      style={{ fontSize: 30 }}
-                      className="page_header"
-                    >
-                      New Product
-                    </Typography>
-                  </BootstrapDialogTitle>
+                    New Product
+                  </Typography>
+                </BootstrapDialogTitle>
 
-                  <DialogContent>
-                    <form>
+                <DialogContent>
+                  <form>
                     <FormControl
                       style={{ display: "flex", justifyContent: "center" }}
                     >
@@ -365,18 +377,17 @@ const LoanType = () => {
                         </Typography>
                       </label>
                       <Box sx={{ maxWidth: "100%" }}>
-                       
                         <TextField
                           fullWidth
                           autoFocus
                           size="small"
                           margin="normal"
                           id="outlined-basic"
-                          label="Text "
+                          placeholder="Text"
                           variant="outlined"
                           name="loanName"
-                          onChange={(e)=>{
-                            setLoanName(e.target.value)
+                          onChange={(e) => {
+                            setLoanName(e.target.value);
                           }}
                         />
                       </Box>
@@ -472,35 +483,40 @@ const LoanType = () => {
                         select
                         value={loanStatus}
                         name="loanStatus"
-                       
                         fullWidth
                         size="small"
                         margin="normal"
                       >
                         {currencies.map((option) => (
-                          <MenuItem key={option.value} value={option.value}  onClick={()=>{setLoanStatus(option.value) }}>
+                          <MenuItem
+                            key={option.value}
+                            value={option.value}
+                            onClick={() => {
+                              setLoanStatus(option.value);
+                            }}
+                          >
                             {option.label}
                           </MenuItem>
                         ))}
                       </TextField>
                     </FormControl>
-                    </form>
-                  </DialogContent>
+                  </form>
+                </DialogContent>
 
-                  <DialogActions mb={5}>
-                    <Button
-                      variant="contained"
-                      onClick={handleAddFormSubmit}
-                      Style={{
-                        fontSize: 16,
-                        fontWeight: 700,
-                        textTransform: "capitalize",
-                      }}
-                    >
-                      Create Product
-                    </Button>
-                  </DialogActions>
-                </Box>
+                <DialogActions mb={5}>
+                  <Button
+                    variant="contained"
+                    onClick={handleAddFormSubmit}
+                    Style={{
+                      fontSize: 16,
+                      fontWeight: 700,
+                      textTransform: "capitalize",
+                    }}
+                  >
+                    Create Product
+                  </Button>
+                </DialogActions>
+              </Box>
             </Dialog>
           </Grid>
         </Grid>
@@ -509,30 +525,28 @@ const LoanType = () => {
           <Grid item xs={12} md={6}>
             <Grid container>
               <Grid item xs={7}>
-                <SearchBox />
+                {/* <SearchBox /> */}
+                <div className={styles.search}>
+                  <SearchOutlinedIcon className={styles.icon} fontSize='medium' />
+                  <TextField className={styles.input} id="input-with-icon-textfield" label="Search" variant="standard" onChange={(e)=>{
+                    setSearchKey(e.target.value)
+                  }}/>
+
+                </div>
               </Grid>
               <Grid item xs={5}>
-                <AvatarGroup total={9}>
-                  <Avatar alt="Remy Sharp" src="/static/images/avatar/1.jpg" />
-                  <Avatar
-                    alt="Travis Howard"
-                    src="/static/images/avatar/2.jpg"
-                  />
-                  <Avatar
-                    alt="Agnes Walker"
-                    src="/static/images/avatar/4.jpg"
-                  />
-                  <Avatar
-                    alt="Trevor Henderson"
-                    src="/static/images/avatar/5.jpg"
-                  />
-                </AvatarGroup>
+                {/* <AvatarGroup total={9}>
+                  <Avatar alt="Remy Sharp" src="/images/avatar1.png" />
+                  <Avatar alt="Travis Howard" src="/images/avatar2.png" />
+                  <Avatar alt="Agnes Walker" src="/images/avatar3.png" />
+                  <Avatar alt="Trevor Henderson" src="/images/avatar4.png" />
+                </AvatarGroup> */}
               </Grid>
             </Grid>
           </Grid>
           <Grid item xs={12} md={6}>
             <Box sx={{ textAlign: "right" }}>
-              <FormControlLabel
+              {/* <FormControlLabel
                 control={<IOSSwitch sx={{ m: 1 }} />}
                 label="Show inactive"
               />
@@ -548,25 +562,34 @@ const LoanType = () => {
                 aria-label="save"
               >
                 <TuneOutlined sx={{ color: "gray" }} />
-              </IconButton>
+              </IconButton> */}
             </Box>
           </Grid>
         </Grid>
 
+        {/* body-section */}
         <Grid
           container
           mt={6}
           rowSpacing={2}
           columnSpacing={{ xs: 2, sm: 3, md: 4 }}
         >
-          {row.map((row, key) => {
+          {row?.filter((data) => {
+            if (searchKey == "") {
+              return data;
+            } else {
+              return data?.loanName
+                .toLowerCase()
+                .includes(searchKey.toLocaleLowerCase());
+            }
+          }).map((row, key) => {
             return (
               <Grid item xs={12} md={6} spacing={2} key={key}>
                 <Card
                   variant="outlined"
                   style={{ backgroundColor: "transparent" }}
                 >
-                  <Grid container columnSpacing={{ xs: 6 }} p={1}>
+                  <Grid container p={1}>
                     <Grid item xs={9} ml={2}>
                       <CardContent style={{}}>
                         <Typography
@@ -595,7 +618,12 @@ const LoanType = () => {
                     <Grid item xs={1} mt={3} ml={0}>
                       {" "}
                       <Box sx={{ textAlign: "right" }}>
-                        <Image src={`${s3URL}/${row.img}`} alt="product icon" width={100} height={100}/>
+                        <Image
+                          src={`${s3URL}/${row.img}`}
+                          alt="product icon"
+                          width={100}
+                          height={100}
+                        />
                       </Box>
                     </Grid>
                   </Grid>

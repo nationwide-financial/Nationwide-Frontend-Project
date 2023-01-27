@@ -1029,7 +1029,7 @@ function ApplicationDate() {
   async function getLabels() {
     try {
       const res = await _listLabel();
-      setLabelList([...res?.data?.data?.results]);
+      setLabelList([...res?.data?.data?.Items]);
     } catch (err) {
       console.log(err);
     }
@@ -1221,6 +1221,13 @@ function ApplicationDate() {
       if (response?.status === 200) {
         const newTask = response?.data?.loanTask
         newTask && setTaskList([...taskList, newTask])
+        let history = {
+          action: "Task Created",
+          description: `The Task created`,
+          applicationId: applicationId,
+        };
+        const resHistory = await _addHistory(history);
+        getHistoryByapplicationId(applicationId);
         handleCloseTask();
       } else {
         setTaskError(response?.response?.data?.message)
@@ -1276,7 +1283,7 @@ function ApplicationDate() {
                 {contactData?.basicInformation?.lastName}{" "}
                 <span style={{ color: "#0B72F1" }}>
                   {" "}
-                  {applicationData.loanAmount} {"$"}
+                  {applicationData?.loanAmount} {"$"}
                 </span>
               </Typography>
 

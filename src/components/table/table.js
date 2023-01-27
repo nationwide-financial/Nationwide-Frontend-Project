@@ -474,9 +474,9 @@ function TableNW({applications}) {
                   <React.Fragment>
                     <Grid item  align="right" style={{marginRight:20}}>
                       <AvatarGroup total={row?.teamArr.length}>
-                      {row?.teamArr && row?.teamArr.map((user)=>{
+                      {row?.teamArr && row?.teamArr.map((user, key)=>{
                         return(
-                          <Avatar alt={user?.PK.split("#")[1]} src={`${s3URL}/${user?.imageId}`} />
+                          <Avatar key={key} alt={user?.PK.split("#")[1]} src={`${s3URL}/${user?.imageId}`} />
                         )
                       })}
                       </AvatarGroup>

@@ -287,7 +287,7 @@ function RejectionOption() {
               <TableBody>
               {applications && applications.map((application,key)=>{
                 if( application?.applicationRejection && application?.applicationRejection?.auto == true){
-                  return ( <div >
+                  return ( <div key={key}>
                     <TableRow
                       sx={{
                         "&:last-child td, &:last-child th": { border: 0 },

@@ -370,9 +370,9 @@ const mergeDocuments = async (tempApplications) =>{
           {/* active-user-display-section */}
           <Grid item xs={12} md={1}>
             <AvatarGroup total={teamMembersArr.length}>
-            {teamMembersArr && teamMembersArr.map((user)=>{
+            {teamMembersArr && teamMembersArr.map((user, key)=>{
                 return(
-                  <Avatar alt={user?.PK.split("#")[1]} src={`${s3URL}/${user?.imageId}`} />
+                  <Avatar key={key} alt={user?.PK.split("#")[1]} src={`${s3URL}/${user?.imageId}`} />
                 )
               })}
               <Avatar alt="Remy Sharp" src="/static/images/avatar/1.jpg" />

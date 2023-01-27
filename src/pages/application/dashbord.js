@@ -618,9 +618,9 @@ function LoanApplication() {
           {/* active-user-display-section */}
           <Grid item xs={12} md={2} pl={2}>
             <AvatarGroup total={teamMembersArr.length}>
-              {teamMembersArr && teamMembersArr.map((user)=>{
+              {teamMembersArr && teamMembersArr.map((user, key)=>{
                 return(
-                  <Avatar alt={user?.PK.split("#")[1]} src={`${s3URL}/${user?.imageId}`} />
+                  <Avatar key={key} alt={user?.PK.split("#")[1]} src={`${s3URL}/${user?.imageId}`} />
                 )
               })}
               

@@ -1279,11 +1279,11 @@ function ApplicationDate() {
                 variant="h6"
                 style={{ fontSize: 45, fontWeight: 700 }}
               >
-                {contactData?.basicInformation?.firstName}{" "}
-                {contactData?.basicInformation?.lastName}{" "}
+                {contactData?.basicInformation?.first_name}{" "}
+                {contactData?.basicInformation?.last_name}{" "}
                 <span style={{ color: "#0B72F1" }}>
                   {" "}
-                  {applicationData?.loanAmount} {"$"}
+                  {applicationData?.applicationBasicInfo?.loan_amount } {"$"}
                 </span>
               </Typography>
 
@@ -1511,8 +1511,8 @@ function ApplicationDate() {
                     <TableContainer style={{ backgroundColor: "transparent" }}>
                       <Typography fontWeight={700} pl={2}>
                         Borrower:{" "}
-                        {contactData?.basicInformation?.firstName || ""}{" "}
-                        {contactData?.basicInformation?.lastName || ""}
+                        {contactData?.basicInformation?.first_name || ""}{" "}
+                        {contactData?.basicInformation?.last_name || ""}
                       </Typography>
 
                       <Table aria-label="simple table">
@@ -1556,7 +1556,7 @@ function ApplicationDate() {
                               {"ID Number"}
                             </TableCell>
                             <TableCell align="left" p={1}>
-                              {contactData?.basicInformation?.idNumber || ""}
+                              {contactData?.basicInformation?.id_number || ""}
                             </TableCell>
                           </TableRow>
 
@@ -1586,7 +1586,7 @@ function ApplicationDate() {
                               {"Address"}
                             </TableCell>
                             <TableCell align="left" p={1}>
-                              {contactData?.basicInformation?.streetAddress ||
+                              {contactData?.basicInformation?.street_address ||
                                 ""}
                             </TableCell>
                           </TableRow>
@@ -1608,8 +1608,8 @@ function ApplicationDate() {
                           >
                             <Typography fontWeight={700} pl={2}>
                               Co-Borrower{key + 1} :{" "}
-                              {row?.basicInformation?.firstName || ""}{" "}
-                              {row?.basicInformation?.lastName || ""}
+                              {row?.basicInformation?.first_name || ""}{" "}
+                              {row?.basicInformation?.last_name || ""}
                             </Typography>
                             <Table aria-label="simple table">
                               <TableBody>
@@ -1652,7 +1652,7 @@ function ApplicationDate() {
                                     {"ID Number"}
                                   </TableCell>
                                   <TableCell align="left" p={1}>
-                                    {row?.basicInformation?.idNumber || ""}
+                                    {row?.basicInformation?.id_number || ""}
                                   </TableCell>
                                 </TableRow>
                                 <TableRow
@@ -1680,7 +1680,7 @@ function ApplicationDate() {
                                     {"Address"}
                                   </TableCell>
                                   <TableCell align="left" p={1}>
-                                    {row?.basicInformation?.streetAddress || ""}
+                                    {row?.basicInformation?.street_address || ""}
                                   </TableCell>
                                 </TableRow>
                               </TableBody>

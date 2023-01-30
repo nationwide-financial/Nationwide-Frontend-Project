@@ -33,41 +33,31 @@ function DashBoardTableOne({taskOverdue,taskDueToday,taskTotal}) {
     { id: 3, number: taskTotal, textVal: " Total" },
   ];
   return (
-    <div>
       <Box>
-        <Grid container>
+        <Grid container spacing={2}>
           {topvaluesets.map((topvalueset, index) => {
             return (
-              <Stack key={index} direction="row">
-                <Grid>
-                  <div key={index}>
-                    <Grid sx={12}>
-                      <Stack direction="column" spacing={1}>
-                        <Typography
-                          align="center"
-                          fontSize="31px"
-                          fontWeight={600}
-                        >
-                          {topvalueset.number}
-                        </Typography>
-                        <Typography
-                          align="center"
-                          fontSize="12px"
-                          fontWeight={600}
-                          color="#858585"
-                        >
-                          {topvalueset.textVal}
-                        </Typography>
-                      </Stack>
-                    </Grid>
-                  </div>
+                <Grid key={index} item sx={12}>
+                    <Typography
+                      align="center"
+                      fontSize="31px"
+                      fontWeight={600}
+                    >
+                      {topvalueset.number}
+                    </Typography>
+                    <Typography
+                      align="center"
+                      fontSize="12px"
+                      fontWeight={600}
+                      color="#858585"
+                    >
+                      {topvalueset.textVal}
+                    </Typography>
                 </Grid>
-              </Stack>
             );
           })}
         </Grid>
       </Box>
-    </div>
   );
 }
 

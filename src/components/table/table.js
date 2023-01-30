@@ -448,7 +448,7 @@ function TableNW({applications}) {
                       ></div> */}
                     </div>
                     <Typography align="left" fontWeight={600}>
-                      {row?.contact?.basicInformation?.firstName || ""} {" "} {row?.contact?.basicInformation?.lastName || ""} 
+                      {row?.contact?.basicInformation?.first_name || ""} {" "} {row?.contact?.basicInformation?.last_name || ""} 
                     </Typography>
                   </React.Fragment>
                 </TableCell>
@@ -488,7 +488,7 @@ function TableNW({applications}) {
                   className="remove_x_padding"
                   style={{ fontWeight: 600 }}
                 >
-                 $ {row?.application?.loanAmount || ""}
+                 $ {row?.application?.applicationBasicInfo?.loan_amount || ""}
                 </TableCell>
               </TableRow>
             ))}

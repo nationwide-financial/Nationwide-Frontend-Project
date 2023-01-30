@@ -46,6 +46,9 @@ import Image from "next/image";
 import { useState } from "react";
 import { _fetchAllContacts, _deleteContact } from "../../services/contactServices";
 import Link from "next/link";
+import {_gatVariabels} from '../../services/variabelService.js';
+import { _getAllPlatformUserByAdmin } from '../../services/authServices'
+import { s3URL } from '../../utils/config'
 
 const label = { inputProps: { "aria-label": "Switch demo" } };
 
@@ -157,6 +160,8 @@ function Contact() {
   const [value, setValue] = React.useState(0);
   const [loading, setLoading] = useState(false);
   const [trigger, setTrigger] = useState(0);
+  const [users, setUsers] = useState([]);
+  
 
   const fetchData = async () => {
     setLoading(true);
@@ -167,8 +172,23 @@ function Contact() {
       setContactData([...tableDt]);
     }
   }
+  const [variableData, setVariableData] = useState([]);
+  const getVariables = async () =>{
+    try{
+      const res = await _gatVariabels();
+      let data = await res?.data?.data?.Items.filter((variable)=>variable?.variableType == "contact")
+      data = await data.sort((a,b) => (a.createTime > b.createTime) ? 1 : ((b.createTime > a.createTime) ? -1 : 0));
+      console.log(res)
+      setVariableData([...data])
+    }catch(err){
+      console.log(err)
+    }
+  }
+
   useEffect(() => {
     fetchData()
+    //getUsers()
+    getVariables()
   }, [trigger])
 
   const handleChange = (event, newValue) => {
@@ -245,285 +265,323 @@ function Contact() {
 
   return (
     <div>
-      {loading ? <CircularProgress /> : <Box p={3} style={{ marginTop:40 }}>
-        <Dialog
-          open={selected?.length > 0}
-          onClose={() => setSelected()}
-        >
-          <DialogTitle>Actions</DialogTitle>
-          <DialogContent>
-            <Stack direction='column' spacing={2}>
-              <Button onClick={() => router.push('/contact/' + selected)} variant="contained">Edit Contact</Button>
-              <Button onClick={() => handleClickDelete(selected)} variant="outlined" color="error">Delete Contact</Button>
-            </Stack>
-          </DialogContent>
-        </Dialog>
-        {/* 1st-header-section */}
-        <Grid container mb={5}>
-          <Grid item xs={12} md={6}>
-            <h1 className="page_header">Contacts</h1>
-          </Grid>
-
-          <Grid item xs={12} md={6}>
-            <Box sx={{ textAlign: "right" }}>
-              <Link href={'/contact/import'}>
-                <Button variant="contained" sx={{ padding: "10px 40px" }}>
-                  Upload List
+      {loading ? (
+        <CircularProgress />
+      ) : (
+        <Box p={3} style={{ marginTop: 40 }}>
+          <Dialog open={selected?.length > 0} onClose={() => setSelected()}>
+            <DialogTitle>Actions</DialogTitle>
+            <DialogContent>
+              <Stack direction="column" spacing={2}>
+                <Button
+                  onClick={() => router.push("/contact/" + selected)}
+                  variant="contained"
+                >
+                  Edit Contact
                 </Button>
-              </Link>
-              <Button
-                variant="contained"
-                sx={{ padding: "10px 40px" }}
-                style={{ marginLeft: 20 }}
-                onClick={handleAddContacts}
-              >
-                Add Contacts
-              </Button>
-            </Box>
+                <Button
+                  onClick={() => handleClickDelete(selected)}
+                  variant="outlined"
+                  color="error"
+                >
+                  Delete Contact
+                </Button>
+              </Stack>
+            </DialogContent>
+          </Dialog>
+          {/* 1st-header-section */}
+          <Grid container mb={5}>
+            <Grid item xs={12} md={6}>
+              <h1 className="page_header">Contacts</h1>
+            </Grid>
+
+            <Grid item xs={12} md={6}>
+              <Box sx={{ textAlign: "right" }}>
+                <Link href={"/contact/import"}>
+                  <Button variant="contained" sx={{ padding: "10px 40px" }}>
+                    Upload List
+                  </Button>
+                </Link>
+                <Button
+                  variant="contained"
+                  sx={{ padding: "10px 40px" }}
+                  style={{ marginLeft: 20 }}
+                  onClick={handleAddContacts}
+                >
+                  Add Contacts
+                </Button>
+              </Box>
+            </Grid>
           </Grid>
-        </Grid>
 
-        {/* body-content-tab-set */}
-        <Box sx={{ width: "100%" }}>
-          <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
-            <Tabs
-              value={value}
-              onChange={handleChange}
-              aria-label="basic tabs example"
-            >
-              <Tab label="Contacts" {...a11yProps(0)} />
-              <Tab label="Lists" {...a11yProps(1)} />
-            </Tabs>
-          </Box>
+          {/* body-content-tab-set */}
+          <Box sx={{ width: "100%" }}>
+            <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
+              <Tabs
+                value={value}
+                onChange={handleChange}
+                aria-label="basic tabs example"
+              >
+                <Tab label="Contacts" {...a11yProps(0)} />
+                <Tab label="Lists" {...a11yProps(1)} />
+              </Tabs>
+            </Box>
 
-          {/* task-related-tab */}
-          <TabPanel value={value} index={0}>
-            {/* 2st-header-section */}
+            {/* task-related-tab */}
+            <TabPanel value={value} index={0}>
+              {/* 2st-header-section */}
 
-            <Grid container p={0} mt={2}>
-              <Grid item xs={6}>
-                <Grid container>
-                  <Stack direction="row">
-                    {/* header-search-section */}
+              <Grid container p={0} mt={2}>
+                <Grid item xs={6}>
+                  <Grid container>
+                    <Stack direction="row">
+                      {/* header-search-section */}
 
-                    <Grid container spacing={1} alignItems="flex-end">
-                      <Grid item>
-                        <SearchOutlinedIcon fontSize="medium" />
+                      <Grid container spacing={1} alignItems="flex-end">
+                        <Grid item>
+                          <SearchOutlinedIcon fontSize="medium" />
+                        </Grid>
+                        <TextField
+                          id="input-with-icon-textfield"
+                          label="Search"
+                          variant="standard"
+                          onChange={(e) => {
+                            setSearchKey(e.target.value);
+                          }}
+                        />
                       </Grid>
-                      <TextField
-                        id="input-with-icon-textfield"
-                        label="Search"
-                        variant="standard"
-                        onChange={(e)=>{
-                          setSearchKey(e.target.value)
-                        }}
-                      />
-                    </Grid>
 
-                    {/* active-user-display-section */}
+                      {/* active-user-display-section */}
 
-                    <AvatarGroup total={9}>
-                      <Avatar
-                        alt="Remy Sharp"
-                        src="/static/images/avatar/1.jpg"
-                      />
-                      <Avatar
-                        alt="Travis Howard"
-                        src="/static/images/avatar/2.jpg"
-                      />
-                      <Avatar
-                        alt="Agnes Walker"
-                        src="/static/images/avatar/4.jpg"
-                      />
-                      <Avatar
-                        alt="Trevor Henderson"
-                        src="/static/images/avatar/5.jpg"
-                      />
-                    </AvatarGroup>
-                  </Stack>
+                      <AvatarGroup total={users.length}>
+                        {users &&
+                          users.map((user, key) => {
+                            return (
+                              <Avatar
+                                key={key}
+                                alt={user?.PK.split("#")[1]}
+                                src={`${s3URL}/${user?.imageId}`}
+                              />
+                            );
+                          })}
+                      </AvatarGroup>
+                    </Stack>
+                  </Grid>
+                </Grid>
+                <Grid item xs={6}>
+                  {/* other-icon-set */}
+                  {/* <Grid item xs={12} md={6}> */}
+                  <Box sx={{ textAlign: "right" }}>
+                    {/* icon-2 */}
+                    <IconButton
+                      sx={{
+                        width: 10,
+                        height: 10,
+                        borderRadius: 1,
+                        border: "1px solid",
+                        borderColor: "gray",
+                        padding: 2,
+                        marginRight: 2,
+                      }}
+                      aria-label="save"
+                    >
+                      <TuneOutlined sx={{ color: "gray" }} />
+                    </IconButton>
+                  </Box>
+                  {/* </Grid> */}
                 </Grid>
               </Grid>
-              <Grid item xs={6}>
-                {/* other-icon-set */}
-                {/* <Grid item xs={12} md={6}> */}
-                <Box sx={{ textAlign: "right" }}>
-                  {/* icon-2 */}
-                  <IconButton
-                    sx={{
-                      width: 10,
-                      height: 10,
-                      borderRadius: 1,
-                      border: "1px solid",
-                      borderColor: "gray",
-                      padding: 2,
-                      marginRight: 2,
-                    }}
-                    aria-label="save"
-                  >
-                    <TuneOutlined sx={{ color: "gray" }} />
-                  </IconButton>
-                </Box>
-                {/* </Grid> */}
-              </Grid>
-            </Grid>
 
-            {/* table-related-section----- */}
-            {contactData && contactData.length > 0 && <Grid container>
-              <TableContainer>
-                <Table
-                  sx={{ minWidth: 500 }}
-                  aria-label="custom pagination table"
-                >
-                  <TableHead>
-                    <TableRow>
-                      <TableCell
-                        align="left"
-                        style={{ fontSize: 14, fontWeight: 700 }}
-                      >
-                        NAME
-                      </TableCell>
-                      <TableCell
-                        align="left"
-                        style={{ fontSize: 14, fontWeight: 700 }}
-                      >
-                        ID NUMBER
-                      </TableCell>
-                      <TableCell
-                        align="left"
-                        style={{ fontSize: 14, fontWeight: 700 }}
-                      >
-                        PHONE
-                      </TableCell>
-                      <TableCell
-                        align="left"
-                        style={{ fontSize: 14, fontWeight: 700 }}
-                      >
-                        EMAIL
-                      </TableCell>
-                      <TableCell
-                        align="left"
-                        style={{ fontSize: 14, fontWeight: 700 }}
-                      >
-                        CREATED
-                      </TableCell>
-                      <TableCell
-                        align="left"
-                        style={{ fontSize: 14, fontWeight: 700 }}
-                      >
-                        UPDATED
-                      </TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {contactData?.filter((data) => {
-                        if (searchKey == "") {
-                          return data;
-                        } else {
-                          return data?.basicInformation?.email.toLowerCase().includes(searchKey.toLocaleLowerCase());
-                        }
-                      }).slice(
-                        page * rowsPerPage,
-                        page * rowsPerPage + rowsPerPage
-                      ).map((row) => {
-                      const basicInfo = row.basicInformation;
-                      return (
-                        <TableRow className="contact-list-row" key={row.name} onClick={() => handleClickContact(row.PK)}>
-                          <TableCell component="th" scope="row">
-                            {basicInfo.firstName + ' ' + basicInfo.lastName}
+              {/* table-related-section----- */}
+              {contactData && contactData.length > 0 && (
+                <Grid container>
+                  <TableContainer>
+                    <Table
+                      sx={{ minWidth: 500 }}
+                      aria-label="custom pagination table"
+                    >
+                      <TableHead>
+                        <TableRow>
+                        {variableData && variableData.map((variable,key)=>{
+                        return( <TableCell key={key}
+                          align="left"
+                          style={{ fontSize: 14, fontWeight: 700 }}
+                        >
+                          {variable?.displayName}
+                        </TableCell>)
+                      })}
+                          {/* <TableCell
+                            align="left"
+                            style={{ fontSize: 14, fontWeight: 700 }}
+                          >
+                            NAME
                           </TableCell>
-                          <TableCell align="left">{basicInfo.idNumber}</TableCell>
-                          <TableCell align="left">{basicInfo.phone}</TableCell>
-                          <TableCell align="left">{basicInfo.email}</TableCell>
-                          <TableCell align="left">{moment(row.createTime).format('YYYY-MM-DD')}</TableCell>
-                          <TableCell align="left">{moment(row.updateTime).format('YYYY-MM-DD')}</TableCell>
+                          <TableCell
+                            align="left"
+                            style={{ fontSize: 14, fontWeight: 700 }}
+                          >
+                            ID NUMBER
+                          </TableCell>
+                          <TableCell
+                            align="left"
+                            style={{ fontSize: 14, fontWeight: 700 }}
+                          >
+                            PHONE
+                          </TableCell>
+                          <TableCell
+                            align="left"
+                            style={{ fontSize: 14, fontWeight: 700 }}
+                          >
+                            EMAIL
+                          </TableCell> */}
+                          <TableCell
+                            align="left"
+                            style={{ fontSize: 14, fontWeight: 700 }}
+                          >
+                            CREATED
+                          </TableCell>
+                          <TableCell
+                            align="left"
+                            style={{ fontSize: 14, fontWeight: 700 }}
+                          >
+                            UPDATED
+                          </TableCell>
                         </TableRow>
-                      )
-                    })}
+                      </TableHead>
+                      <TableBody>
+                        {contactData
+                          ?.filter((data) => {
+                            if (searchKey == "") {
+                              return data;
+                            } else {
+                              return data?.basicInformation?.email
+                                .toLowerCase()
+                                .includes(searchKey.toLocaleLowerCase());
+                            }
+                          })
+                          .slice(
+                            page * rowsPerPage,
+                            page * rowsPerPage + rowsPerPage
+                          )
+                          .map((row) => {
+                            const basicInfo = row.basicInformation;
+                            return (
+                              <TableRow
+                                className="contact-list-row"
+                                key={row.name}
+                                onClick={() => handleClickContact(row.PK)}
+                              >
+                                {/* <TableCell component="th" scope="row">
+                                  {basicInfo.firstName +
+                                    " " +
+                                    basicInfo.lastName}
+                                </TableCell>
+                                <TableCell align="left">
+                                  {basicInfo.idNumber}
+                                </TableCell>
+                                <TableCell align="left">
+                                  {basicInfo.phone}
+                                </TableCell>
+                                <TableCell align="left">
+                                  {basicInfo.email}
+                                </TableCell> */}
+                                {variableData && variableData.map((variable, key)=>{
+                                  return(<TableCell key={key} align="left">{basicInfo[variable?.systemName]}</TableCell> )
+                                })}
+                                <TableCell align="left">
+                                  {moment(row.createTime).format("YYYY-MM-DD")}
+                                </TableCell>
+                                <TableCell align="left">
+                                  {moment(row.updateTime).format("YYYY-MM-DD")}
+                                </TableCell>
+                              </TableRow>
+                            );
+                          })}
+                      </TableBody>
+                      <TableFooter>
+                        <TableRow>
+                          <TablePagination
+                            rowsPerPageOptions={[
+                              5,
+                              10,
+                              25,
+                              { label: "All", value: -1 },
+                            ]}
+                            count={contactData.length}
+                            rowsPerPage={rowsPerPage}
+                            page={page}
+                            SelectProps={{
+                              inputProps: {
+                                "aria-label": "rows per page",
+                              },
+                              native: true,
+                            }}
+                            onPageChange={handleChangePage}
+                            onRowsPerPageChange={handleChangeRowsPerPage}
+                            ActionsComponent={TablePaginationActions}
+                          />
+                        </TableRow>
+                      </TableFooter>
+                    </Table>
+                  </TableContainer>
+                </Grid>
+              )}
+            </TabPanel>
+            <TabPanel value={value} name="email-tab" index={2}>
+              {/* 1st-header-section */}
+              <Grid container p={0} mb={2}>
+                <Grid item xs={12} md={6}>
+                  <Typography style={{ fontSize: 21, fontWeight: 700 }}>
+                    Emails
+                  </Typography>
+                </Grid>
 
-                    
-                  </TableBody>
-                  <TableFooter>
-                    <TableRow>
-                      <TablePagination
-                        rowsPerPageOptions={[
-                          5,
-                          10,
-                          25,
-                          { label: "All", value: -1 },
-                        ]}
-                        count={contactData.length}
-                        rowsPerPage={rowsPerPage}
-                        page={page}
-                        SelectProps={{
-                          inputProps: {
-                            "aria-label": "rows per page",
-                          },
-                          native: true,
-                        }}
-                        onPageChange={handleChangePage}
-                        onRowsPerPageChange={handleChangeRowsPerPage}
-                        ActionsComponent={TablePaginationActions}
-                      />
-                    </TableRow>
-                  </TableFooter>
-                </Table>
-              </TableContainer>
-            </Grid>}
-          </TabPanel>
-          <TabPanel value={value} name="email-tab" index={2}>
-            {/* 1st-header-section */}
-            <Grid container p={0} mb={2}>
-              <Grid item xs={12} md={6}>
-                <Typography style={{ fontSize: 21, fontWeight: 700 }}>
-                  Emails
-                </Typography>
+                <Grid item xs={12} md={6}>
+                  <Box sx={{ textAlign: "right" }}>
+                    <Button
+                      variant="outlined"
+                      sx={{ padding: "10px 40px" }}
+                      onClick={handleClickOpen}
+                    >
+                      Connect Email
+                    </Button>
+                    <Button
+                      variant="contained"
+                      sx={{ padding: "10px 40px", marginLeft: "5px" }}
+                      onClick={handleClickOpen}
+                    >
+                      Send Email
+                    </Button>
+                  </Box>
+                </Grid>
               </Grid>
 
-              <Grid item xs={12} md={6}>
-                <Box sx={{ textAlign: "right" }}>
-                  <Button
-                    variant="outlined"
-                    sx={{ padding: "10px 40px" }}
-                    onClick={handleClickOpen}
-                  >
-                    Connect Email
-                  </Button>
-                  <Button
-                    variant="contained"
-                    sx={{ padding: "10px 40px", marginLeft: "5px" }}
-                    onClick={handleClickOpen}
-                  >
-                    Send Email
-                  </Button>
-                </Box>
-              </Grid>
-            </Grid>
+              <Grid container>
+                <Grid xs={8}>
+                  <Typography>
+                    To connect emails to the DigiFi Loan Origination System,
+                    please CC or BCC the following email address on your
+                    outbound emails:
+                  </Typography>
 
-            <Grid container>
-              <Grid xs={8}>
-                <Typography>
-                  To connect emails to the DigiFi Loan Origination System,
-                  please CC or BCC the following email address on your outbound
-                  emails:
-                </Typography>
+                  <Typography mt={1}>
+                    0-fw19519jeweweeruidfkjdfh@mail.digifyllc
+                  </Typography>
+                </Grid>
 
-                <Typography mt={1}>
-                  0-fw19519jeweweeruidfkjdfh@mail.digifyllc
-                </Typography>
+                <Grid xs={4}>
+                  <Image
+                    src="/Group 455.svg"
+                    alt="Picture of the author"
+                    width={500}
+                    height={500}
+                  />
+                </Grid>
               </Grid>
-
-              <Grid xs={4}>
-                <Image
-                  src="/Group 455.svg"
-                  alt="Picture of the author"
-                  width={500}
-                  height={500}
-                />
-              </Grid>
-            </Grid>
-          </TabPanel>
+            </TabPanel>
+          </Box>
         </Box>
-      </Box>}
+      )}
     </div>
   );
 }

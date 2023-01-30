@@ -53,17 +53,14 @@ function Bars({ytdCount,monthCount}) {
                           height={200}
                           data={data1}
                         /> */}
-      <Grid container>
-        <Grid item xs={2}>
+
           <Chart
             chartType="ColumnChart"
-            width={300}
-            height={220}
+            width="100%"
+            height="238px"
             data={data1}
             style={{ transform: "Scale(110%,115%) ", padding: 0, margin: 0 }}
           />
-        </Grid>
-      </Grid>
     </>
   );
 }

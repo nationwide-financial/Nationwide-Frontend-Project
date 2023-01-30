@@ -17,6 +17,7 @@ import KeyboardArrowRight from "@mui/icons-material/KeyboardArrowRight";
 
 import { _gatSingleLoanType } from '../../services/loanTypeService.js'
 import { _fetchAllContacts ,_addContact} from '../../services/contactServices.js'
+import {_gatVariabels} from '../../services/variabelService.js';
 
 function TablePaginationActions(props) {
   const theme = useTheme();
@@ -157,8 +158,20 @@ function CoContactForm() {
       console.log(err)
     }
   }
-
+  const [variableData, setVariableData] = useState([]);
+  const getVariables = async () =>{
+    try{
+      const res = await _gatVariabels();
+      let data = await res?.data?.data?.Items.filter((variable)=>variable?.variableType == "contact")
+      data = await data.sort((a,b) => (a.createTime > b.createTime) ? 1 : ((b.createTime > a.createTime) ? -1 : 0));
+      console.log(res)
+      setVariableData([...data])
+    }catch(err){
+      console.log(err)
+    }
+  }
   useEffect (()=>{
+    getVariables()
     getContacts()
   },[])
 
@@ -213,7 +226,15 @@ function CoContactForm() {
                     >
                       SELECT CONTACT
                     </TableCell>
-                    <TableCell
+                    {variableData && variableData.map((variable,key)=>{
+                        return( <TableCell key={key}
+                          align="left"
+                          style={{ fontSize: 14, fontWeight: 700 }}
+                        >
+                          {variable?.displayName}
+                        </TableCell>)
+                      })}
+                    {/* <TableCell
                       align="left"
                       style={{ fontSize: 14, fontWeight: 700 }}
                     >
@@ -236,7 +257,7 @@ function CoContactForm() {
                       style={{ fontSize: 14, fontWeight: 700 }}
                     >
                       EMAIL
-                    </TableCell>
+                    </TableCell> */}
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -254,12 +275,15 @@ function CoContactForm() {
                             onChange={(e) => handlecheckbox(e)}
                           />
                         </TableCell>
-                        <TableCell component="th" scope="row">
+                        {variableData && variableData.map((variable, key)=>{
+                            return(<TableCell key={key} align="left">{basicInfo[variable?.systemName]}</TableCell> )
+                          })}
+                        {/* <TableCell component="th" scope="row">
                           {basicInfo.firstName + " " + basicInfo.lastName}
                         </TableCell>
                         <TableCell align="left">{basicInfo.idNumber}</TableCell>
                         <TableCell align="left">{basicInfo.phone}</TableCell>
-                        <TableCell align="left">{basicInfo.email}</TableCell>
+                        <TableCell align="left">{basicInfo.email}</TableCell> */}
                       </TableRow>
                     );
                   })}

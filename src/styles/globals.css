@@ -220,9 +220,9 @@ border: none;
 box-shadow: none;
 }
 
-.MuiGrid-root , .MuiGrid-item , .MuiGrid-grid-xs-3 , .css-1equabv-MuiGrid-root {
+/* .MuiGrid-root , .MuiGrid-item , .MuiGrid-grid-xs-3 , .css-1equabv-MuiGrid-root {
   padding: 2px!important;
-}
+} */
 
 .MuiGrid-root, .css-f09aq2-MuiGrid-root {
 margin-bottom: 0px;
@@ -451,4 +451,40 @@ color: #fff !important;
 }
 .profileImg:hover svg {
   opacity: 1;
+}
+
+.MuiTableCell-root, .MuiTableCell-body, .MuiTableCell-sizeMedium, .task_tbl_cell, .css-1ex1afd-MuiTableCell-root {
+ padding-left: 0px !important;
+ padding-right: 0px !important;
+}
+
+
+
+.newScroll::-webkit-scrollbar {
+  width: 4px;
+}
+
+/* Track */
+.newScroll::-webkit-scrollbar-track {
+  /* box-shadow: inset 0 0 4px grey;  */
+  /* border-radius: 4px; */
+  background-color: #ccc;
+}
+ 
+/* Handle */
+.newScroll::-webkit-scrollbar-thumb {
+  background: #333; 
+  border-radius: 10px;
+}
+
+/* Handle on hover */
+.newScroll::-webkit-scrollbar-thumb:hover {
+  background: #333; 
+}
+
+.limitChar {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
 }

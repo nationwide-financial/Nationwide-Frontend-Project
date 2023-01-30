@@ -1,20 +1,20 @@
-import React ,{useEffect}from "react";
+import React ,{useEffect,useCallback}from "react";
 import {
-  Avatar,
+  //Avatar,
   Box,
   Button,
-  FormControlLabel,
+  //FormControlLabel,
   Grid,
   IconButton,
-  InputAdornment,
+ //InputAdornment,
   TablePagination,
   TextField,
   Typography,
 } from "@mui/material";
-import Stack from "@mui/material/Stack";
-import FormControl from "@mui/material/FormControl";
-import Select from "@mui/material/Select";
-import MenuItem from "@mui/material/MenuItem";
+// import Stack from "@mui/material/Stack";
+// import FormControl from "@mui/material/FormControl";
+// import Select from "@mui/material/Select";
+// import MenuItem from "@mui/material/MenuItem";
 import { useRouter } from "next/router";
 import { useState } from "react";
 //import MuiPhone from "../../components/MuiPhone/MuiPhone";
@@ -31,30 +31,32 @@ import { DesktopDatePicker } from "@mui/x-date-pickers/DesktopDatePicker";
 // import { MuiPickersUtilsProvider } from "@material-ui/pickers";
 import Radio from '@mui/material/Radio';
 import TableContainer from "@mui/material/TableContainer";
-import TableFooter from "@mui/material/TableFooter";
+// import TableFooter from "@mui/material/TableFooter";
 import TableRow from "@mui/material/TableRow";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
 import TableHead from "@mui/material/TableHead";
 import PropTypes from "prop-types";
-import { styled } from "@mui/material/styles";
-import Dialog from "@mui/material/Dialog";
+// import { styled } from "@mui/material/styles";
+// import Dialog from "@mui/material/Dialog";
 import { useTheme } from "@mui/material/styles";
 import FirstPageIcon from "@mui/icons-material/FirstPage";
 
-import moment from "moment";
+// import moment from "moment";
 import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
 import KeyboardArrowRight from "@mui/icons-material/KeyboardArrowRight";
 import LastPageIcon from "@mui/icons-material/LastPage";
 
-import FormLabel from '@mui/material/FormLabel';
-import FormGroup from '@mui/material/FormGroup';
-import FormHelperText from '@mui/material/FormHelperText';
-import Checkbox from '@mui/material/Checkbox';
+// import FormLabel from '@mui/material/FormLabel';
+// import FormGroup from '@mui/material/FormGroup';
+// import FormHelperText from '@mui/material/FormHelperText';
+// import Checkbox from '@mui/material/Checkbox';
 
 import { _gatSingleLoanType } from '../../services/loanTypeService.js'
 import { _fetchAllContacts ,_addContact} from '../../services/contactServices.js'
+import {_gatVariabels} from '../../services/variabelService.js';
+// import { Elderly } from "@mui/icons-material";
 
 function TablePaginationActions(props) {
   const theme = useTheme();
@@ -164,22 +166,22 @@ function ApplicationForm() {
   };
   const router = useRouter();
 
-  const [contactId, setContactId] = useState("");
+ // const [contactId, setContactId] = useState("");
   const [allContact, setAllContact] = useState([]);
   const [loanTypeId,setLoanTypeId]= useState("");
   const [coEnableFlag,setCoEnableFlag]= useState("");
 
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [email, setEmail] = useState("");
-  const [dob, setDob] = useState("");
-  const [idNumber, setIdNumber] = useState("");
-  const [city, setCity] = useState("");
-  const [streetAddress, setStreetAddress] = useState("");
-  const [postalCode, setPostalCode] = useState("");
-  const [province, setProvince] = useState("");
-  const [country, setCountry] = useState("");
+  // const [phoneNumber, setPhoneNumber] = useState("");
+  // const [firstName, setFirstName] = useState("");
+  // const [lastName, setLastName] = useState("");
+  // const [email, setEmail] = useState("");
+  // const [dob, setDob] = useState("");
+  // const [idNumber, setIdNumber] = useState("");
+  // const [city, setCity] = useState("");
+  // const [streetAddress, setStreetAddress] = useState("");
+  // const [postalCode, setPostalCode] = useState("");
+  // const [province, setProvince] = useState("");
+  // const [country, setCountry] = useState("");
 
   const handleContinue = () => {
     let string = isChecked.join('S')
@@ -191,20 +193,21 @@ function ApplicationForm() {
   };
 
   const [selectedValueContactAvailability, setSelectedValueContactAvailability] = useState('no');
+
   const handleChangeContactAvailability = (event) => {
     setSelectedValueContactAvailability(event.target.value);
-    setFirstName("");
-    setLastName("");
-    setEmail("");
-    setDob("");
-    setIdNumber( "");
-    setCity("");
-    setStreetAddress("");
-    setPostalCode("");
-    setProvince("");
-    setCountry("");
-    setPhoneNumber("")
-    setSubmitErr('')
+    // setFirstName("");
+    // setLastName("");
+    // setEmail("");
+    // setDob("");
+    // setIdNumber( "");
+    // setCity("");
+    // setStreetAddress("");
+    // setPostalCode("");
+    // setProvince("");
+    // setCountry("");
+    // setPhoneNumber("")
+    // setSubmitErr('')
   };
 
    const [isChecked, setisChecked]= useState([]);
@@ -231,63 +234,123 @@ function ApplicationForm() {
       console.log(err)
     }
   }
-  const [submitErr,setSubmitErr] = useState('');
-  const handelSubmitContact = async () =>{
+ // const [submitErr,setSubmitErr] = useState('');
+
+  // const handelSubmitContact = async () =>{
+  //   try{
+  //     if(!firstName  || firstName == "" || firstName == null){
+  //       setSubmitErr('first name can not be empty !')
+  //     }else if(!lastName  || lastName == "" || lastName == null){
+  //       setSubmitErr('last name can not be empty !')
+  //     }else if(!email  || email == "" || email == null){
+  //       setSubmitErr('email can not be empty !')
+  //     }else if(!dob  || dob == "" || dob == null){
+  //       setSubmitErr('date of birth can not be empty !')
+  //     }else if(!idNumber  || idNumber == "" || idNumber == null){
+  //       setSubmitErr('ID number can not be empty !')
+  //     }else if(!city  || city == "" || city == null){
+  //       setSubmitErr('city can not be empty !')
+  //     }else if(!streetAddress  || streetAddress == "" || streetAddress == null){
+  //       setSubmitErr('street address can not be empty !')
+  //     }else if(!postalCode  || postalCode == "" || postalCode == null){
+  //       setSubmitErr('postal code can not be empty !')
+  //     }else if(!province  || province == "" || province == null){
+  //       setSubmitErr('province code can not be empty !')
+  //     }else if(!country  || country == "" || country == null){
+  //       setSubmitErr('country code can not be empty !')
+  //     }else if(!phoneNumber  || phoneNumber == "" || phoneNumber == null){
+  //       setSubmitErr('phone number code can not be empty !')
+  //     }else{
+  //       setSubmitErr('')
+  //       let body = {
+  //         basicInformation: {
+  //           firstName:firstName,
+  //           lastName: lastName,
+  //           email: email,
+  //           phone:phoneNumber ,
+  //           idNumber: idNumber,
+  //           dob: dob,
+  //           streetAddress: streetAddress,
+  //           city:city,
+  //           state: province,
+  //           postalCode:postalCode,
+  //           country: country,
+  //         },
+  //         jobInformation: {
+  //           companyName: "",
+  //           jobTitle: "",
+  //         },
+  //       };
+  //       const res = await _addContact(body)
+  //       if((res?.status == 200 || 201) && (res?.data?.ID)){
+  //         if(coEnableFlag == 1){
+  //           router.push(`/application/application-co-contacts?product=${loanTypeId}&contact=${res?.data?.ID}`);
+  //         }else{
+  //           router.push(`/application/application-form-data?product=${loanTypeId}&contact=${res?.data?.ID}`);
+  //         }
+  //       }
+  //     }
+  //   }catch(err){
+  //     console.log(err)
+  //   }
+  // }
+
+  const [error, setError] = useState('');
+  const [contact, setContact] = useState([]);
+  const [variableData, setVariableData] = useState([]);
+  const getVariables = async () =>{
     try{
-      if(!firstName  || firstName == "" || firstName == null){
-        setSubmitErr('first name can not be empty !')
-      }else if(!lastName  || lastName == "" || lastName == null){
-        setSubmitErr('last name can not be empty !')
-      }else if(!email  || email == "" || email == null){
-        setSubmitErr('email can not be empty !')
-      }else if(!dob  || dob == "" || dob == null){
-        setSubmitErr('date of birth can not be empty !')
-      }else if(!idNumber  || idNumber == "" || idNumber == null){
-        setSubmitErr('ID number can not be empty !')
-      }else if(!city  || city == "" || city == null){
-        setSubmitErr('city can not be empty !')
-      }else if(!streetAddress  || streetAddress == "" || streetAddress == null){
-        setSubmitErr('street address can not be empty !')
-      }else if(!postalCode  || postalCode == "" || postalCode == null){
-        setSubmitErr('postal code can not be empty !')
-      }else if(!province  || province == "" || province == null){
-        setSubmitErr('province code can not be empty !')
-      }else if(!country  || country == "" || country == null){
-        setSubmitErr('country code can not be empty !')
-      }else if(!phoneNumber  || phoneNumber == "" || phoneNumber == null){
-        setSubmitErr('phone number code can not be empty !')
-      }else{
-        setSubmitErr('')
-        console.log("inside")
-        let body = {
-          basicInformation: {
-            firstName:firstName,
-            lastName: lastName,
-            email: email,
-            phone:phoneNumber ,
-            idNumber: idNumber,
-            dob: dob,
-            streetAddress: streetAddress,
-            city:city,
-            state: province,
-            postalCode:postalCode,
-            country: country,
-          },
-          jobInformation: {
-            companyName: "",
-            jobTitle: "",
-          },
-        };
+      const res = await _gatVariabels();
+      let data = await res?.data?.data?.Items.filter((variable)=>variable?.variableType == "contact")
+      data = await data.sort((a,b) => (a.createTime > b.createTime) ? 1 : ((b.createTime > a.createTime) ? -1 : 0));
+      setVariableData([...data])
+    }catch(err){
+      console.log(err)
+    }
+  }
+  const onChangeHandler = useCallback(
+    ({target}) => {
+      setContact((state)=> ({ ...state, [target.name]:target.value }));
+    }, []
+);
+
+const inputValidations =  (contact) =>{
+  let error = "";
+  for (const [key, val] of Object.entries({ ...contact})) {
+    if (val.length === 0 || val === '') {
+      setError("Required field cannot be empty!");
+      error = "Required field cannot be empty!";
+    } else{
+      setError();
+    }
+  }
+  if(Object.keys(contact).length < variableData.length) {
+    setError("Missing required fields");
+    error = "Missing required fields";
+  }
+  return error;
+}
+
+  const handelSubmitContactDynamic = async () => {
+    let inputErrors = await inputValidations(contact);
+    if(inputErrors){
+     setError(inputErrors)
+    }
+    try {
+      let body = {
+        basicInformation: contact
+      }
+      if (!inputErrors) {
         const res = await _addContact(body)
-        if((res?.status == 200 || 201) && (res?.data?.ID)){
-          if(coEnableFlag == 1){
+        if ((res?.status == 200 || 201) && (res?.data?.ID)) {
+          if (coEnableFlag == 1) {
             router.push(`/application/application-co-contacts?product=${loanTypeId}&contact=${res?.data?.ID}`);
-          }else{
+          } else {
             router.push(`/application/application-form-data?product=${loanTypeId}&contact=${res?.data?.ID}`);
           }
         }
       }
-    }catch(err){
+    } catch (err) {
       console.log(err)
     }
   }
@@ -298,6 +361,7 @@ function ApplicationForm() {
     setLoanTypeId(query.product);
     setCoEnableFlag(query.coEnable);
     getContacts();
+    getVariables();
   }, [router.isReady, router.query]);
 
   return (
@@ -328,7 +392,7 @@ function ApplicationForm() {
         <Grid container>
           <Grid item xs={12} p={2}>
             <div>
-              <label> create contact </label>
+              <label> Create contact </label>
               <Radio
                 checked={selectedValueContactAvailability === "no"}
                 onChange={handleChangeContactAvailability}
@@ -336,7 +400,7 @@ function ApplicationForm() {
                 name="radio-buttons"
                 inputProps={{ "aria-label": "A" }}
               />
-              <label> use available contact </label>
+              <label> Use available contact </label>
               <Radio
                 checked={selectedValueContactAvailability === "yes"}
                 onChange={handleChangeContactAvailability}
@@ -353,360 +417,374 @@ function ApplicationForm() {
         </Grid>
 
         {selectedValueContactAvailability == "no" ? (
-          <Grid
-            container
-            style={{ display: "flex", justifyContent: "space-between" }}
-          >
+          // <Grid
+          //   container
+          //   style={{ display: "flex", justifyContent: "space-between" }}
+          // >
+          //   {/* body-section */}
+
+          //   <Grid item xs={6}>
+          //     <Stack direction="column" spacing={2} m={2}>
+          //       <Grid item>
+          //         <label>
+          //           {" "}
+          //           <Typography
+          //             align="left"
+          //             variant="h6"
+          //             style={{
+          //               fontSize: 17,
+          //               fontWeight: 700,
+          //               fontStyle: "normal",
+          //             }}
+          //           >
+          //             First name <span style={{ color: "#FF0000" }}>*</span>
+          //           </Typography>
+          //         </label>
+          //         <TextField
+          //           fullWidth
+          //           size="small"
+          //           margin="normal"
+          //           id="outlined-basic"
+          //           variant="outlined"
+          //           placeholder="Text"
+          //           value={firstName}
+          //           onChange={(e) => {
+          //             setFirstName(e.target.value);
+          //           }}
+          //         />
+          //       </Grid>
+
+          //       <Grid item>
+          //         <label>
+          //           {" "}
+          //           <Typography
+          //             align="left"
+          //             variant="h6"
+          //             style={{
+          //               fontSize: 17,
+          //               fontWeight: 700,
+          //               fontStyle: "normal",
+          //             }}
+          //           >
+          //             Email <span style={{ color: "#FF0000" }}>*</span>
+          //           </Typography>
+          //         </label>
+          //         <TextField
+          //           fullWidth
+          //           size="small"
+          //           margin="normal"
+          //           id="outlined-basic"
+          //           variant="outlined"
+          //           placeholder="Text"
+          //           value={email}
+          //           onChange={(e) => {
+          //             setEmail(e.target.value);
+          //           }}
+          //         />
+          //       </Grid>
+
+          //       <Grid item>
+          //         <label>
+          //           {" "}
+          //           <Typography
+          //             align="left"
+          //             variant="h6"
+          //             style={{
+          //               fontSize: 17,
+          //               fontWeight: 700,
+          //               fontStyle: "normal",
+          //             }}
+          //           >
+          //             ID Number <span style={{ color: "#FF0000" }}>*</span>
+          //           </Typography>
+          //         </label>
+          //         <TextField
+          //           fullWidth
+          //           size="small"
+          //           margin="normal"
+          //           id="outlined-basic"
+          //           variant="outlined"
+          //           placeholder="Text"
+          //           value={`${idNumber}`}
+          //           onChange={(e) => {
+          //             setIdNumber(e.target.value);
+          //           }}
+          //         />
+          //       </Grid>
+          //       <Grid item>
+          //         <label>
+          //           {" "}
+          //           <Typography
+          //             align="left"
+          //             variant="h6"
+          //             style={{
+          //               fontSize: 17,
+          //               fontWeight: 700,
+          //               fontStyle: "normal",
+          //             }}
+          //           >
+          //             Street Address <span style={{ color: "#FF0000" }}>*</span>
+          //           </Typography>
+          //         </label>
+          //         <TextField
+          //           fullWidth
+          //           size="small"
+          //           margin="normal"
+          //           id="outlined-basic"
+          //           variant="outlined"
+          //           placeholder="Text"
+          //           value={`${streetAddress}`}
+          //           onChange={(e) => {
+          //             setStreetAddress(e.target.value);
+          //           }}
+          //         />
+          //       </Grid>
+
+          //       <Grid item>
+          //         <label>
+          //           {" "}
+          //           <Typography
+          //             align="left"
+          //             variant="h6"
+          //             style={{
+          //               fontSize: 17,
+          //               fontWeight: 700,
+          //               fontStyle: "normal",
+          //             }}
+          //           >
+          //             Province <span style={{ color: "#FF0000" }}>*</span>
+          //           </Typography>
+          //         </label>
+          //         <FormControl fullWidth size="small" margin="normal">
+          //           <Select
+          //             labelId="demo-simple-select-label"
+          //             id="demo-simple-select"
+          //             placeholder="Cooper"
+          //             onChange={(e) => {
+          //               setProvince(e.target.value);
+          //             }}
+          //           >
+          //             <MenuItem value={"Province 1"}>
+          //               <Typography align="left">Province 1</Typography>
+          //             </MenuItem>
+          //             <MenuItem value={"Province 2"}>
+          //               <Typography align="left">Province 2</Typography>
+          //             </MenuItem>
+          //             <MenuItem value={"Province 3"}>
+          //               <Typography align="left">Province 3</Typography>
+          //             </MenuItem>
+          //           </Select>
+          //         </FormControl>
+          //       </Grid>
+          //       <Grid item>
+          //         <label>
+          //           {" "}
+          //           <Typography
+          //             align="left"
+          //             variant="h6"
+          //             style={{
+          //               fontSize: 17,
+          //               fontWeight: 700,
+          //               fontStyle: "normal",
+          //             }}
+          //           >
+          //             Country<span style={{ color: "#FF0000" }}>*</span>
+          //           </Typography>
+          //         </label>
+          //         <FormControl fullWidth size="small" margin="normal">
+          //           {/* <InputLabel id="demo-simple-select-label">Cooper</InputLabel> */}
+          //           <Select
+          //             labelId="demo-simple-select-label"
+          //             id="demo-simple-select"
+          //             onChange={(e) => {
+          //               setCountry(e.target.value);
+          //             }}
+          //             placeholder="Cooper"
+          //           >
+          //             <MenuItem value={"Province 1"}>
+          //               <Typography align="left">Country 1</Typography>
+          //             </MenuItem>
+          //             <MenuItem value={"Province 2"}>
+          //               <Typography align="left">Country 2</Typography>
+          //             </MenuItem>
+          //             <MenuItem value={"Province 3"}>
+          //               <Typography align="left">Country 3</Typography>
+          //             </MenuItem>
+          //           </Select>
+          //         </FormControl>
+          //       </Grid>
+          //     </Stack>
+          //   </Grid>
+          //   <Grid item xs={6}>
+          //     <Stack direction="column" spacing={2} m={2}>
+          //       <Grid item>
+          //         <label>
+          //           {" "}
+          //           <Typography
+          //             align="left"
+          //             variant="h6"
+          //             style={{
+          //               fontSize: 17,
+          //               fontWeight: 700,
+          //               fontStyle: "normal",
+          //             }}
+          //           >
+          //             Last Name <span style={{ color: "#FF0000" }}>*</span>
+          //           </Typography>
+          //         </label>
+          //         <TextField
+          //           fullWidth
+          //           size="small"
+          //           margin="normal"
+          //           id="outlined-basic"
+          //           variant="outlined"
+          //           placeholder="Text"
+          //           value={`${lastName}`}
+          //           onChange={(e) => {
+          //             setLastName(e.target.value);
+          //           }}
+          //         />
+          //       </Grid>
+          //       <Grid item>
+          //         <label>
+          //           {" "}
+          //           <Typography
+          //             align="left"
+          //             variant="h6"
+          //             style={{
+          //               fontSize: 17,
+          //               fontWeight: 700,
+          //               fontStyle: "normal",
+          //             }}
+          //           >
+          //             Phone <span style={{ color: "#FF0000" }}>*</span>
+          //           </Typography>
+          //         </label>
+          //         <TextField
+          //           fullWidth
+          //           size="small"
+          //           margin="normal"
+          //           id="outlined-basic"
+          //           variant="outlined"
+          //           placeholder="Text"
+          //           value={`${phoneNumber}`}
+          //           onChange={(e) => {
+          //             setPhoneNumber(e.target.value);
+          //           }}
+          //         />
+          //         {/* <MuiPhone
+          //           value={phoneNumber}
+          //           countryOptions={countryOptions}
+          //           onChange={(e) => {
+          //             setPhoneNumber(e.target.value);
+          //           }}
+          //           className="phon_number_field_border_effect"
+          //         /> */}
+          //       </Grid>
+          //       <Grid item>
+          //         <label>
+          //           {" "}
+          //           <Typography
+          //             align="left"
+          //             variant="h6"
+          //             style={{
+          //               fontSize: 17,
+          //               fontWeight: 700,
+          //               fontStyle: "normal",
+          //             }}
+          //           >
+          //             Date of Birth <span style={{ color: "#FF0000" }}>*</span>
+          //           </Typography>
+          //         </label>
+          //         <TextField
+          //           fullWidth
+          //           size="small"
+          //           margin="normal"
+          //           id="outlined-basic"
+          //           variant="outlined"
+          //           placeholder="MM/DD/YY"
+          //           value={`${dob}`}
+          //           onChange={(e) => {
+          //             setDob(e.target.value);
+          //           }}
+          //         />
+          //       </Grid>
+          //       <Grid item>
+          //         <label>
+          //           {" "}
+          //           <Typography
+          //             align="left"
+          //             variant="h6"
+          //             style={{
+          //               fontSize: 17,
+          //               fontWeight: 700,
+          //               fontStyle: "normal",
+          //             }}
+          //           >
+          //             City <span style={{ color: "#FF0000" }}>*</span>
+          //           </Typography>
+          //         </label>
+          //         <TextField
+          //           fullWidth
+          //           size="small"
+          //           margin="normal"
+          //           id="outlined-basic"
+          //           variant="outlined"
+          //           placeholder="Text"
+          //           value={`${city}`}
+          //           onChange={(e) => {
+          //             setCity(e.target.value);
+          //           }}
+          //         />
+          //       </Grid>
+
+          //       <Grid item>
+          //         <label>
+          //           {" "}
+          //           <Typography
+          //             align="left"
+          //             variant="h6"
+          //             style={{
+          //               fontSize: 17,
+          //               fontWeight: 700,
+          //               fontStyle: "normal",
+          //             }}
+          //           >
+          //             Zip or Postal Code{" "}
+          //             <span style={{ color: "#FF0000" }}>*</span>
+          //           </Typography>
+          //         </label>
+          //         <TextField
+          //           fullWidth
+          //           size="small"
+          //           margin="normal"
+          //           id="outlined-basic"
+          //           variant="outlined"
+          //           placeholder="Text"
+          //           value={`${postalCode}`}
+          //           onChange={(e) => {
+          //             setPostalCode(e.target.value);
+          //           }}
+          //         />
+          //       </Grid>
+          //     </Stack>
+          //   </Grid>
+          //   <p style={{ color: "red" }}>{submitErr}</p>
+          // </Grid>
+          <div>
+            <Grid container spacing={1} mx={1}>
             {/* body-section */}
 
-            <Grid item xs={6}>
-              <Stack direction="column" spacing={2} m={2}>
-                <Grid item>
-                  <label>
-                    {" "}
-                    <Typography
-                      align="left"
-                      variant="h6"
-                      style={{
-                        fontSize: 17,
-                        fontWeight: 700,
-                        fontStyle: "normal",
-                      }}
-                    >
-                      First name <span style={{ color: "#FF0000" }}>*</span>
-                    </Typography>
-                  </label>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    margin="normal"
-                    id="outlined-basic"
-                    variant="outlined"
-                    placeholder="Text"
-                    value={firstName}
-                    onChange={(e) => {
-                      setFirstName(e.target.value);
-                    }}
-                  />
-                </Grid>
-
-                <Grid item>
-                  <label>
-                    {" "}
-                    <Typography
-                      align="left"
-                      variant="h6"
-                      style={{
-                        fontSize: 17,
-                        fontWeight: 700,
-                        fontStyle: "normal",
-                      }}
-                    >
-                      Email <span style={{ color: "#FF0000" }}>*</span>
-                    </Typography>
-                  </label>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    margin="normal"
-                    id="outlined-basic"
-                    variant="outlined"
-                    placeholder="Text"
-                    value={email}
-                    onChange={(e) => {
-                      setEmail(e.target.value);
-                    }}
-                  />
-                </Grid>
-
-                <Grid item>
-                  <label>
-                    {" "}
-                    <Typography
-                      align="left"
-                      variant="h6"
-                      style={{
-                        fontSize: 17,
-                        fontWeight: 700,
-                        fontStyle: "normal",
-                      }}
-                    >
-                      ID Number <span style={{ color: "#FF0000" }}>*</span>
-                    </Typography>
-                  </label>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    margin="normal"
-                    id="outlined-basic"
-                    variant="outlined"
-                    placeholder="Text"
-                    value={`${idNumber}`}
-                    onChange={(e) => {
-                      setIdNumber(e.target.value);
-                    }}
-                  />
-                </Grid>
-                <Grid item>
-                  <label>
-                    {" "}
-                    <Typography
-                      align="left"
-                      variant="h6"
-                      style={{
-                        fontSize: 17,
-                        fontWeight: 700,
-                        fontStyle: "normal",
-                      }}
-                    >
-                      Street Address <span style={{ color: "#FF0000" }}>*</span>
-                    </Typography>
-                  </label>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    margin="normal"
-                    id="outlined-basic"
-                    variant="outlined"
-                    placeholder="Text"
-                    value={`${streetAddress}`}
-                    onChange={(e) => {
-                      setStreetAddress(e.target.value);
-                    }}
-                  />
-                </Grid>
-
-                <Grid item>
-                  <label>
-                    {" "}
-                    <Typography
-                      align="left"
-                      variant="h6"
-                      style={{
-                        fontSize: 17,
-                        fontWeight: 700,
-                        fontStyle: "normal",
-                      }}
-                    >
-                      Province <span style={{ color: "#FF0000" }}>*</span>
-                    </Typography>
-                  </label>
-                  <FormControl fullWidth size="small" margin="normal">
-                    <Select
-                      labelId="demo-simple-select-label"
-                      id="demo-simple-select"
-                      placeholder="Cooper"
-                      onChange={(e) => {
-                        setProvince(e.target.value);
-                      }}
-                    >
-                      <MenuItem value={"Province 1"}>
-                        <Typography align="left">Province 1</Typography>
-                      </MenuItem>
-                      <MenuItem value={"Province 2"}>
-                        <Typography align="left">Province 2</Typography>
-                      </MenuItem>
-                      <MenuItem value={"Province 3"}>
-                        <Typography align="left">Province 3</Typography>
-                      </MenuItem>
-                    </Select>
-                  </FormControl>
-                </Grid>
-                <Grid item>
-                  <label>
-                    {" "}
-                    <Typography
-                      align="left"
-                      variant="h6"
-                      style={{
-                        fontSize: 17,
-                        fontWeight: 700,
-                        fontStyle: "normal",
-                      }}
-                    >
-                      Country<span style={{ color: "#FF0000" }}>*</span>
-                    </Typography>
-                  </label>
-                  <FormControl fullWidth size="small" margin="normal">
-                    {/* <InputLabel id="demo-simple-select-label">Cooper</InputLabel> */}
-                    <Select
-                      labelId="demo-simple-select-label"
-                      id="demo-simple-select"
-                      onChange={(e) => {
-                        setCountry(e.target.value);
-                      }}
-                      placeholder="Cooper"
-                    >
-                      <MenuItem value={"Province 1"}>
-                        <Typography align="left">Country 1</Typography>
-                      </MenuItem>
-                      <MenuItem value={"Province 2"}>
-                        <Typography align="left">Country 2</Typography>
-                      </MenuItem>
-                      <MenuItem value={"Province 3"}>
-                        <Typography align="left">Country 3</Typography>
-                      </MenuItem>
-                    </Select>
-                  </FormControl>
-                </Grid>
-              </Stack>
+              {variableData && variableData.map((variable, key)=>{
+                return(<Grid item xs={6} key={key}>
+                  <label>  <Typography align='left' variant='h6' style={{ fontSize: 17, fontWeight: 700, fontStyle: 'normal' }}>{variable?.displayName} <span style={{ color: '#FF0000' }}>*</span></Typography></label>
+                  <TextField fullWidth onChange={onChangeHandler} name={variable?.systemName} size="small" margin="normal" id="outlined-basic" variant="outlined" value={contact && contact[`${variable?.systemName}`]} />
+                </Grid>)
+              })}
+              
             </Grid>
-            <Grid item xs={6}>
-              <Stack direction="column" spacing={2} m={2}>
-                <Grid item>
-                  <label>
-                    {" "}
-                    <Typography
-                      align="left"
-                      variant="h6"
-                      style={{
-                        fontSize: 17,
-                        fontWeight: 700,
-                        fontStyle: "normal",
-                      }}
-                    >
-                      Last Name <span style={{ color: "#FF0000" }}>*</span>
-                    </Typography>
-                  </label>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    margin="normal"
-                    id="outlined-basic"
-                    variant="outlined"
-                    placeholder="Text"
-                    value={`${lastName}`}
-                    onChange={(e) => {
-                      setLastName(e.target.value);
-                    }}
-                  />
-                </Grid>
-                <Grid item>
-                  <label>
-                    {" "}
-                    <Typography
-                      align="left"
-                      variant="h6"
-                      style={{
-                        fontSize: 17,
-                        fontWeight: 700,
-                        fontStyle: "normal",
-                      }}
-                    >
-                      Phone <span style={{ color: "#FF0000" }}>*</span>
-                    </Typography>
-                  </label>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    margin="normal"
-                    id="outlined-basic"
-                    variant="outlined"
-                    placeholder="Text"
-                    value={`${phoneNumber}`}
-                    onChange={(e) => {
-                      setPhoneNumber(e.target.value);
-                    }}
-                  />
-                  {/* <MuiPhone
-                    value={phoneNumber}
-                    countryOptions={countryOptions}
-                    onChange={(e) => {
-                      setPhoneNumber(e.target.value);
-                    }}
-                    className="phon_number_field_border_effect"
-                  /> */}
-                </Grid>
-                <Grid item>
-                  <label>
-                    {" "}
-                    <Typography
-                      align="left"
-                      variant="h6"
-                      style={{
-                        fontSize: 17,
-                        fontWeight: 700,
-                        fontStyle: "normal",
-                      }}
-                    >
-                      Date of Birth <span style={{ color: "#FF0000" }}>*</span>
-                    </Typography>
-                  </label>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    margin="normal"
-                    id="outlined-basic"
-                    variant="outlined"
-                    placeholder="MM/DD/YY"
-                    value={`${dob}`}
-                    onChange={(e) => {
-                      setDob(e.target.value);
-                    }}
-                  />
-                </Grid>
-                <Grid item>
-                  <label>
-                    {" "}
-                    <Typography
-                      align="left"
-                      variant="h6"
-                      style={{
-                        fontSize: 17,
-                        fontWeight: 700,
-                        fontStyle: "normal",
-                      }}
-                    >
-                      City <span style={{ color: "#FF0000" }}>*</span>
-                    </Typography>
-                  </label>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    margin="normal"
-                    id="outlined-basic"
-                    variant="outlined"
-                    placeholder="Text"
-                    value={`${city}`}
-                    onChange={(e) => {
-                      setCity(e.target.value);
-                    }}
-                  />
-                </Grid>
-
-                <Grid item>
-                  <label>
-                    {" "}
-                    <Typography
-                      align="left"
-                      variant="h6"
-                      style={{
-                        fontSize: 17,
-                        fontWeight: 700,
-                        fontStyle: "normal",
-                      }}
-                    >
-                      Zip or Postal Code{" "}
-                      <span style={{ color: "#FF0000" }}>*</span>
-                    </Typography>
-                  </label>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    margin="normal"
-                    id="outlined-basic"
-                    variant="outlined"
-                    placeholder="Text"
-                    value={`${postalCode}`}
-                    onChange={(e) => {
-                      setPostalCode(e.target.value);
-                    }}
-                  />
-                </Grid>
-              </Stack>
-            </Grid>
-            <p style={{ color: "red" }}>{submitErr}</p>
-          </Grid>
+            <p style={{color:'red',marginLeft:10}}>{error}</p>
+          </div>
         ) : (
           <Grid container>
             <TableContainer>
@@ -722,7 +800,7 @@ function ApplicationForm() {
                     >
                       SELECT CONTACT
                     </TableCell>
-                    <TableCell
+                    {/* <TableCell
                       align="left"
                       style={{ fontSize: 14, fontWeight: 700 }}
                     >
@@ -739,13 +817,17 @@ function ApplicationForm() {
                       style={{ fontSize: 14, fontWeight: 700 }}
                     >
                       PHONE
-                    </TableCell>
-                    <TableCell
-                      align="left"
-                      style={{ fontSize: 14, fontWeight: 700 }}
-                    >
-                      EMAIL
-                    </TableCell>
+                    </TableCell> */}
+
+                 
+                    {variableData && variableData.map((variable,key)=>{
+                        return( <TableCell key={key}
+                          align="left"
+                          style={{ fontSize: 14, fontWeight: 700 }}
+                        >
+                          {variable?.displayName}
+                        </TableCell>)
+                      })}
                     
                   </TableRow>
                 </TableHead>
@@ -766,12 +848,15 @@ function ApplicationForm() {
                           /> */}
                           <input type="radio" name="contact" value={row.PK} onChange={handelRadioButton} />
                         </TableCell>
-                        <TableCell component="th" scope="row">
+                        {variableData && variableData.map((variable, key)=>{
+                            return(<TableCell key={key} align="left">{basicInfo[variable?.systemName]}</TableCell> )
+                          })}
+                        {/* <TableCell component="th" scope="row">
                           {basicInfo.firstName + " " + basicInfo.lastName}
                         </TableCell>
                         <TableCell align="left">{basicInfo.idNumber}</TableCell>
                         <TableCell align="left">{basicInfo.phone}</TableCell>
-                        <TableCell align="left">{basicInfo.email}</TableCell>
+                        <TableCell align="left">{basicInfo.email}</TableCell> */}
                       </TableRow>
                     );
                   })}
@@ -820,7 +905,7 @@ function ApplicationForm() {
               padding: 20,
             }}
           >
-            <Button variant="contained" onClick={handelSubmitContact}>
+            <Button variant="contained" onClick={handelSubmitContactDynamic}>
               Create Contact
             </Button>
           </div>

@@ -14,6 +14,7 @@ import { useRouter } from "next/router";
 
 import { _gatSingleLoanType } from '../../services/loanTypeService.js'
 import { _fetchAllContacts  } from '../../services/contactServices.js'
+import {_gatVariabels} from '../../services/variabelService.js';
 import { Contrast } from "@mui/icons-material";
 
 const Item = styled(Paper)(({ theme }) => ({
@@ -123,10 +124,27 @@ const getContactData = async(ids) =>{
     console.log(err)
   }
 }
-
+const [variableData, setVariableData] = useState([]);
+console.log("variableData.length/2",Math.round(variableData.length/2))
+  let midNo = Math.round(variableData.length/2)
+  let leftCount = variableData.length - midNo;
+  let rightCount = 0;
+  
+  const getVariables = async () =>{
+    try{
+      const res = await _gatVariabels();
+      let data = await res?.data?.data?.Items.filter((variable)=>variable?.variableType == "contact")
+      data = await data.sort((a,b) => (a.createTime > b.createTime) ? 1 : ((b.createTime > a.createTime) ? -1 : 0));
+      console.log(res)
+      setVariableData([...data])
+    }catch(err){
+      console.log(err)
+    }
+  }
   useEffect(() => {
     async function getData(){
       if (!router.isReady) return;
+      getVariables();
       const query = router.query;
       let contactString= query?.contact;
       let coContactString= query?.cocontact;
@@ -216,30 +234,36 @@ const getContactData = async(ids) =>{
                           >
                             <Table aria-label="simple table">
                               <TableBody>
-                                <TableRow
-                                  sx={{
-                                    "&:last-child td, &:last-child th": {
-                                      border: 0,
-                                    },
-                                  }}
-                                >
-                                  <TableCell
-                                    component="th"
-                                    scope="row"
-                                    style={{ fontSize:20, fontWeight: 400}}
-                                  >
-                                    {" First Name "}
-                                  </TableCell>
-                                  <TableCell
-                                    align="left"
-                                  
-                                    style={{ fontSize:20, fontWeight: 600}}
-                                  >
-                                    {row?.basicInformation?.firstName || ""}
-                                  </TableCell>
-                                </TableRow>
+                                {variableData && variableData.map((variable,key)=>{
+                                 
+                                  if(leftCount>=key){
+                                    return( <TableRow key={key}
+                                      sx={{
+                                        "&:last-child td, &:last-child th": {
+                                          border: 0,
+                                        },
+                                      }}
+                                    >
+                                      <TableCell
+                                        component="th"
+                                        scope="row"
+                                        style={{ fontSize:20, fontWeight: 400}}
+                                      >
+                                        {variable?.displayName}
+                                      </TableCell>
+                                      <TableCell
+                                        align="left"
+                                      
+                                        style={{ fontSize:20, fontWeight: 600}}
+                                      >
+                                        {row?.basicInformation?.[variable?.systemName] || ""}
+                                      </TableCell>
+                                    </TableRow>)
+                                  }
+                                })}
+                               
 
-                                <TableRow
+                                {/* <TableRow
                                   sx={{
                                     "&:last-child td, &:last-child th": {
                                       border: 0,
@@ -311,7 +335,7 @@ const getContactData = async(ids) =>{
                                   >
                                     {row?.basicInformation?.streetAddress || ""}
                                   </TableCell>
-                                </TableRow>
+                                </TableRow> */}
                               </TableBody>
                             </Table>
                           </TableContainer>
@@ -323,40 +347,45 @@ const getContactData = async(ids) =>{
                             <Table aria-label="simple table">
                               <TableBody>
                                
-                                  <TableRow
-                                  
-                                    sx={{
-                                      "&:last-child td, &:last-child th": {
-                                        border: 0,
-                                      },
-                                    }}
-                                  >
-                                    <TableCell
-                                      component="th"
-                                      scope="row"
-                                      style={{ fontSize:20, fontWeight: 400}}
-                                                                  >
-                                      {"Last Name"}
-                                    </TableCell>
-                                    <TableCell
-                                      align="left"
-                                      style={{ fontSize:20, fontWeight: 600}}
+                              {variableData && variableData.map((variable,key)=>{
+                                 
+                                  if(leftCount<key){
+                                    return( <TableRow key={key}
+                                      sx={{
+                                        "&:last-child td, &:last-child th": {
+                                          border: 0,
+                                        },
+                                      }}
                                     >
-                                      {row?.basicInformation?.lastName || ""}
-                                    </TableCell>
-                                  </TableRow>
+                                      <TableCell
+                                        component="th"
+                                        scope="row"
+                                        style={{ fontSize:20, fontWeight: 400}}
+                                      >
+                                        {variable?.displayName}
+                                      </TableCell>
+                                      <TableCell
+                                        align="left"
+                                      
+                                        style={{ fontSize:20, fontWeight: 600}}
+                                      >
+                                        {row?.basicInformation?.[variable?.systemName] || ""}
+                                      </TableCell>
+                                    </TableRow>)
+                                  }
+                                })}
                             
 
 
 
-                                  <TableRow
+                                  {/* <TableRow
                                   
                                   sx={{
                                     "&:last-child td, &:last-child th": {
                                       border: 0,
                                     },
                                   }}
-                                >
+                                  >
                                   <TableCell
                                     component="th"
                                     scope="row"
@@ -414,8 +443,8 @@ const getContactData = async(ids) =>{
                                     align="left"
                                     style={{ fontSize:20, fontWeight: 600}}                                  >
                                     {row?.basicInformation?.postalCode || ""}
-                                  </TableCell>
-                                </TableRow>
+                                  </TableCell> 
+                                </TableRow> */}
 
 
 
@@ -425,15 +454,15 @@ const getContactData = async(ids) =>{
                         </Grid>
                       </Grid>
                       {/* down */}
-                      <Grid mt={4}>
+                      {/* <Grid mt={4}>
                         <Typography
                           align="left"
                           className="page_sub_content_header"
                         >
                           Financial Information
                         </Typography>
-                      </Grid>
-                      <Grid container spacing={2}>
+                      </Grid> */}
+                      {/* <Grid container spacing={2}>
                         <Grid item xs={6}>
                           <TableContainer
                             style={{ backgroundColor: "transparent" }}
@@ -503,26 +532,14 @@ const getContactData = async(ids) =>{
                                       },
                                     }}
                                   >
-                                    {/* <TableCell
-                                      component="th"
-                                      scope="row"
-                                      style={{ fontSize:20, fontWeight: 400}}
-                                    >
-                                      {"Year at Job"}
-                                    </TableCell>
-                                    <TableCell
-                                      align="left"
-                                      style={{ fontSize:20, fontWeight: 600}}
-                                    >
-                                      {" "}
-                                    </TableCell> */}
+                                   
                                   </TableRow>
                                
                               </TableBody>
                             </Table>
                           </TableContainer>
                         </Grid>
-                      </Grid>
+                      </Grid> */}
                     </Box>
                   ))}
 

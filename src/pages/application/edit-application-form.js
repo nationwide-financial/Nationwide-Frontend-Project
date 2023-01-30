@@ -1,83 +1,44 @@
-import React, { useEffect } from "react";
+import React, { useEffect,useCallback } from "react";
 import {
   Avatar,
   Box,
   Button,
-  FormControlLabel,
   Grid,
   IconButton,
-  InputAdornment,
-  TablePagination,
   TextField,
   Typography,
 } from "@mui/material";
-import MoreVertIcon from "@mui/icons-material/MoreVert";
-import CachedIcon from "@mui/icons-material/Cached";
-import SyncAltOutlinedIcon from "@mui/icons-material/SyncAltOutlined";
-import DashboardOutlinedIcon from "@mui/icons-material/DashboardOutlined";
-import ViewCompactOutlinedIcon from "@mui/icons-material/ViewCompactOutlined";
-import SyncOutlinedIcon from "@mui/icons-material/SyncOutlined";
-import { styled } from "@mui/material/styles";
-import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined";
 import AvatarGroup from "@mui/material/AvatarGroup";
-import {
-  MoreVert,
-  Rotate90DegreesCcw,
-  Search,
-  TuneOutlined,
-} from "@mui/icons-material";
-import Switch, { SwitchProps } from "@mui/material/Switch";
-import FormGroup from "@mui/material/FormGroup";
 import Stack from "@mui/material/Stack";
 import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
-import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import CloseIcon from "@mui/icons-material/Close";
 import FormControl from "@mui/material/FormControl";
 import { useRouter } from "next/router";
-import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
-import TextSnippetOutlinedIcon from "@mui/icons-material/TextSnippetOutlined";
-import CreditCardOutlinedIcon from "@mui/icons-material/CreditCardOutlined";
-import DirectionsCarFilledOutlinedIcon from "@mui/icons-material/DirectionsCarFilledOutlined";
-import WorkOutlineOutlinedIcon from "@mui/icons-material/WorkOutlineOutlined";
-import Checkbox from "@mui/material/Checkbox";
 import Chip from "@mui/material/Chip";
-import CloseOutlinedIcon from "@mui/icons-material/CloseOutlined";
-import ControlPointIcon from "@mui/icons-material/ControlPoint";
-import Paper from "@mui/material/Paper";
 import NoteAltOutlinedIcon from "@mui/icons-material/NoteAltOutlined";
 import Link from "@mui/material/Link";
-// import { styled } from '@mui/material/styles';
-import Divider from "@mui/material/Divider";
 import PropTypes from "prop-types";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
-
 import { useTheme } from "@mui/material/styles";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
-import TableFooter from "@mui/material/TableFooter";
 import TableRow from "@mui/material/TableRow";
 import FirstPageIcon from "@mui/icons-material/FirstPage";
 import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
 import KeyboardArrowRight from "@mui/icons-material/KeyboardArrowRight";
 import LastPageIcon from "@mui/icons-material/LastPage";
-import TableHead from "@mui/material/TableHead";
-import OutlinedInput from "@mui/material/OutlinedInput";
-// import Switch from '@mui/material/Switch';
-import Image from "next/image";
-import DatasetRoundedIcon from "@mui/icons-material/DatasetRounded";
-import TextareaAutosize from "@mui/base/TextareaAutosize";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
-import InputLabel from "@mui/material/InputLabel";
 import { useState } from "react";
 import Snackbar from '@mui/material/Snackbar';
 import Alert from '@mui/material/Alert';
+import {_gatVariabels} from '../../services/variabelService.js';
 
 // import AvatarGroup from '@mui/material/AvatarGroup';
 import {
@@ -89,57 +50,7 @@ import {
   _manageTeamMembers,
 } from "../../services/applicationService.js";
 import { _getAllPlatformUserByAdmin } from "../../services/authServices.js";
-function topleftcreateData(leftData, rightData) {
-  return { leftData, rightData };
-}
 
-const topleftrows = [
-  topleftcreateData("First Name", "Phillip"),
-  topleftcreateData("Email", "Johnsmith@gmail.com"),
-  topleftcreateData("ID Number", "555-55-5555"),
-  topleftcreateData("Street Address", "123 Apple Lane"),
-];
-
-// TopRight
-
-function toprightcreateData(leftData, rightData) {
-  return { leftData, rightData };
-}
-
-const toprightrows = [
-  toprightcreateData("Last Name", "Cooper"),
-  toprightcreateData("Phone", "(239) 555-0108"),
-  toprightcreateData("Date of Birth", "04/23/1980"),
-  toprightcreateData("Postal Code", "10004"),
-];
-
-// bottom rowws
-
-// DownLeft
-
-function downleftcreateData(leftData, rightData) {
-  return { leftData, rightData };
-}
-
-const downleftrows = [
-  downleftcreateData("Company Name", "ABC Technology"),
-  downleftcreateData("Job Title ", "Software Engineer"),
-];
-
-// DownRight
-
-function downrightcreateData(leftData, rightData) {
-  return { leftData, rightData };
-}
-
-const downrightrows = [
-  downrightcreateData("Year at Job", "8"),
-  // downcreateData('Decline Reason ','The Customer did not respond'),
-];
-
-const label = { inputProps: { "aria-label": "Switch demo" } };
-
-// table-with-pagination-------------------
 function TablePaginationActions(props) {
   const theme = useTheme();
   const { count, page, rowsPerPage, onPageChange } = props;
@@ -247,20 +158,7 @@ function a11yProps(index) {
 }
 // ------
 
-const style = {
-  width: "100%",
-  maxWidth: 360,
-  bgcolor: "background.paper",
-};
 
-const BootstrapDialog = styled(Dialog)(({ theme }) => ({
-  "& .MuiDialogContent-root": {
-    padding: theme.spacing(2),
-  },
-  "& .MuiDialogActions-root": {
-    padding: theme.spacing(1),
-  },
-}));
 
 function BootstrapDialogTitle(props) {
   const { children, onClose, ...other } = props;
@@ -287,6 +185,11 @@ function BootstrapDialogTitle(props) {
 }
 
 function EditApplicationForm() {
+  const [contact, setContact ]=useState({})
+  const [variableData, setVariableData] = useState([]);
+  let midNo = Math.round(variableData.length / 2)
+  let leftCount = variableData.length - midNo;
+
   const [openSuccessMessage, setOpenSuccessMessage] = useState(false);
   const [message,setMessage] =useState('');
   const handleSuccessMessage = () => {
@@ -310,74 +213,13 @@ function EditApplicationForm() {
     setEditMemberOpen(false);
   };
 
-  const members = [
-    {
-      value: "name",
-      label: "Denise Yancovec",
-    },
-  ];
-
-  const [member, setMember] = React.useState("text");
-
   const [value, setValue] = React.useState(0);
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
   };
-
-  const handleClick = () => {
-    console.info("You clicked the Chip.");
-  };
-
-  const handleDelete = () => {
-    console.info("You clicked the delete icon.");
-  };
-
-  const [open, setOpen] = React.useState(false);
   const router = useRouter();
-
-  const handleClickOpen = () => {
-    setOpen(true);
-  };
-
-  const handleClose = () => {
-    setOpen(false);
-  };
-  const handleContinue = () => {
-    // setOpen(false);
-
-    router.push("/application/new-application");
-  };
-
-  const handleAddContacts = () => {
-    router.push("/application/add-new-contact");
-  };
-
-  // table-related---
-  const [page, setPage] = React.useState(0);
-  const [rowsPerPage, setRowsPerPage] = React.useState(5);
-
-  // Avoid a layout jump when reaching the last page with empty rows.
-  const emptyRows =
-    page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
-
-  const handleChangePage = (event, newPage) => {
-    setPage(newPage);
-  };
-
-  const handleChangeRowsPerPage = (event) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
-  };
-  // table-related---
-
-  // application-related-function--
-
-  const handleEditDetails = () => {
-    // setShowContent(true)
-    setShowContent(!showContent);
-  };
-
+ 
   const ITEM_HEIGHT = 48;
   const ITEM_PADDING_TOP = 8;
   const MenuProps = {
@@ -388,6 +230,8 @@ function EditApplicationForm() {
       },
     },
   };
+
+
   const [switchEditMode, setSwitchEditMode] = useState(false);
   const [applicationData, setApplicationData] = useState([]);
   const [contactData, setContactData] = useState({});
@@ -492,119 +336,153 @@ function EditApplicationForm() {
     if (!router.isReady) return;
     const query = router.query;
     let applicationID = query.applicationId;
-    console.log("****applicationID", applicationID);
 
     const applicationDataObject = await getApplicationData(applicationID);
     setInitialStateOfTeam(applicationDataObject?.members);
     setApplicationData(applicationDataObject);
 
-    console.log("*****applicationDataObject", applicationDataObject);
-
     const contactDataArray = await getContactData(
       applicationDataObject?.contactId[0]
     );
     setContactData(contactDataArray);
-    console.log("*****contactDataArray", contactDataArray);
+
+    setContact(contactDataArray?.basicInformation)
 
     const coContactDataArray = await getCocontactData(
       applicationDataObject?.coContact
     );
     setCocontactData([...coContactDataArray]);
-    console.log("******coContactDataArray", coContactDataArray);
 
     const teamMembersArray = await getTeamMembers();
     setTeamMembersData([...teamMembersArray]);
-    console.log("*****teamMembersArray", teamMembersArray);
 
-    setPhoneNumber(contactDataArray?.basicInformation?.phone);
-    setFirstName(contactDataArray?.basicInformation?.firstName);
-    setLastName(contactDataArray?.basicInformation?.lastName);
-    setEmail(contactDataArray?.basicInformation?.email);
-    setDob(contactDataArray?.basicInformation?.dob);
-    setIdNumber(contactDataArray?.basicInformation?.idNumber);
-    setCity(contactDataArray?.basicInformation?.city);
-    setStreetAddress(contactDataArray?.basicInformation?.streetAddress);
-    setPostalCode(contactDataArray?.basicInformation?.postalCode);
-    setProvince(contactDataArray?.basicInformation?.state);
-    setCountry(contactDataArray?.basicInformation?.country);
-    setCompanyName(contactDataArray?.jobInformation?.companyName);
-    setJobTitle(contactDataArray?.jobInformation?.jobTitle);
-    setYearAtJob("");
+    // setPhoneNumber(contactDataArray?.basicInformation?.phone);
+    // setFirstName(contactDataArray?.basicInformation?.firstName);
+    // setLastName(contactDataArray?.basicInformation?.lastName);
+    // setEmail(contactDataArray?.basicInformation?.email);
+    // setDob(contactDataArray?.basicInformation?.dob);
+    // setIdNumber(contactDataArray?.basicInformation?.idNumber);
+    // setCity(contactDataArray?.basicInformation?.city);
+    // setStreetAddress(contactDataArray?.basicInformation?.streetAddress);
+    // setPostalCode(contactDataArray?.basicInformation?.postalCode);
+    // setProvince(contactDataArray?.basicInformation?.state);
+    // setCountry(contactDataArray?.basicInformation?.country);
+    // setCompanyName(contactDataArray?.jobInformation?.companyName);
+    // setJobTitle(contactDataArray?.jobInformation?.jobTitle);
+    // setYearAtJob("");
   }
 
   const [submitErr, setSubmitErr] = useState("");
 
+  // const handelSubmitContact = async (id) => {
+  //   try {
+  //     if (!firstName || firstName == "" || firstName == null) {
+  //       setSubmitErr("first name can not be empty !");
+  //     } else if (!lastName || lastName == "" || lastName == null) {
+  //       setSubmitErr("last name can not be empty !");
+  //     } else if (!email || email == "" || email == null) {
+  //       setSubmitErr("email can not be empty !");
+  //     } else if (!dob || dob == "" || dob == null) {
+  //       setSubmitErr("date of birth can not be empty !");
+  //     } else if (!idNumber || idNumber == "" || idNumber == null) {
+  //       setSubmitErr("ID number can not be empty !");
+  //     } else if (!city || city == "" || city == null) {
+  //       setSubmitErr("city can not be empty !");
+  //     } else if (
+  //       !streetAddress ||
+  //       streetAddress == "" ||
+  //       streetAddress == null
+  //     ) {
+  //       setSubmitErr("street address can not be empty !");
+  //     } else if (!postalCode || postalCode == "" || postalCode == null) {
+  //       setSubmitErr("postal code can not be empty !");
+  //     } else if (!province || province == "" || province == null) {
+  //       setSubmitErr("province code can not be empty !");
+  //     } else if (!country || country == "" || country == null) {
+  //       setSubmitErr("country code can not be empty !");
+  //     } else if (!phoneNumber || phoneNumber == "" || phoneNumber == null) {
+  //       setSubmitErr("phone number code can not be empty !");
+  //     } else if (!companyName || companyName == "" || companyName == null) {
+  //       setSubmitErr("Company Name code can not be empty !");
+  //     } else if (!jobTitle || jobTitle == "" || jobTitle == null) {
+  //       setSubmitErr("job Title code can not be empty !");
+  //     } else {
+  //       setSubmitErr("");
+  //       console.log("inside");
+  //       let body = {
+  //         basicInformation: {
+  //           firstName: firstName,
+  //           lastName: lastName,
+  //           email: email,
+  //           phone: phoneNumber,
+  //           idNumber: idNumber,
+  //           dob: dob,
+  //           streetAddress: streetAddress,
+  //           city: city,
+  //           state: province,
+  //           postalCode: postalCode,
+  //           country: country,
+  //         },
+  //         jobInformation: {
+  //           companyName: companyName,
+  //           jobTitle: jobTitle,
+  //         },
+  //       };
+  //       const res = await _updateContactById(id, body);
+  //       console.log("_updateContactById", res);
+  //       if (res?.status == 200) {
+  //         //alert("Updated");
+  //         handleSuccessMessage()
+  //         setMessage("Updated")
+  //         setSwitchEditMode((switchEditMode) => !switchEditMode);
+  //         getData();
+  //       }
+  //     }
+  //   } catch (err) {
+  //     console.log(err);
+  //   }
+  // };
+
   const handelSubmitContact = async (id) => {
-    try {
-      if (!firstName || firstName == "" || firstName == null) {
-        setSubmitErr("first name can not be empty !");
-      } else if (!lastName || lastName == "" || lastName == null) {
-        setSubmitErr("last name can not be empty !");
-      } else if (!email || email == "" || email == null) {
-        setSubmitErr("email can not be empty !");
-      } else if (!dob || dob == "" || dob == null) {
-        setSubmitErr("date of birth can not be empty !");
-      } else if (!idNumber || idNumber == "" || idNumber == null) {
-        setSubmitErr("ID number can not be empty !");
-      } else if (!city || city == "" || city == null) {
-        setSubmitErr("city can not be empty !");
-      } else if (
-        !streetAddress ||
-        streetAddress == "" ||
-        streetAddress == null
-      ) {
-        setSubmitErr("street address can not be empty !");
-      } else if (!postalCode || postalCode == "" || postalCode == null) {
-        setSubmitErr("postal code can not be empty !");
-      } else if (!province || province == "" || province == null) {
-        setSubmitErr("province code can not be empty !");
-      } else if (!country || country == "" || country == null) {
-        setSubmitErr("country code can not be empty !");
-      } else if (!phoneNumber || phoneNumber == "" || phoneNumber == null) {
-        setSubmitErr("phone number code can not be empty !");
-      } else if (!companyName || companyName == "" || companyName == null) {
-        setSubmitErr("Company Name code can not be empty !");
-      } else if (!jobTitle || jobTitle == "" || jobTitle == null) {
-        setSubmitErr("job Title code can not be empty !");
-      } else {
-        setSubmitErr("");
-        console.log("inside");
+    try { 
+      setSubmitErr(""); 
         let body = {
-          basicInformation: {
-            firstName: firstName,
-            lastName: lastName,
-            email: email,
-            phone: phoneNumber,
-            idNumber: idNumber,
-            dob: dob,
-            streetAddress: streetAddress,
-            city: city,
-            state: province,
-            postalCode: postalCode,
-            country: country,
-          },
-          jobInformation: {
-            companyName: companyName,
-            jobTitle: jobTitle,
-          },
-        };
+          basicInformation: contact
+        }
         const res = await _updateContactById(id, body);
         console.log("_updateContactById", res);
         if (res?.status == 200) {
-          //alert("Updated");
           handleSuccessMessage()
           setMessage("Updated")
           setSwitchEditMode((switchEditMode) => !switchEditMode);
           getData();
         }
-      }
     } catch (err) {
       console.log(err);
     }
   };
 
+  const onChangeHandler = useCallback(
+    ({ target }) => {
+      setContact((state) => ({ ...state, [target.name]: target.value }));
+    }, []
+  );
+
+  const getVariables = async () =>{
+    try{
+      const res = await _gatVariabels();
+      let data = await res?.data?.data?.Items.filter((variable)=>variable?.variableType == "contact")
+      data = await data.sort((a,b) => (a.createTime > b.createTime) ? 1 : ((b.createTime > a.createTime) ? -1 : 0));
+      //console.log(res)
+      setVariableData([...data])
+    }catch(err){
+      console.log(err)
+    }
+  }
+
   useEffect(() => {
     getData();
+    getVariables();
   }, [router.isReady, router.query]);
 
   return (
@@ -895,34 +773,34 @@ function EditApplicationForm() {
                     <TableContainer style={{ backgroundColor: "transparent" }}>
                       <Table aria-label="simple table">
                         <TableBody>
-                          <TableRow
-                            sx={{
-                              "&:last-child td, &:last-child th": { border: 0 },
-                            }}
-                          >
-                            <TableCell
-                              component="th"
-                              scope="row"
-                              style={{
-                                fontSize: 20,
-                                fontWeight: 400,
-                                color: "#393939",
-                              }}
-                            >
-                              {"First Name"}
-                            </TableCell>
-                            <TableCell
-                              align="left"
-                              style={{
-                                fontSize: 20,
-                                fontWeight: 600,
-                                color: "#393939",
-                              }}
-                            >
-                              {contactData?.basicInformation?.firstName || ""}
-                            </TableCell>
-                          </TableRow>
-                          <TableRow
+                        {variableData && variableData.map((variable,key)=>{
+                                 
+                                 if(leftCount>=key){
+                                 return( <TableRow key={key}
+                                   sx={{
+                                   "&:last-child td, &:last-child th": {
+                                     border: 0,
+                                   },
+                                   }}
+                                 >
+                                   <TableCell
+                                   component="th"
+                                   scope="row"
+                                   style={{ fontSize:20, fontWeight: 400}}
+                                   >
+                                   {variable?.displayName}
+                                   </TableCell>
+                                   <TableCell
+                                   align="left"
+                                   
+                                   style={{ fontSize:20, fontWeight: 600}}
+                                   >
+                                   {contactData?.basicInformation?.[variable?.systemName] || ""}
+                                   </TableCell>
+                                 </TableRow>)
+                                 }
+                               })}
+                          {/* <TableRow
                             sx={{
                               "&:last-child td, &:last-child th": { border: 0 },
                             }}
@@ -1004,7 +882,7 @@ function EditApplicationForm() {
                               {contactData?.basicInformation?.streetAddress ||
                                 ""}
                             </TableCell>
-                          </TableRow>
+                          </TableRow> */}
                         </TableBody>
                       </Table>
                     </TableContainer>
@@ -1013,34 +891,34 @@ function EditApplicationForm() {
                     <TableContainer style={{ backgroundColor: "transparent" }}>
                       <Table aria-label="simple table">
                         <TableBody>
-                          <TableRow
-                            sx={{
-                              "&:last-child td, &:last-child th": { border: 0 },
-                            }}
-                          >
-                            <TableCell
-                              component="th"
-                              scope="row"
-                              style={{
-                                fontSize: 20,
-                                fontWeight: 400,
-                                color: "#393939",
-                              }}
-                            >
-                              {"Last Name"}
-                            </TableCell>
-                            <TableCell
-                              align="left"
-                              style={{
-                                fontSize: 20,
-                                fontWeight: 600,
-                                color: "#393939",
-                              }}
-                            >
-                              {contactData?.basicInformation?.lastName || ""}
-                            </TableCell>
-                          </TableRow>
-                          <TableRow
+                        {variableData && variableData.map((variable,key)=>{
+                                 
+                                 if(leftCount<key){
+                                 return( <TableRow key={key}
+                                   sx={{
+                                   "&:last-child td, &:last-child th": {
+                                     border: 0,
+                                   },
+                                   }}
+                                 >
+                                   <TableCell
+                                   component="th"
+                                   scope="row"
+                                   style={{ fontSize:20, fontWeight: 400}}
+                                   >
+                                   {variable?.displayName}
+                                   </TableCell>
+                                   <TableCell
+                                   align="left"
+                                   
+                                   style={{ fontSize:20, fontWeight: 600}}
+                                   >
+                                   {contactData?.basicInformation?.[variable?.systemName] || ""}
+                                   </TableCell>
+                                 </TableRow>)
+                                 }
+                               })}	
+                          {/* <TableRow
                             sx={{
                               "&:last-child td, &:last-child th": { border: 0 },
                             }}
@@ -1121,23 +999,23 @@ function EditApplicationForm() {
                             >
                               {contactData?.basicInformation?.postalCode || ""}
                             </TableCell>
-                          </TableRow>
+                          </TableRow> */}
                         </TableBody>
                       </Table>
                     </TableContainer>
                   </Grid>
                 </Grid>
-                <Grid mt={4}>
+                {/* <Grid mt={4}>
                   <Typography align="left" fontSize={20} fontWeigh={700}>
                     Financial Information
                   </Typography>
-                </Grid>
+                </Grid> */}
                 <Grid container spacing={2}>
                   <Grid item xs={6}>
                     <TableContainer style={{ backgroundColor: "transparent" }}>
                       <Table aria-label="simple table">
                         <TableBody>
-                          <TableRow
+                          {/* <TableRow
                             sx={{
                               "&:last-child td, &:last-child th": { border: 0 },
                             }}
@@ -1163,8 +1041,8 @@ function EditApplicationForm() {
                             >
                               {contactData?.jobInformation?.companyName || ""}
                             </TableCell>
-                          </TableRow>
-                          <TableRow
+                          </TableRow> */}
+                          {/* <TableRow
                             sx={{
                               "&:last-child td, &:last-child th": { border: 0 },
                             }}
@@ -1190,7 +1068,7 @@ function EditApplicationForm() {
                             >
                               {contactData?.jobInformation?.jobTitle || ""}
                             </TableCell>
-                          </TableRow>
+                          </TableRow> */}
                         </TableBody>
                       </Table>
                     </TableContainer>
@@ -1249,7 +1127,48 @@ function EditApplicationForm() {
                       >
                         <Table aria-label="simple table">
                           <TableBody>
-                            <TableRow
+                          {variableData && variableData.map((variable,key)=>{
+                                 
+                                 if(leftCount>=key){
+                                 return( <TableRow key={key}
+                                   sx={{
+                                   "&:last-child td, &:last-child th": {
+                                     border: 0,
+                                   },
+                                   }}
+                                 >
+                                   <TableCell
+                                   component="th"
+                                   scope="row"
+                                   style={{ fontSize:20, fontWeight: 400}}
+                                   >
+                                   {variable?.displayName}
+                                   </TableCell>
+                                   <TableCell
+                                    align="left"
+                                    style={{
+                                      fontSize: 20,
+                                      fontWeight: 600,
+                                      color: "#393939",
+                                    }}
+                                  >
+                                    <TextField
+                                      fullWidth
+                                      name={variable?.systemName}
+                                      size="small"
+                                      margin="normal"
+                                      id="outlined-basic"
+                                      variant="outlined"
+                                      placeholder="Text"
+                                      value={contact && contact[`${variable?.systemName}`] }
+                                      onChange={onChangeHandler}
+                                      style={{ margin: 0 }}
+                                    />
+                                    </TableCell>
+                                 </TableRow>)
+                                 }
+                               })}
+                            {/* <TableRow
                               sx={{
                                 "&:last-child td, &:last-child th": {
                                   border: 0,
@@ -1290,8 +1209,8 @@ function EditApplicationForm() {
                                   style={{ margin: 0 }}
                                 />
                               </TableCell>
-                            </TableRow>
-                            <TableRow
+                            </TableRow> */}
+                            {/* <TableRow
                               sx={{
                                 "&:last-child td, &:last-child th": {
                                   border: 0,
@@ -1416,7 +1335,7 @@ function EditApplicationForm() {
                                   style={{ margin: 0 }}
                                 />
                               </TableCell>
-                            </TableRow>
+                            </TableRow> */}
                           </TableBody>
                         </Table>
                       </TableContainer>
@@ -1427,7 +1346,48 @@ function EditApplicationForm() {
                       >
                         <Table aria-label="simple table">
                           <TableBody>
-                            <TableRow
+                          {variableData && variableData.map((variable,key)=>{
+                                 
+                                 if(leftCount<key){
+                                 return( <TableRow key={key}
+                                   sx={{
+                                   "&:last-child td, &:last-child th": {
+                                     border: 0,
+                                   },
+                                   }}
+                                 >
+                                   <TableCell
+                                   component="th"
+                                   scope="row"
+                                   style={{ fontSize:20, fontWeight: 400}}
+                                   >
+                                   {variable?.displayName}
+                                   </TableCell>
+                                   <TableCell
+                                    align="left"
+                                    style={{
+                                      fontSize: 20,
+                                      fontWeight: 600,
+                                      color: "#393939",
+                                    }}
+                                  >
+                                    <TextField
+                                      fullWidth
+                                      name={variable?.systemName} 
+                                      size="small"
+                                      margin="normal"
+                                      id="outlined-basic"
+                                      variant="outlined"
+                                      placeholder="Text"
+                                      value={contact && contact[`${variable?.systemName}`] }
+                                      onChange={onChangeHandler}
+                                      style={{ margin: 0 }}
+                                    />
+                                  </TableCell>
+                                 </TableRow>)
+                                 }
+                               })}	
+                            {/* <TableRow
                               sx={{
                                 "&:last-child td, &:last-child th": {
                                   border: 0,
@@ -1468,8 +1428,8 @@ function EditApplicationForm() {
                                   style={{ margin: 0 }}
                                 />
                               </TableCell>
-                            </TableRow>
-                            <TableRow
+                            </TableRow> */}
+                            {/* <TableRow
                               sx={{
                                 "&:last-child td, &:last-child th": {
                                   border: 0,
@@ -1594,18 +1554,18 @@ function EditApplicationForm() {
                                   style={{ margin: 0 }}
                                 />
                               </TableCell>
-                            </TableRow>
+                            </TableRow> */}
                           </TableBody>
                         </Table>
                       </TableContainer>
                     </Grid>
                   </Grid>
                   {/* down */}
-                  <Grid mt={4}>
+                  {/* <Grid mt={4}>
                     <Typography align="left" fontSize={20} fontWeigh={700}>
                       Financial Information
                     </Typography>
-                  </Grid>
+                  </Grid> */}
                   <Grid container spacing={2}>
                     <Grid item xs={6}>
                       <TableContainer
@@ -1613,7 +1573,7 @@ function EditApplicationForm() {
                       >
                         <Table aria-label="simple table">
                           <TableBody>
-                            <TableRow
+                            {/* <TableRow
                               sx={{
                                 "&:last-child td, &:last-child th": {
                                   border: 0,
@@ -1654,9 +1614,9 @@ function EditApplicationForm() {
                                   style={{ margin: 0 }}
                                 />
                               </TableCell>
-                            </TableRow>
+                            </TableRow> */}
 
-                            <TableRow
+                            {/* <TableRow
                               sx={{
                                 "&:last-child td, &:last-child th": {
                                   border: 0,
@@ -1697,7 +1657,7 @@ function EditApplicationForm() {
                                   style={{ margin: 0 }}
                                 />
                               </TableCell>
-                            </TableRow>
+                            </TableRow> */}
                           </TableBody>
                         </Table>
                       </TableContainer>

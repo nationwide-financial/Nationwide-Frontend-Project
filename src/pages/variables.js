@@ -41,7 +41,11 @@ import MenuItem from "@mui/material/MenuItem";
 import Modal from "@mui/material/Modal";
 import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
+import Select from '@mui/material/Select';
 
+
+import { s3URL } from '../utils/config'
+import { _getAllPlatformUserByAdmin } from '../services/authServices'
 const style = {
   position: "absolute",
   top: "50%",
@@ -66,6 +70,7 @@ import { filter } from "lodash";
 
 function Variable() {
   const [searchKey, setSearchKey] = useState("");
+  const [users, setUsers] = useState([]);
   // rowId
   const [rowsId, setRowsId] = useState("");
 
@@ -213,10 +218,11 @@ function Variable() {
 
   // fetch table data
   async function getTableData() {
-    const response = await _gatVariabels(100, 1);
+    const response = await _gatVariabels();
     console.log(response?.data?.data?.Items);
+    let tableDt = await response?.data?.data?.Items.sort((a,b) => (a.createTime < b.createTime) ? 1 : ((b.createTime < a.createTime) ? -1 : 0));
     setData(
-      response?.data?.data?.Items.map((row) => {
+      tableDt.map((row) => {
         let uT = getTime(row.updateTime);
         return {
           rowId: row.PK,
@@ -225,6 +231,7 @@ function Variable() {
           dataType: row.dataType,
           uT: uT,
           description: row.description,
+          variableType:row.variableType
         };
       })
     );
@@ -232,6 +239,7 @@ function Variable() {
 
   useEffect(() => {
     getTableData();
+    getUsers();
   }, []);
 
   const [onClickObj, setOnClickObj] = useState({});
@@ -241,7 +249,7 @@ function Variable() {
   const onChangeHandler = useCallback(({ target }) => {
     setFormDt((state) => ({ ...state, [target.name]: target.value }));
   }, []);
-
+console.log(formDt)
   const onSubmit = async () => {
     const body = formDt;
     if (!formDt || (formDt && Object.keys(formDt).length === 0)) {
@@ -261,6 +269,11 @@ function Variable() {
       formDt["dataType"] === undefined
     ) {
       setError("datatype can not be empty");
+    } else if (
+      (formDt && formDt["variableType"] === "") ||
+      formDt["variableType"] === undefined
+    ) {
+      setError("variableType can not be empty");
     } else {
       setError("");
       console.log(body);
@@ -302,12 +315,21 @@ function Variable() {
       console.log(err);
     }
   };
-
+  const getUsers = async() =>{
+    try{
+      const res = await _getAllPlatformUserByAdmin()
+      setUsers([...res?.data?.users])
+    }catch(err){
+      console.log(err)
+    }
+  }
+  
   // update variable states
   const [displayNameUpdate, setDisplayNameUpdate] = useState("");
   const [systemNameUpdate, setSystemNameUpdate] = useState("");
   const [dataTypeUpdate, setDataTypeUpdate] = useState("");
   const [descriptionUpdate, setDescriptionUpdate] = useState("");
+  const [variableType,setVariableType] = useState("");
   const [errorEdit, setErrorEdit] = useState("");
   // update variable
   const editVariable = async (id) => {
@@ -317,6 +339,7 @@ function Variable() {
         systemName: systemNameUpdate,
         dataType: dataTypeUpdate,
         description: descriptionUpdate,
+        variableType:variableType,
         permission_: true,
       };
       if (
@@ -337,7 +360,13 @@ function Variable() {
         dataTypeUpdate == null
       ) {
         setErrorEdit("data Type can not be empty !");
-      } else {
+      } else if (
+        !variableType ||
+        variableType === "" ||
+        variableType == null
+      ) {
+        setErrorEdit("variable Type can not be empty !");
+      }else {
         setErrorEdit("");
         console.log(body);
         console.log(id);
@@ -457,7 +486,7 @@ function Variable() {
                         size="small"
                         margin="normal"
                         id="outlined-basic"
-                        placeholder="Text"
+                        placeholder=" Display Name"
                         variant="outlined"
                       />
                     </Box>
@@ -487,7 +516,7 @@ function Variable() {
                         size="small"
                         margin="normal"
                         id="outlined-basic"
-                        placeholder="Text"
+                        placeholder="System Name"
                         variant="outlined"
                       />
                     </Box>
@@ -507,7 +536,20 @@ function Variable() {
                       </Typography>
                     </label>
                     <Box sx={{ maxWidth: "100%" }}>
-                      <TextField
+                    <FormControl fullWidth>
+                      <Select
+                        labelId="demo-simple-select-label"
+                        id="demo-simple-select"
+                        name="dataType"
+                        onChange={onChangeHandler}
+                      //  value={(formDt && formDt["dataType"]) || "string"}
+                        
+                      >
+                        <MenuItem value={"string"}>String</MenuItem>
+                        <MenuItem value={"number"}>Number</MenuItem>
+                      </Select>
+                    </FormControl>
+                      {/* <TextField
                         name="dataType"
                         type="text"
                         onChange={onChangeHandler}
@@ -517,11 +559,38 @@ function Variable() {
                         size="small"
                         margin="normal"
                         id="outlined-basic"
-                        placeholder="Text"
+                        placeholder=" Data Type"
                         variant="outlined"
-                      />
+                      /> */}
                     </Box>
-
+                    <label>
+                      {" "}
+                      <Typography
+                        variant="h6"
+                        style={{
+                          fontSize: 17,
+                          fontWeight: 700,
+                          fontFamily: "Montserrat",
+                          fontStyle: "normal",
+                        }}
+                      >
+                        Variable Type<span style={{ color: "#FF0000" }}>*</span>
+                      </Typography>
+                    </label>
+                    <Box sx={{ maxWidth: "100%" }}>
+                    <FormControl fullWidth>
+                      <Select
+                        labelId="demo-simple-select-label"
+                        id="demo-simple-select"
+                        name="variableType"
+                        onChange={onChangeHandler}
+                       // value={(formDt && formDt["variableType"]) || "contact"}
+                      >
+                        <MenuItem value={"application"}>Application</MenuItem>
+                        <MenuItem value={"contact"}>Contact</MenuItem>
+                      </Select>
+                    </FormControl>
+                    </Box>
                     <label>
                       {" "}
                       <Typography
@@ -547,7 +616,7 @@ function Variable() {
                         size="small"
                         margin="normal"
                         id="outlined-basic"
-                        placeholder="Text"
+                        placeholder="Description"
                         variant="outlined"
                       />
                     </Box>
@@ -558,7 +627,7 @@ function Variable() {
                   <DialogActions
                     style={{ display: "flex", justifyContent: "left" }}
                   >
-                    <Button variant="contained" onClick={onSubmit}>
+                    <Button variant="contained" onClick={onSubmit} style={{marginLeft:16}}>
                       Create Variable
                     </Button>
                   </DialogActions>
@@ -678,7 +747,21 @@ function Variable() {
                       </Typography>
                     </label>
                     <Box sx={{ maxWidth: "100%" }}>
-                      <TextField
+                    <FormControl fullWidth>
+                      <Select
+                        labelId="demo-simple-select-label"
+                        id="demo-simple-select"
+                        name="dataType"
+                        value={dataTypeUpdate}
+                        onChange={(e)=>{
+                          setDataTypeUpdate(e.target.value)
+                        }}
+                      >
+                        <MenuItem value={"string"}>String</MenuItem>
+                        <MenuItem value={"number"}>Number</MenuItem>
+                      </Select>
+                    </FormControl>
+                      {/* <TextField
                         name="dataType"
                         type="text"
                         onChange={(e) => {
@@ -692,7 +775,37 @@ function Variable() {
                         id="outlined-basic"
                         placeholder="Text"
                         variant="outlined"
-                      />
+                      /> */}
+                    </Box>
+                    <label>
+                      {" "}
+                      <Typography
+                        variant="h6"
+                        style={{
+                          fontSize: 17,
+                          fontWeight: 700,
+                          fontFamily: "Montserrat",
+                          fontStyle: "normal",
+                        }}
+                      >
+                        Variable Type<span style={{ color: "#FF0000" }}>*</span>
+                      </Typography>
+                    </label>
+                    <Box sx={{ maxWidth: "100%" }}>
+                    <FormControl fullWidth>
+                      <Select
+                        labelId="demo-simple-select-label"
+                        id="demo-simple-select"
+                        name="variableType"
+                        value={variableType}
+                        onChange={(e)=>{
+                          setVariableType(e.target.value)
+                        }}
+                      >
+                        <MenuItem value={"application"}>Application</MenuItem>
+                        <MenuItem value={"contact"}>Contact</MenuItem>
+                      </Select>
+                    </FormControl>
                     </Box>
 
                     <label>
@@ -728,8 +841,8 @@ function Variable() {
                     </Box>
                   </FormControl>
                 </DialogContent>
-                <p style={{ color: "red" }}>{errorEdit}</p>
-                <div style={{ marginBottom: 100 }}>
+                <p style={{ color: "red", marginLeft:26 }}>{errorEdit}</p>
+                <div style={{ marginBottom: 100 , marginLeft:16}}>
                   <DialogActions
                     style={{ display: "flex", justifyContent: "left" }}
                   >
@@ -767,17 +880,23 @@ function Variable() {
         </Grid>
         {/* active-user-display-section */}
         <Grid item xs={12} md={1}>
-          <AvatarGroup total={9}>
-            <Avatar alt="Remy Sharp" src="/static/images/avatar/1.jpg" />
-            <Avatar alt="Travis Howard" src="/static/images/avatar/2.jpg" />
-            <Avatar alt="Agnes Walker" src="/static/images/avatar/4.jpg" />
-            <Avatar alt="Trevor Henderson" src="/static/images/avatar/5.jpg" />
-          </AvatarGroup>
+        <AvatarGroup total={users.length}>
+          {users &&
+            users.map((user, key) => {
+            return (
+              <Avatar
+              key={key}
+              alt={user?.PK.split("#")[1]}
+              src={`${s3URL}/${user?.imageId}`}
+              />
+            );
+            })}
+        </AvatarGroup>
         </Grid>
         {/* other-icon-set */}
         <Grid item xs={12} md={6}>
           <Box sx={{ textAlign: "right" }}>
-            <IconButton
+            {/* <IconButton
               sx={{
                 width: 10,
                 height: 10,
@@ -789,7 +908,7 @@ function Variable() {
               aria-label="save"
             >
               <TuneOutlined sx={{ color: "gray" }} />
-            </IconButton>
+            </IconButton> */}
           </Box>
         </Grid>
       </Grid>
@@ -910,7 +1029,7 @@ function Variable() {
                           fontWeight: 700,
                         }}
                       >
-                        {row.systemName}
+                        {row?.systemName}
                       </TableCell>
                       <TableCell
                         align="left"
@@ -921,7 +1040,7 @@ function Variable() {
                           fontWeight: 500,
                         }}
                       >
-                        {row.displayName}
+                        {row?.displayName}
                       </TableCell>
 
                       <TableCell
@@ -934,7 +1053,7 @@ function Variable() {
                           fontWeight: 500,
                         }}
                       >
-                        {row.dataType}
+                        {row?.dataType}
                       </TableCell>
                       <TableCell
                         align="left"
@@ -953,7 +1072,7 @@ function Variable() {
                           }}
                         >
                           {" "}
-                          {"custom"}
+                          {row?.variableType}
                         </span>
                       </TableCell>
 
@@ -969,7 +1088,7 @@ function Variable() {
                       >
                         <Stack direction="row" spacing={2}>
                           <Avatar alt="Remy Sharp" src="/Ellise 179(1).png" />
-                          <span>{row.uT}</span>
+                          <span>{row?.uT}</span>
                         </Stack>
                       </TableCell>
                       <TableCell
@@ -981,7 +1100,7 @@ function Variable() {
                           fontWeight: 500,
                         }}
                       >
-                        {row.description}
+                        {row?.description}
                       </TableCell>
                     </TableRow>
                   ))}

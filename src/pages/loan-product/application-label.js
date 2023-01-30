@@ -325,7 +325,8 @@ function ApplicationLabel() {
       if (reasons?.status == 200) {
         handleClose();
         getTableData();
-        alert("You have successfully added");
+        handleSuccessMessage();
+        setMessage("you have successfully Added");
       }
       console.log("reasons", reasons);
     } catch (err) {

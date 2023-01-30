@@ -35,6 +35,7 @@ import Image from 'next/image';
 //import styles from './searchBox.module.scss'
 import styles from '../../../src/components/searchBox/searchBox.module.scss'
 import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
+import { _getAllPlatformUserByAdmin } from '../../services/authServices'
 
 
 import { _gatLoanType, _addLoanType } from "../../services/loanTypeService";
@@ -242,6 +243,7 @@ const LoanType = () => {
   const handleChange = (event) => {
     setCurrency(event.target.value);
   };
+  const [users, setUsers] = useState([]);
 
   const [loanName, setLoanName] = useState("");
   const [loanIcon, setLoanIcon] = useState("");
@@ -268,6 +270,7 @@ const LoanType = () => {
 
   useEffect(() => {
     getData();
+    getUsers();
   }, []);
 
   const [openSuccessMessage, setOpenSuccessMessage] = useState(false);
@@ -304,6 +307,14 @@ const LoanType = () => {
       console.log(error);
     }
   };
+  const getUsers = async() =>{
+    try{
+      const res = await _getAllPlatformUserByAdmin()
+      setUsers([...res?.data?.users])
+    }catch(err){
+      console.log(err)
+    }
+  }
 
   return (
     <div>
@@ -455,7 +466,8 @@ const LoanType = () => {
                                 <PhotoCamera color="disabled" />
                               </Grid>
                               <Grid item xs={12}>
-                                <Typography style={{ color: "#E0DCDC" }}>
+                             
+                                <Typography style={{ color: "#E0DCDC"}} >
                                   Drag & Drop here
                                 </Typography>
                               </Grid>
@@ -535,12 +547,18 @@ const LoanType = () => {
                 </div>
               </Grid>
               <Grid item xs={5}>
-                {/* <AvatarGroup total={9}>
-                  <Avatar alt="Remy Sharp" src="/images/avatar1.png" />
-                  <Avatar alt="Travis Howard" src="/images/avatar2.png" />
-                  <Avatar alt="Agnes Walker" src="/images/avatar3.png" />
-                  <Avatar alt="Trevor Henderson" src="/images/avatar4.png" />
-                </AvatarGroup> */}
+                <AvatarGroup total={users.length}>
+                  {users &&
+                    users.map((user, key) => {
+                    return (
+                      <Avatar
+                      key={key}
+                      alt={user?.PK.split("#")[1]}
+                      src={`${s3URL}/${user?.imageId}`}
+                      />
+                    );
+                    })}
+                </AvatarGroup>
               </Grid>
             </Grid>
           </Grid>

@@ -229,25 +229,19 @@ const mergeDocuments = async (tempApplications) =>{
     try{
       const res = await _getAllPlatformUserByAdmin()
       const resContact = await _fetchAllContacts();
-      console.log("_fetchAllContacts",resContact?.data?.Items)
       let tempUsers = res?.data?.users;
-      console.log("tempApplications",tempApplications)
-      console.log("tempUsers",tempUsers)
       let userIds = [];
       let teamMembers = [];
       await tempApplications.map( async (tempApplications)=>{
-        console.log("tempApplications",tempApplications?.members)
         if(tempApplications?.members){
          await userIds.push(...tempApplications?.members)
         }
       })
       let removedduplicatesUsers = [...new Set(userIds)];
-      console.log("removedduplicatesUsers",removedduplicatesUsers)
       await removedduplicatesUsers.map( async (id)=>{
         let tempU = await tempUsers.filter((user)=> user?.PK == 'USER#'+id)
         teamMembers.push(...tempU)
       })
-      console.log("teamMembers",teamMembers)
       setTeamMembersArr([...teamMembers])
 
       let labelsArr = await getLabels();
@@ -262,7 +256,6 @@ const mergeDocuments = async (tempApplications) =>{
         object.application = application
         if (application?.members){
           application?.members.map((user)=>{
-            console.log("user",user)
             team.push(...teamMembers.filter((member)=>{ return member?.PK == 'USER#'+user}));
           })
           object.teamArr = team;
@@ -270,19 +263,16 @@ const mergeDocuments = async (tempApplications) =>{
         
         if (application?.appLabel){
           application?.appLabel.map((applabel)=>{
-            console.log("label",label)
             labels.push(...labelsArr.filter((label)=>{ return label?.PK == applabel}));
           })
           object.labelArr = labels;
         }
 
         if (application?.contactId){
-            console.log("contactId",application?.contactId)
             object.contact= resContact?.data?.Items.filter((con)=>{ return con?.PK == application?.contactId[0]})[0]; 
         }
         tableDataArry.push(object)
       })
-      console.log("tableDataArry",tableDataArry)
       setTableData([...tableDataArry])
     }catch(err){
       console.log(err)

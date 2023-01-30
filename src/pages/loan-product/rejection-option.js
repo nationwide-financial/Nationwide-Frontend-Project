@@ -131,7 +131,7 @@ function RejectionOption() {
         </Grid>
       </Grid>
 
-      <Grid container mb={5}>
+      <Grid container mb={5} mt={3}>
         <Grid item xs={12} md={8}>
           <Stack direction="row" spacing={1}>
             <Typography variant="h5" className=" page_sub_header">

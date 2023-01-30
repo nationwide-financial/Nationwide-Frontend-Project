@@ -35,6 +35,8 @@ import { Snackbar } from "@material-ui/core";
 import DialogContentText from '@mui/material/DialogContentText';
 import TextField from '@mui/material/TextField';
 import { _getAllPlatformUserByAdmin } from '../../services/authServices'
+import { _listLabel } from '../../services/labelService'
+
 
 const Item = styled(Paper)(({ theme }) => ({
   backgroundColor: theme.palette.mode === "dark" ? "#1A2027" : "#fff",
@@ -81,6 +83,7 @@ function LoanApplication() {
   const [apiStatus, setApiStatus] = useState();
   const [rejectionUpdateMsg, setRejectionUpdateMsg] = useState();
   const [teamMembersArr, setTeamMembersArr] = useState([]);
+  const [platfromUsers, setPlatfromUsers] =useState([]);
 
 
   const [appId,setAppId]=useState('');
@@ -92,18 +95,21 @@ function LoanApplication() {
     setCheckedReasonAuto(event.target.checked);
   };
 
+  useEffect(()=>{
+    getUsers();
+  },[])
+
   useEffect(() => {
     getWorkflowStatus();
     getLoanType();
     getApplications();
+    
   }, [trigger]);
 
   const getLoanType = async () => {
     try {
       const res = await _gatLoanType();
-
       setLoanTypeData(res?.data?.data?.Items)
-      console.log(loanTypeData)
     } catch (err) {
       console.log(err)
     }
@@ -125,7 +131,6 @@ function LoanApplication() {
   const getWorkflowStatus = async () => {
     try {
       const response = await _fetchWorkflowStatuses();
-
       if (response?.status === 200) {
         setWorkflowStatus(response.data.loanStatuses.Items.length > 0 && response.data.loanStatuses.Items);
       }
@@ -137,11 +142,12 @@ function LoanApplication() {
 
   const getApplications = async () => {
     try {
+      const res = await _getAllPlatformUserByAdmin()
       const response = await _getApplications();
-
       if (response?.status === 200) {
         setApplications(response.data.data.Items.length > 0 && response.data.data.Items);
         getTeamMembers(response.data.data.Items);
+        console.log("platfromUsers inside getApplications",res)
       }
     } catch (err) {
       console.log("Error ", err);
@@ -149,7 +155,6 @@ function LoanApplication() {
     }
   }
   const addRejection = async (id,days,auto,reason) =>{
-    console.log("id,days,auto,reason",id,"  ",days,"  ",auto,"  ",reason)
     try{
       let body = {
           applicationRejection: {
@@ -170,15 +175,26 @@ function LoanApplication() {
     }
   }
 
-  const getTeamMembers = async (tempApplications) =>{
+  const getUsers = async()=>{
     try{
       const res = await _getAllPlatformUserByAdmin()
+      console.log("_getAllPlatformUserByAdmin",res)
+      setPlatfromUsers(res?.data?.users)
+    }catch(err){
+      console.log(err)
+    }
+  }
+
+  const getTeamMembers = async (tempApplications) =>{
+    try{
+     const res = await _getAllPlatformUserByAdmin()
       let tempUsers = res?.data?.users;
       let userIds = [];
       let teamMembers = [];
-      await tempApplications.map( async (tempApplications)=>{
+
+      await tempApplications.map((tempApplications)=>{
         if(tempApplications?.members){
-         await userIds.push(...tempApplications?.members)
+          userIds.push(...tempApplications?.members)
         }
       })
       let removedduplicatesUsers = [...new Set(userIds)];
@@ -207,7 +223,6 @@ function LoanApplication() {
         const applicationCopy = [...applications];
         const updatedIndex = applicationCopy.findIndex(application => application.PK === applicationId);
         const updated = [...applications, applications[updatedIndex].status_ = newStatus];
-
         setLoading(true);
         if (newStatus=="closed" ||newStatus=="won"){
           handleClickOpenRejectionPopup()
@@ -260,13 +275,13 @@ function LoanApplication() {
 
     return statusList;
   }
-
-  const renderApplications = (status, varaint) => {
+console.log("applications",applications)
+  const renderApplications =  (status, varaint) => {
     const applicationList = [];
     let total = 0;
     applications && applications.map((application, index) => {
       if (application.status_ === status) {
-        total = total + parseInt(application.loanAmount)
+        total = total + parseInt(application?.applicationBasicInfo?.loan_amount)
         applicationList.push(
           <Draggable draggableId={application.PK} index={index} type="application">
             {(provided, snapshot) => (
@@ -293,8 +308,11 @@ function LoanApplication() {
                       <Typography variant="p">{moment(application.createTime).format('YYYY-MM-DD')}</Typography>
                     </Stack>
                     <Stack direction='row' spacing={1} justifyContent='space-between'>
-                      <Typography variant="h6" sx={{ fontWeight: 600 }}>${application.loanAmount}</Typography>
+                      <Typography variant="h6" sx={{ fontWeight: 600 }}>${application?.applicationBasicInfo?.loan_amount}</Typography>
                       <AvatarGroup max={2}>
+                        {/* {users && users.map((user)=>{
+                          return( <Avatar alt={user.PK.split("#")[1]} src={`${s3URL}/${user?.imageId}`}/>)
+                        })} */}
                         <Avatar src={'/images/avatar' + (index + 1) + '.png'} />
                         <Avatar src='' />
                         <Avatar src='' />
@@ -341,7 +359,6 @@ function LoanApplication() {
 
   const handelSelectProduct = (id) => {
     setProduct(id)
-    console.log(id)
   }
 
   const handleContinue = () => {
@@ -410,25 +427,6 @@ function LoanApplication() {
       }),
     },
   }));
-
-
-  // const handelSelectProduct = (id) => {
-  //   setProduct(id)
-  //   console.log(id)
-  // }
-
-  // const [loanTypeData, setLoanTypeData] = useState([]);
-  // const getLoanType = async () => {
-  //   try {
-  //     const res = await _gatLoanType();
-  //     setLoanTypeData(res?.data?.data?.Items)
-  //    console.log(loanTypeData) 
-  //   } catch (err) {
-  //     console.log(err)
-  //   }
-  // };
-
-
 
   const applicationsWon = renderApplications('won', 'mini');
   const applicationsLost = renderApplications('lost', 'mini');
@@ -536,7 +534,7 @@ function LoanApplication() {
                                 borderColor="#393939"
                                 style={{
                                   backgroundColor: row.PK == product ? '#1478F1' : '',
-                                  color: row.PK == product ? '#FFFFFF' : '',
+                                  color: row.PK == product ? '#FFFFFF' : '#393939',
                                 }}
                                 onMouseOver={() => {
                                   backgroundColor: "#1478F1";
@@ -550,11 +548,12 @@ function LoanApplication() {
                                   <Grid
                                     xs={6}
                                     align="left"
-                                    color={"#393939"}
+                                   // color={"#393939"}
                                     textTransform="capitalize"
                                   >
                                     <Typography
-                                      className="page_sub_content_header"
+                                    //  className="page_sub_content_header"
+                                    style={{fontSize:20,fontWeight:700,textTransform:"capitalize"}}
                                       p={1}
                                     >
                                       {row.loanName}
@@ -623,10 +622,6 @@ function LoanApplication() {
                   <Avatar key={key} alt={user?.PK.split("#")[1]} src={`${s3URL}/${user?.imageId}`} />
                 )
               })}
-              
-              {/* <Avatar alt="Travis Howard" src="/static/images/avatar/2.jpg" />
-              <Avatar alt="Agnes Walker" src="/static/images/avatar/4.jpg" />
-              <Avatar alt="Trevor Henderson" src="/static/images/avatar/5.jpg" /> */}
             </AvatarGroup>
           </Grid>
           {/* other-icon-set */}

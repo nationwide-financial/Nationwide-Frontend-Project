@@ -51,43 +51,42 @@ function NestedGrid({ task }) {
   }
   return (
     <Box sx={{ flexGrow: 1 }}>
-      <Grid container spacing={1}>
+      <Grid container spacing={1} mt={2}>
         {task &&
           task.map((task, key) => {
             return (
               <React.Fragment key={key}>
-                <Stack direction="row" mt={2}>
-                  <Grid item xs={2} mr={4}>
-                    {/* <img src='./images/Frame 63.png' width="70px"></img> */}
-                    <Button
-                      variant="contained"
-                      size="small"
-                      style={{ fontSize: 6 }}
-                      onClick={() => {
-                        router.push(`/tasks/view/${task?.id}`);
-                      }}
-                    >
-                      {" "}
-                      Edit{" "}
-                    </Button>
-                  </Grid>
-                  <Grid item xs={5} pt={1}>
-                    <Typography
-                      align="center"
-                      color="#858585"
-                      style={{ fontSize: 9, padding: 0, margin: 0 }}
-                    >
-                      {task?.assignTo || ""}
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={4}>
-                    <Chip
-                      label="Pre-Approved"
-                      size="small"
-                      style={{ fontSize: 8, padding: 0, margin: 0 }}
-                    />
-                  </Grid>
-                </Stack>
+                <Grid item xs={3}>
+                  {/* <img src='./images/Frame 63.png' width="70px"></img> */}
+                  <Button
+                    variant="contained"
+                    size="small"
+                    style={{ fontSize: 6, minWidth: "100%"}}
+                    onClick={() => {
+                      router.push(`/tasks/view/${task?.id}`);
+                    }}
+                  >
+                    Edit
+                  </Button>
+                </Grid>
+                <Grid item xs={6} mt={1} pl={1}>
+                  <Typography
+                    align="left"
+                    color="#858585"
+                    style={{ fontSize: 9, padding: 0, margin: 0,  }}
+                    className="limitChar"
+                  >
+                    {task?.assignTo || ""}
+                  </Typography>
+                </Grid>
+                <Grid item xs={3}>
+                  <Chip
+                    label="Pre-Approved"
+                    size="small"
+                    style={{ fontSize: 8, padding: 0, margin: 0 }}
+                  />
+                </Grid>
+
                 <Grid item xs={12}>
                   <Typography
                     align="left"
@@ -367,311 +366,291 @@ const HomePage = () => {
   }, []);
 
   return (
-    <div style={{ padding: "10px 20px", backgroundColor: "#fff" }}>
-      
-        <Box>
-          <Grid mt={4}>
+    <div style={{ padding: "10px 20px"}}>
+          <Box mt={4}>
             {/* header section-dashboard */}
-            <Grid container>
-              <Grid item xs={7}>
-                <Typography style={{ fontSize: 45, fontWeight: 700 }}>
-                  Dashboard
-                </Typography>
-              </Grid>
-              {/* <Grid item xs={5}>
-                <SearchBox />
-              </Grid> */}
-            </Grid>
+            <Typography style={{ fontSize: 45, fontWeight: 700 }}>
+              Dashboard
+            </Typography>
+          </Box>
+          <Box>
             {/* body section-dashboard */}
-            <Grid container>
-              <Stack direction="column" spacing={1}>
-                {/* 1st row */}
-                <Grid>
-                  <Stack direction="row" spacing={2}>
-                    <Grid xs={4}>
-                      <Card>
-                        <CardContent>
-                          <Stack direction="column" spacing={1}>
-                            <Typography
-                              style={{ fontSize: 18, fontWeight: 700 }}
-                              align="left"
-                            >
-                              {`Year to Date / ${
-                                month[currentDate.getMonth()]
-                              } ${new Date().getFullYear()} `}
-                            </Typography>
-                            <Typography
-                              style={{ fontSize: 14, fontWeight: 600 }}
-                              align="left"
-                              color="blue"
-                            >
-                              Loans Closed
-                            </Typography>
-                          </Stack>
-                        </CardContent>
-
-                        <CardContent>
-                          <Bars
-                            ytdCount={ytdLoanClose}
-                            monthCount={mtdLoanClose}
-                          />
-                        </CardContent>
-                      </Card>
-                    </Grid>
-                    <Grid xs={5}>
-                      <Card>
-                        <CardContent>
-                          <Stack direction="column" spacing={1}>
-                            <Typography
-                              style={{ fontSize: 18, fontWeight: 700 }}
-                              align="left"
-                            >
-                              Year to Date
-                            </Typography>
-                            <Typography
-                              style={{ fontSize: 14, fontWeight: 600 }}
-                              align="left"
-                              color="blue"
-                            >
-                              Loans Closed
-                            </Typography>
-                          </Stack>
-                          <Typography
-                            align="center"
-                            fontSize={60}
-                            fontWeight={600}
-                          >
-                            ${ytdTotalCloseAmount}
-                          </Typography>
-                          <Grid
-                            style={{
-                              display: "flex",
-                              justifyContent: "center",
-                            }}
-                          >
-                            <DashBoardCards
-                              totalLoans={totalLoans}
-                              perchase={10}
-                              references={10}
-                            />
-                          </Grid>
-                        </CardContent>
-
-                        {/* <CardContent>
-                    <DashBoardCards />
-                  </CardContent> */}
-                      </Card>
-                      <Grid
-                        style={{ display: "flex", justifyContent: "center" }}
-                        mt={1}
-                      >
-                        <Button
-                          variant="contained"
-                          style={{ width: 505, height: 38, margin: 1 }}
-                          size="small"
-                          onClick={() => {
-                            router.push(`/application/dashbord`);
-                          }}
+            <Grid container spacing={2}>
+                  {/* 1st row */}
+                <Grid item xs={4} md={4}>
+                  <Card>
+                    <CardContent>
+                        <Typography
+                          style={{ fontSize: 18, fontWeight: 700 }}
+                          align="left"
                         >
-                          Start New Loan
-                        </Button>
-                      </Grid>
-                    </Grid>
-                    <Grid xs={3}>
-                      <Card
-                        style={{
-                          height: 355,
-                          overflow: "scroll",
-                          overflowX: "hidden",
-                        }}
-                      >
-                        <CardContent>
-                          <Stack direction="column" spacing={1}>
-                            <Typography
-                              style={{ fontSize: 18, fontWeight: 700 }}
-                            >
-                              My Tasks
-                            </Typography>
-                            <DashBoardTableOne
-                              taskOverdue={taskOverdue}
-                              taskDueToday={taskDueToday}
-                              taskTotal={taskTotal}
-                            />
+                          {`Year to Date / ${
+                            month[currentDate.getMonth()]
+                          } ${new Date().getFullYear()} `}
+                        </Typography>
+                        <Typography
+                          style={{ fontSize: 14, fontWeight: 600 }}
+                          align="left"
+                          color="blue"
+                        >
+                          Loans Closed
+                        </Typography>
+                    </CardContent>
 
-                            <NestedGrid task={taskData} />
-                          </Stack>
-                        </CardContent>
-
-                        <CardContent>{/* <Bars /> */}</CardContent>
-                      </Card>
-                    </Grid>
-                  </Stack>
+                    <CardContent>
+                      <Bars
+                        ytdCount={ytdLoanClose}
+                        monthCount={mtdLoanClose}
+                      />
+                    </CardContent>
+                  </Card>
                 </Grid>
-                {/* 2nd row */}
-                <Grid>
-                  <Stack direction="row" spacing={2}>
-                    <Grid xs={4}>
-                      <Card style={{ height: 435 }}>
-                        <CardContent>
-                          <Stack direction="column" spacing={1}>
-                            <Typography
-                              style={{ fontSize: 18, fontWeight: 700 }}
-                              align="left"
-                            >
-                              Loans Status
-                            </Typography>
-                          </Stack>
-                        </CardContent>
-
-                        <CardContent>
-                          <LoanStatusPieChart chartData={loanStatusesChart} />
-                        </CardContent>
-                      </Card>
-                    </Grid>
-                    <Grid xs={5}>
-                      <Stack direction="row" spacing={2}>
-                        <Grid container>
-                          <Grid item xs={6}>
-                            <Card style={{ height: 220 }}>
-                              <CardContent>
-                                <Typography
-                                  pb={1}
-                                  mb={1}
-                                  align="center"
-                                  style={{
-                                    fontSize: 18,
-                                    fontWeight: 700,
-                                  }}
-                                >
-                                  Oppotunity-to-win-Ratio
-                                </Typography>
-                                <div id="container">
-                                  <div
-                                    style={{
-                                      width: "58%",
-                                      paddingLeft: "16%",
-                                      fontWeight: "bold",
-                                      color: "black",
-                                    }}
-                                  >
-                                    <CircularProgressbar
-                                      value={wonRatio.toFixed(2)}
-                                      text={`${wonRatio.toFixed(2)}%`}
-                                      styles={buildStyles({
-                                        textColor: "black",
-                                      })}
-                                    />
-                                  </div>
-                                </div>
-                              </CardContent>
-                            </Card>
-                          </Grid>
-                          <Grid item xs={6}>
-                            <Card style={{ height: 220 }}>
-                              <CardContent>
-                                <Typography
-                                  align="left"
-                                  style={{ fontSize: 18, fontWeight: 700 }}
-                                >
-                                  Current Pipeline
-                                </Typography>
-
-                                {/* <Typography
-                                align="center"
-                                style={{ fontSize: 36, fontWeight: 700 }}
-                              >
-                                $824,150
-                              </Typography> */}
-                                <Stack direction="column" mt={3} mb={4}>
-                                  <Typography
-                                    style={{ fontSize: 36, fontWeight: 700 }}
-                                    align="center"
-                                  >
-                                    ${ytdTotalCloseAmountForUser}
-                                  </Typography>
-                                  <Typography
-                                    style={{
-                                      fontSize: 16,
-                                      fontWeight: 500,
-                                      color: "#858585",
-                                    }}
-                                    align="center"
-                                  >
-                                    Loans Closed
-                                  </Typography>
-                                </Stack>
-                              </CardContent>
-                            </Card>
-                          </Grid>
-                        </Grid>
+                <Grid item xs={5} md={5}>
+                  <Card>
+                    <CardContent>
+                      <Stack direction="column" spacing={1}>
+                        <Typography
+                          style={{ fontSize: 18, fontWeight: 700 }}
+                          align="left"
+                        >
+                          Year to Date
+                        </Typography>
+                        <Typography
+                          style={{ fontSize: 14, fontWeight: 600 }}
+                          align="left"
+                          color="blue"
+                        >
+                          Loans Closed
+                        </Typography>
                       </Stack>
-                      <Card style={{ marginTop: 35 }}>
-                        <CardContent>
-                          <Stack direction="column" spacing={1}>
-                            <Typography
-                              style={{ fontSize: 18, fontWeight: 700 }}
-                              align="left"
-                            >
-                              Oppotunities
-                            </Typography>
-                          </Stack>
-                          <Grid
-                            style={{
-                              display: "flex",
-                              justifyContent: "center",
-                            }}
-                          >
-                            <DashBoardCardsSectionTwo
-                              closedApplications={closedApplicationsCount}
-                              lostApplications={lostApplicationsCount}
-                              givenApplications={givenApplicationsCount}
-                            />
-                          </Grid>
-                        </CardContent>
-
-                        {/* <CardContent>
-                    <DashBoardCards />
-                  </CardContent> */}
-                      </Card>
+                      <Typography
+                        align="center"
+                        fontSize={60}
+                        fontWeight={600}
+                      >
+                        ${ytdTotalCloseAmount}
+                      </Typography>
                       <Grid
-                        style={{ display: "flex", justifyContent: "center" }}
-                        mt={1}
-                      ></Grid>
-                    </Grid>
-                    <Grid xs={3}>
-                      <Card
                         style={{
-                          height: 435,
-                          overflow: "scroll",
-                          overflowX: "hidden",
+                          display: "flex",
+                          justifyContent: "center",
                         }}
                       >
-                        <CardContent>
-                          <Stack direction="column">
+                        <DashBoardCards
+                          totalLoans={totalLoans}
+                          perchase={10}
+                          references={10}
+                        />
+                      </Grid>
+                    </CardContent>
+
+                    {/* <CardContent>
+                <DashBoardCards />
+              </CardContent> */}
+                  </Card>
+                  <Grid
+                    style={{ display: "flex", justifyContent: "center" }}
+                    mt={2}
+                  >
+                    <Button
+                      variant="contained"
+                      style={{ width: "100%", height: 38, margin: 1 ,fontWeight:700, textTransform:"capitalize"}}
+                      size="small"
+                      onClick={() => {
+                        router.push(`/application/dashbord`);
+                      }}
+                    >
+                      Start New Loan
+                    </Button>
+                  </Grid>
+                </Grid>
+                <Grid item xs={3} md={3}>
+                  <Card
+                    style={{
+                      height: 355,
+                      overflow: "scroll",
+                      overflowX: "hidden",
+                    }}
+                    className="newScroll"
+                  >
+                    <CardContent>
+                        <Typography
+                          style={{ fontSize: 18, fontWeight: 700 }}
+                        >
+                          My Tasks
+                        </Typography>
+                        <DashBoardTableOne
+                          taskOverdue={taskOverdue}
+                          taskDueToday={taskDueToday}
+                          taskTotal={taskTotal}
+                        />
+                        <NestedGrid task={taskData} />
+                    </CardContent>
+
+                  </Card>
+                </Grid>
+                 
+                {/* 2nd row */}
+                 
+                <Grid item xs={4}>
+                  <Card style={{ height: 435 }}>
+                    <CardContent>
+                      <Stack direction="column" spacing={1}>
+                        <Typography
+                          style={{ fontSize: 18, fontWeight: 700 }}
+                          align="left"
+                        >
+                          Loans Status
+                        </Typography>
+                      </Stack>
+                    </CardContent>
+
+                    <CardContent>
+                      <LoanStatusPieChart chartData={loanStatusesChart} />
+                    </CardContent>
+                  </Card>
+                </Grid>
+                <Grid item xs={5}>
+                  {/* <Stack direction="row" spacing={1}> */}
+                    <Grid container>
+                      <Grid item xs={6}>
+                        <Card style={{ height: 220 }}>
+                          <CardContent>
                             <Typography
+                              pb={1}
+                              mb={1}
+                              align="center"
                               style={{
                                 fontSize: 18,
                                 fontWeight: 700,
-                                padding: 0,
-                                margin: 0,
                               }}
                             >
-                              Leads
+                              Oppotunity-to-win-Ratio
                             </Typography>
-                            <BasicTable rows={leadsData} />
+                            <div id="container">
+                              <div
+                                style={{
+                                  width: "58%",
+                                  paddingLeft: "16%",
+                                  fontWeight: "bold",
+                                  color: "black",
+                                }}
+                              >
+                                <CircularProgressbar
+                                  value={wonRatio.toFixed(2)}
+                                  text={`${wonRatio.toFixed(2)}%`}
+                                  styles={buildStyles({
+                                    textColor: "black",
+                                  })}
+                                />
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      </Grid>
+                      <Grid item xs={6}>
+                        <Card style={{ height: 220 }}>
+                          <CardContent>
+                            <Typography
+                              align="left"
+                              style={{ fontSize: 18, fontWeight: 700 }}
+                            >
+                              Current Pipeline
+                            </Typography>
 
-                            {/* <Grid style={{ height: 500 }}>
-                            <BasicTable />
-                          </Grid> */}
-                          </Stack>
-                        </CardContent>
-                      </Card>
+                            {/* <Typography
+                            align="center"
+                            style={{ fontSize: 36, fontWeight: 700 }}
+                          >
+                            $824,150
+                          </Typography> */}
+                            <Stack direction="column" mt={3} mb={4}>
+                              <Typography
+                                style={{ fontSize: 36, fontWeight: 700 }}
+                                align="center"
+                              >
+                                ${ytdTotalCloseAmountForUser}
+                              </Typography>
+                              <Typography
+                                style={{
+                                  fontSize: 16,
+                                  fontWeight: 500,
+                                  color: "#858585",
+                                }}
+                                align="center"
+                              >
+                                Loans Closed
+                              </Typography>
+                            </Stack>
+                          </CardContent>
+                        </Card>
+                      </Grid>
                     </Grid>
-                  </Stack>
+                  {/* </Stack> */}
+                  <Card style={{ marginTop: 28 }}>
+                    <CardContent>
+                      <Stack direction="column" spacing={1}>
+                        <Typography
+                          style={{ fontSize: 18, fontWeight: 700 }}
+                          align="left"
+                        >
+                          Oppotunities
+                        </Typography>
+                      </Stack>
+                      <Grid
+                        style={{
+                          display: "flex",
+                          justifyContent: "center",
+                        }}
+                      >
+                        <DashBoardCardsSectionTwo
+                          closedApplications={closedApplicationsCount}
+                          lostApplications={lostApplicationsCount}
+                          givenApplications={givenApplicationsCount}
+                        />
+                      </Grid>
+                    </CardContent>
+
+                    {/* <CardContent>
+                <DashBoardCards />
+              </CardContent> */}
+                  </Card>
+                  {/* <Grid
+                    style={{ display: "flex", justifyContent: "center" }}
+                    mt={1}
+                  ></Grid> */}
                 </Grid>
-              </Stack>
+                <Grid item xs={3}>
+                  <Card
+                    style={{
+                      height: 435,
+                      overflow: "scroll",
+                      overflowX: "hidden",
+                    }}
+                    className="newScroll"
+                  >
+                    <CardContent>
+                      <Stack direction="column">
+                        <Typography
+                          style={{
+                            fontSize: 18,
+                            fontWeight: 700,
+                            padding: 0,
+                            margin: 0,
+                          }}
+                        >
+                          Leads
+                        </Typography>
+                        <BasicTable rows={leadsData} />
+
+                        {/* <Grid style={{ height: 500 }}>
+                        <BasicTable />
+                      </Grid> */}
+                      </Stack>
+                    </CardContent>
+                  </Card>
+                </Grid>
             </Grid>
-          </Grid>
         </Box>
 
         {/* </div> */}

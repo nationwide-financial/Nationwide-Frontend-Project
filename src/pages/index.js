@@ -285,14 +285,12 @@ const HomePage = () => {
     setWonRatio(winRatio);
 
     await closedApplications.map((application) => {
-      ytdClosedLoanTotalAmount =
-        ytdClosedLoanTotalAmount + parseInt(application?.loanAmount);
+      ytdClosedLoanTotalAmount = ytdClosedLoanTotalAmount + parseInt(application?.applicationBasicInfo?.loan_amount || 0);
     });
     setYtdTotalCloseAmount(ytdClosedLoanTotalAmount);
 
     await closedApplicationsForUser.map((application) => {
-      ytdClosedLoanTotalAmountForUSer =
-        ytdClosedLoanTotalAmountForUSer + parseInt(application?.loanAmount);
+      ytdClosedLoanTotalAmountForUSer = ytdClosedLoanTotalAmountForUSer + parseInt(application?.applicationBasicInfo?.loan_amount || 0);
     });
     setYtdTotalCloseAmountForUser(ytdClosedLoanTotalAmountForUSer);
   };

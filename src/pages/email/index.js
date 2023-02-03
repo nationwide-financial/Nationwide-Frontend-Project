@@ -13,12 +13,13 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Stack from "@mui/material/Stack";
+import { useRouter } from "next/router";
 import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined";
 import { getCookie, deleteCookie } from 'cookies-next';
-import {_authMS} from '../../services/authServices'
+import {_authMS, _authMSToken} from '../../services/authServices'
 
 const Email = () => {
-
+    const router = useRouter();
     const [emaildatarows, setEmaildatarows] = useState([]);
     const [showContent, setShowContent] = useState(false);
     
@@ -30,8 +31,18 @@ const Email = () => {
         console.log(JSON.stringify(res?.data?.url), "urlurlurl");
         window.location.href = res?.data?.url
     };
+    const {code, client_info} = router.query
 
     useEffect(() => {
+
+        code && _authMSToken(code)
+        .then((res) => {
+            router.push("/email");
+        })
+        .catch((error) => {
+            console.error(error);
+        });
+
         const accessToken =  getCookie('accessToken');
         console.log(accessToken, "accessToken")
         if (accessToken) {

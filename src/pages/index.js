@@ -375,30 +375,6 @@ const HomePage = () => {
   useEffect(() => {
     fetchAllData();
 
-    code && _authMSToken(code)
-    .then((res) => {
-        router.push("/email");
-    })
-    .catch((error) => {
-      console.error(error);
-    });
-
-    const accessToken =  getCookie('accessToken');
-    if (accessToken) {
-      fetch('https://graph.microsoft.com/v1.0/me', {
-        method: 'GET',
-        headers: {
-          Authorization: `Bearer ${accessToken}`
-        },
-      })
-        .then(response => response.json())
-        .then((res) => {
-          setMailConnect("Mail Connected");
-        })
-        .catch((error) => {
-          console.error(error);
-        });
-    }
 
   }, []);
 

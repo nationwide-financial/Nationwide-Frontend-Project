@@ -488,3 +488,29 @@ color: #fff !important;
   text-overflow: ellipsis;
   max-width: 200px;
 }
+
+.file-drag-and-drop{
+  border-style: "dashed";
+  border: "5 solid #fff ";
+  border-color: "grey";
+  padding: 5;
+  display: "flex";
+  justify-content: "center";
+}
+
+.file-drag-and-drop {
+  min-height: 100px;
+}
+.file-drag-and-drop svg{
+  display: none;
+}
+
+.file-drag-and-drop .file-types {
+  display: none;
+}
+
+.file-drag-and-drop span {
+  width: 100%;
+  text-align: center;
+  font-size: 16px;
+}

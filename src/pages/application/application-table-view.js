@@ -41,6 +41,8 @@ import DirectionsCarFilledOutlinedIcon from "@mui/icons-material/DirectionsCarFi
 import WorkOutlineOutlinedIcon from "@mui/icons-material/WorkOutlineOutlined";
 import Checkbox from "@mui/material/Checkbox";
 import SearchBox from "../../components/searchBox/searchBox";
+import styles from '../../components/searchBox/searchBox.module.scss'
+import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
 import LoanApplicatioTable from "../../components/table/table";
 const label = { inputProps: { "aria-label": "Checkbox demo" } };
 import { useRouter } from "next/router";
@@ -128,7 +130,8 @@ function ApplicationTableView() {
   const [teamMembersArr, setTeamMembersArr] = useState([]);
   const [open, setOpen] = React.useState(false);
   const router = useRouter();
-
+  const [searchKey, setSearchKey] = useState("");
+console.log(searchKey)
   // const changeStatOfElement = () =>{
 
   // }
@@ -346,14 +349,16 @@ const mergeDocuments = async (tempApplications) =>{
             </Box>
           </Grid>
         </Grid>
-
         {/* 2nd-header-section */}
         <Grid container mt={2}>
           {/* header-search-section */}
           <Grid item xs={12} md={5}>
-            <Grid container spacing={1} alignItems="flex-end">IconButton
+            <Grid container spacing={1} alignItems="flex-end">
               <Grid item xs={12}>
-                <SearchBox style={{ color: "#858585" }} />
+                <div className={styles.search}>
+                  <SearchOutlinedIcon className={styles.icon} fontSize='medium'/>
+                  <TextField onChange={(e)=>{setSearchKey(e.target.value)}}  className={styles.input} id="input-with-icon-textfield" label="Search" variant="standard"  />
+                </div>
               </Grid>
             </Grid>
           </Grid>
@@ -460,7 +465,7 @@ const mergeDocuments = async (tempApplications) =>{
         {/*body-content  */}
         <Grid container spacing={2} mt={2}>
           <Grid item xs={12}>
-            <LoanApplicatioTable applications={tableData} />
+            <LoanApplicatioTable applications={tableData} searchKey={searchKey}/>
           </Grid>
         </Grid>
       </Box>

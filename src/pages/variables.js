@@ -41,11 +41,10 @@ import MenuItem from "@mui/material/MenuItem";
 import Modal from "@mui/material/Modal";
 import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
-import Select from '@mui/material/Select';
+import Select from "@mui/material/Select";
 
-
-import { s3URL } from '../utils/config'
-import { _getAllPlatformUserByAdmin } from '../services/authServices'
+import { s3URL } from "../utils/config";
+import { _getAllPlatformUserByAdmin } from "../services/authServices";
 const style = {
   position: "absolute",
   top: "50%",
@@ -151,6 +150,11 @@ function Variable() {
     setOpen(true);
   };
   const handleClose = () => {
+    setDisplayName("");
+    setSystemName("");
+    setDataType("string");
+    setDescription("");
+    setVariableType("application");
     setOpen(false);
   };
 
@@ -220,9 +224,11 @@ function Variable() {
   async function getTableData() {
     const response = await _gatVariabels();
     console.log(response?.data?.data?.Items);
-    let tableDt = await response?.data?.data?.Items.sort((a,b) => (a.createTime < b.createTime) ? 1 : ((b.createTime < a.createTime) ? -1 : 0));
+    let tableDt = await response?.data?.data?.Items.sort((a, b) =>
+      a.createTime < b.createTime ? 1 : b.createTime < a.createTime ? -1 : 0
+    );
     setData(
-      tableDt.map((row) => {
+      tableDt?.map((row) => {
         let uT = getTime(row.updateTime);
         return {
           rowId: row.PK,
@@ -231,7 +237,7 @@ function Variable() {
           dataType: row.dataType,
           uT: uT,
           description: row.description,
-          variableType:row.variableType
+          variableType: row.variableType,
         };
       })
     );
@@ -249,31 +255,32 @@ function Variable() {
   const onChangeHandler = useCallback(({ target }) => {
     setFormDt((state) => ({ ...state, [target.name]: target.value }));
   }, []);
-console.log(formDt)
+
+  const [displayName, setDisplayName] = useState("");
+  const [systemName, setSystemName] = useState("");
+  const [dataType, setDataType] = useState("string");
+  const [description, setDescription] = useState("");
+  const [variableType, setVariableType] = useState("application");
+
   const onSubmit = async () => {
-    const body = formDt;
-    if (!formDt || (formDt && Object.keys(formDt).length === 0)) {
-      setError("display name, system name and data type can not be empty");
-    } else if (
-      (formDt && formDt["displayName"] === "") ||
-      formDt["displayName"] === undefined
-    ) {
-      setError("displayName can not be empty");
-    } else if (
-      (formDt && formDt["systemName"] === "") ||
-      formDt["systemName"] === undefined
-    ) {
-      setError("systemName can not be empty");
-    } else if (
-      (formDt && formDt["dataType"] === "") ||
-      formDt["dataType"] === undefined
-    ) {
-      setError("datatype can not be empty");
-    } else if (
-      (formDt && formDt["variableType"] === "") ||
-      formDt["variableType"] === undefined
-    ) {
-      setError("variableType can not be empty");
+    let body = {
+      displayName: displayName,
+      systemName: systemName,
+      dataType: dataType,
+      description: description,
+      variableType: variableType,
+      permission_: true,
+    };
+    if (!displayName || displayName === "" || displayName == null) {
+      setError("Display Name can not be empty !");
+    } else if (!systemName || systemName === "" || systemName == null) {
+      setError("system Name can not be empty !");
+    } else if (!description || description === "" || description == null) {
+      setError("description can not be empty !");
+    } else if (!dataType || dataType === "" || dataType == null) {
+      setError("data Type can not be empty !");
+    } else if (!variableType || variableType === "" || variableType == null) {
+      setError("variable Type can not be empty !");
     } else {
       setError("");
       console.log(body);
@@ -315,21 +322,21 @@ console.log(formDt)
       console.log(err);
     }
   };
-  const getUsers = async() =>{
-    try{
-      const res = await _getAllPlatformUserByAdmin()
-      setUsers([...res?.data?.users])
-    }catch(err){
-      console.log(err)
+  const getUsers = async () => {
+    try {
+      const res = await _getAllPlatformUserByAdmin();
+      setUsers([...res?.data?.users]);
+    } catch (err) {
+      console.log(err);
     }
-  }
-  
+  };
+
   // update variable states
   const [displayNameUpdate, setDisplayNameUpdate] = useState("");
   const [systemNameUpdate, setSystemNameUpdate] = useState("");
   const [dataTypeUpdate, setDataTypeUpdate] = useState("");
   const [descriptionUpdate, setDescriptionUpdate] = useState("");
-  const [variableType,setVariableType] = useState("");
+  const [variableTypeUpdate, setVariableTypeUpdate] = useState("");
   const [errorEdit, setErrorEdit] = useState("");
   // update variable
   const editVariable = async (id) => {
@@ -339,7 +346,7 @@ console.log(formDt)
         systemName: systemNameUpdate,
         dataType: dataTypeUpdate,
         description: descriptionUpdate,
-        variableType:variableType,
+        variableType: variableType,
         permission_: true,
       };
       if (
@@ -360,13 +367,9 @@ console.log(formDt)
         dataTypeUpdate == null
       ) {
         setErrorEdit("data Type can not be empty !");
-      } else if (
-        !variableType ||
-        variableType === "" ||
-        variableType == null
-      ) {
+      } else if (!variableType || variableType === "" || variableType == null) {
         setErrorEdit("variable Type can not be empty !");
-      }else {
+      } else {
         setErrorEdit("");
         console.log(body);
         console.log(id);
@@ -399,7 +402,7 @@ console.log(formDt)
   };
 
   return (
-    <Box m={0} style={{ padding: 20, marginTop: 40 }}>
+    <Box m={0} style={{ padding: 20, marginTop: 40, paddingLeft: 40 }}>
       <Snackbar
         open={openSuccessMessage}
         autoHideDuration={6000}
@@ -479,8 +482,10 @@ console.log(formDt)
                       <TextField
                         name="displayName"
                         type="text"
-                        onChange={onChangeHandler}
-                        value={(formDt && formDt["displayName"]) || ""}
+                        onChange={(e) => {
+                          setDisplayName(e.target.value);
+                        }}
+                        value={displayName || ""}
                         fullWidth
                         autoFocus
                         size="small"
@@ -509,8 +514,10 @@ console.log(formDt)
                       <TextField
                         name="systemName"
                         type="text"
-                        onChange={onChangeHandler}
-                        value={(formDt && formDt["systemName"]) || ""}
+                        onChange={(e) => {
+                          setSystemName(e.target.value);
+                        }}
+                        value={systemName || ""}
                         fullWidth
                         autoFocus
                         size="small"
@@ -536,19 +543,20 @@ console.log(formDt)
                       </Typography>
                     </label>
                     <Box sx={{ maxWidth: "100%" }}>
-                    <FormControl fullWidth>
-                      <Select
-                        labelId="demo-simple-select-label"
-                        id="demo-simple-select"
-                        name="dataType"
-                        onChange={onChangeHandler}
-                      //  value={(formDt && formDt["dataType"]) || "string"}
-                        
-                      >
-                        <MenuItem value={"string"}>String</MenuItem>
-                        <MenuItem value={"number"}>Number</MenuItem>
-                      </Select>
-                    </FormControl>
+                      <FormControl fullWidth>
+                        <Select
+                          labelId="demo-simple-select-label"
+                          id="demo-simple-select"
+                          name="dataType"
+                          onChange={(e) => {
+                            setDataType(e.target.value);
+                          }}
+                          value={dataType}
+                        >
+                          <MenuItem value={"string"}>String</MenuItem>
+                          <MenuItem value={"number"}>Number</MenuItem>
+                        </Select>
+                      </FormControl>
                       {/* <TextField
                         name="dataType"
                         type="text"
@@ -578,18 +586,20 @@ console.log(formDt)
                       </Typography>
                     </label>
                     <Box sx={{ maxWidth: "100%" }}>
-                    <FormControl fullWidth>
-                      <Select
-                        labelId="demo-simple-select-label"
-                        id="demo-simple-select"
-                        name="variableType"
-                        onChange={onChangeHandler}
-                       // value={(formDt && formDt["variableType"]) || "contact"}
-                      >
-                        <MenuItem value={"application"}>Application</MenuItem>
-                        <MenuItem value={"contact"}>Contact</MenuItem>
-                      </Select>
-                    </FormControl>
+                      <FormControl fullWidth>
+                        <Select
+                          labelId="demo-simple-select-label"
+                          id="demo-simple-select"
+                          name="variableType"
+                          onChange={(e) => {
+                            setVariableType(e.target.value);
+                          }}
+                          value={variableType}
+                        >
+                          <MenuItem value={"application"}>Application</MenuItem>
+                          <MenuItem value={"contact"}>Contact</MenuItem>
+                        </Select>
+                      </FormControl>
                     </Box>
                     <label>
                       {" "}
@@ -609,8 +619,10 @@ console.log(formDt)
                       <TextField
                         name="description"
                         type="text"
-                        onChange={onChangeHandler}
-                        value={(formDt && formDt["description"]) || ""}
+                        onChange={(e) => {
+                          setDescription(e.target.value);
+                        }}
+                        value={description}
                         fullWidth
                         autoFocus
                         size="small"
@@ -627,7 +639,11 @@ console.log(formDt)
                   <DialogActions
                     style={{ display: "flex", justifyContent: "left" }}
                   >
-                    <Button variant="contained" onClick={onSubmit} style={{marginLeft:16}}>
+                    <Button
+                      variant="contained"
+                      onClick={onSubmit}
+                      style={{ marginLeft: 16 }}
+                    >
                       Create Variable
                     </Button>
                   </DialogActions>
@@ -747,20 +763,20 @@ console.log(formDt)
                       </Typography>
                     </label>
                     <Box sx={{ maxWidth: "100%" }}>
-                    <FormControl fullWidth>
-                      <Select
-                        labelId="demo-simple-select-label"
-                        id="demo-simple-select"
-                        name="dataType"
-                        value={dataTypeUpdate}
-                        onChange={(e)=>{
-                          setDataTypeUpdate(e.target.value)
-                        }}
-                      >
-                        <MenuItem value={"string"}>String</MenuItem>
-                        <MenuItem value={"number"}>Number</MenuItem>
-                      </Select>
-                    </FormControl>
+                      <FormControl fullWidth>
+                        <Select
+                          labelId="demo-simple-select-label"
+                          id="demo-simple-select"
+                          name="dataType"
+                          value={dataTypeUpdate}
+                          onChange={(e) => {
+                            setDataTypeUpdate(e.target.value);
+                          }}
+                        >
+                          <MenuItem value={"string"}>String</MenuItem>
+                          <MenuItem value={"number"}>Number</MenuItem>
+                        </Select>
+                      </FormControl>
                       {/* <TextField
                         name="dataType"
                         type="text"
@@ -792,20 +808,20 @@ console.log(formDt)
                       </Typography>
                     </label>
                     <Box sx={{ maxWidth: "100%" }}>
-                    <FormControl fullWidth>
-                      <Select
-                        labelId="demo-simple-select-label"
-                        id="demo-simple-select"
-                        name="variableType"
-                        value={variableType}
-                        onChange={(e)=>{
-                          setVariableType(e.target.value)
-                        }}
-                      >
-                        <MenuItem value={"application"}>Application</MenuItem>
-                        <MenuItem value={"contact"}>Contact</MenuItem>
-                      </Select>
-                    </FormControl>
+                      <FormControl fullWidth>
+                        <Select
+                          labelId="demo-simple-select-label"
+                          id="demo-simple-select"
+                          name="variableType"
+                          value={variableTypeUpdate}
+                          onChange={(e) => {
+                            setVariableTypeUpdate(e.target.value);
+                          }}
+                        >
+                          <MenuItem value={"application"}>Application</MenuItem>
+                          <MenuItem value={"contact"}>Contact</MenuItem>
+                        </Select>
+                      </FormControl>
                     </Box>
 
                     <label>
@@ -841,8 +857,8 @@ console.log(formDt)
                     </Box>
                   </FormControl>
                 </DialogContent>
-                <p style={{ color: "red", marginLeft:26 }}>{errorEdit}</p>
-                <div style={{ marginBottom: 100 , marginLeft:16}}>
+                <p style={{ color: "red", marginLeft: 26 }}>{errorEdit}</p>
+                <div style={{ marginBottom: 100, marginLeft: 16 }}>
                   <DialogActions
                     style={{ display: "flex", justifyContent: "left" }}
                   >
@@ -864,7 +880,7 @@ console.log(formDt)
       <Grid container mt={2}>
         {/* header-search-section */}
         <Grid item xs={12} md={5}>
-          <Grid container spacing={1} alignItems="flex-end">
+          {/* <Grid container spacing={1} alignItems="flex-end">
             <Grid item>
               <SearchOutlinedIcon fontSize="medium" />
             </Grid>
@@ -876,27 +892,44 @@ console.log(formDt)
                 setSearchKey(e.target.value);
               }}
             />
-          </Grid>
+          </Grid> */}
+          <TextField
+            fullWidth
+            id="input-with-icon-textfield"
+            placeholder="Search"
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchOutlinedIcon fontSize="medium" />
+                </InputAdornment>
+              ),
+            }}
+            variant="standard"
+            onChange={(e) => {
+              setSearchKey(e.target.value);
+            }}
+          />
+          `
         </Grid>
         {/* active-user-display-section */}
-        <Grid item xs={12} md={1}>
-        <AvatarGroup total={users.length}>
-          {users &&
-            users.map((user, key) => {
-            return (
-              <Avatar
-              key={key}
-              alt={user?.PK.split("#")[1]}
-              src={`${s3URL}/${user?.imageId}`}
-              />
-            );
-            })}
-        </AvatarGroup>
+        <Grid item xs={12} md={2} style={{ marginLeft: 20 }}>
+          <AvatarGroup total={users.length}>
+            {users &&
+              users.map((user, key) => {
+                return (
+                  <Avatar
+                    key={key}
+                    alt={user?.PK.split("#")[1]}
+                    src={`${s3URL}/${user?.imageId}`}
+                  />
+                );
+              })}
+          </AvatarGroup>
         </Grid>
         {/* other-icon-set */}
-        <Grid item xs={12} md={6}>
+        {/* <Grid item xs={12} md={6}>
           <Box sx={{ textAlign: "right" }}>
-            {/* <IconButton
+            <IconButton
               sx={{
                 width: 10,
                 height: 10,
@@ -908,17 +941,14 @@ console.log(formDt)
               aria-label="save"
             >
               <TuneOutlined sx={{ color: "gray" }} />
-            </IconButton> */}
+            </IconButton>
           </Box>
-        </Grid>
+        </Grid> */}
       </Grid>
 
       <Grid container mb={5}>
         <Grid item xs={12} mt={4}>
-          <TableContainer
-            component={Paper}
-            style={{ backgroundColor: "transparent" }}
-          >
+          <TableContainer style={{ backgroundColor: "transparent" }}>
             <Table aria-label="simple table">
               <TableHead>
                 <TableRow>
@@ -1110,7 +1140,7 @@ console.log(formDt)
           <TablePagination
             rowsPerPageOptions={[5, 10, 25, 100]}
             component="div"
-            count={data.length}
+            count={data?.length || 0}
             rowsPerPage={rowsPerPage}
             page={pages}
             onPageChange={handleChangePage}
@@ -1135,6 +1165,7 @@ console.log(formDt)
                 setSystemNameUpdate(onClickObj?.systemName);
                 setDataTypeUpdate(onClickObj?.dataType);
                 setDescriptionUpdate(onClickObj?.description);
+                setVariableTypeUpdate(onClickObj?.variableType);
                 handleClickOpenEdit();
               }}
             >

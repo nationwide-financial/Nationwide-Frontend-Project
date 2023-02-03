@@ -25,7 +25,7 @@ import Stack from "@mui/material/Stack";
 import styles from "./dashBoardCards.module.scss";
 import { Scale } from "@mui/icons-material";
 
-function DashBoardCards({totalLoans,perchase,references}) {
+function DashBoardCards({ totalLoans, perchase, references }) {
   //   let cdNo = this.cdNo;
   //   let cdnm = this.cdnm;
   //   let bgclr = this.bgclr;
@@ -41,14 +41,14 @@ function DashBoardCards({totalLoans,perchase,references}) {
         <Grid container>
           {setOnecrdVals.map((setOnecrdVal, index) => {
             return (
-              <Stack key ={index} direction="row" spacing={3}>
+              <Stack key={index} direction="row" spacing={3}>
                 <Grid p={1}>
                   <div key={index}>
                     <Grid
                       xs={12}
                       style={{
-                        height: 100,
-                        width: 120,
+                        height: 90,
+                        width: 105,
                         // backgroundColor: { setOnecrdVal.bgclr },
                         padding: 5,
                         color: "white",

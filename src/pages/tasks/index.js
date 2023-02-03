@@ -45,6 +45,18 @@ import KeyboardArrowRight from "@mui/icons-material/KeyboardArrowRight";
 import LastPageIcon from "@mui/icons-material/LastPage";
 import { red } from "@mui/material/colors";
 import { teal } from "@mui/material/colors";
+import Dialog from "@mui/material/Dialog";
+import DialogTitle from "@mui/material/DialogTitle";
+import DialogContent from "@mui/material/DialogContent";
+import DialogContentText from "@mui/material/DialogContentText";
+import DialogActions from "@mui/material/DialogActions";
+import CardContent from "@mui/material/CardContent";
+
+import { Autocomplete, FormControl, Switch } from "@mui/material";
+import { _addTask } from "../../services/loanTaskServices";
+import { _getApplications } from "../../services/applicationService";
+import { _addHistory } from "../../services/applicationHistory";
+
 // cutom-btn--
 
 const BootstrapButton = styled(Button)({
@@ -204,6 +216,54 @@ const rows = [createData("Cupcake", 305, 3.7)].sort((a, b) =>
 );
 
 const Tasks = () => {
+  const [pages, setPages] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+
+  const handleChangePage = (event, newPage) => {
+    setPages(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(+event.target.value);
+    setPages(0);
+  };
+
+  const [openSuccessMessage, setOpenSuccessMessage] = useState(false);
+  const [message, setMessage] = useState("");
+  const handleSuccessMessage = () => {
+    setOpenSuccessMessage(true);
+  };
+
+  const handleCloseSuccessMessage = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+    setMessage("");
+    setOpenSuccessMessage(false);
+  };
+
+  const [assignUsers, setAssignUsers] = useState("");
+  const [taskDescription, setTaskDescription] = useState("");
+  const [taskDueDate, setTaskDueDate] = useState("");
+  const [taskPriventApplication, setTaskPriventApplication] = useState(false);
+  const [taskEditable, setTaskEditable] = useState(false);
+  const [teamMembers, setTeamMembers] = useState([]);
+  const [teamMember, setTeamMember] = useState("");
+
+  const [applicationData, setApplicationData] = useState([]);
+  const [taskError, setTaskError] = useState(false);
+  const [openTask, setOpenTask] = useState(false);
+  const handleClickOpenTask = () => {
+    setOpenTask(true);
+  };
+  const handleCloseTask = () => {
+    setAssignUsers("");
+    setTaskDescription("");
+    setTaskDueDate("");
+    setTaskPriventApplication(false);
+    setTaskEditable(false);
+    setOpenTask(false);
+  };
   const router = useRouter();
 
   const [taskData, setTaskData] = useState([]);
@@ -211,12 +271,92 @@ const Tasks = () => {
   const [loading, setLoading] = useState(false);
   const [searchKey, setSearchKey] = useState("");
   const [users, setUsers] = useState([]);
+  const [applications, setApplications] = useState([]);
+  const [applicationId, setApplicationId] = useState("");
 
-  const [selectTask, setSelectTask] = useState();
+  const [selectTask, setSelectTask] = useState({});
   const [openModify, setOpenModify] = useState(false);
   const handleOpenModify = () => setOpenModify(true);
   const handleCloseModify = () => {
     setOpenModify(false);
+  };
+
+  const isNull = (val) => {
+    return !val || val.length === 0 ? true : false;
+  };
+
+  const handleTaskCreate = async (taskDt) => {
+    const { description, assignedTo, dueDate, prevert, editable } = taskDt;
+
+    if (isNull(description) || isNull(dueDate) || isNull(applicationId)) {
+      setTaskError("Mandatory fields are empty");
+    } else {
+      const body = {
+        description: description,
+        assignTo: assignedTo,
+        dueDate: dueDate,
+        prevert: prevert,
+        editable: editable,
+        applicationId: applicationId,
+        status: "Not Done",
+      };
+
+      const response = await _addTask(body);
+      console.log("response", response);
+
+      if (response?.status === 200) {
+        const newTask = response?.data?.loanTask;
+        if (newTask) {
+          let tempTasks = [...taskData, newTask];
+          let tableDt = await tempTasks.sort((a, b) =>
+            a.createTime < b.createTime
+              ? 1
+              : b.createTime < a.createTime
+              ? -1
+              : 0
+          );
+          setTaskData([...tableDt]);
+        }
+
+        let history = {
+          action: "Task Created",
+          description: `The Task created`,
+          applicationId: applicationId,
+        };
+        const resHistory = await _addHistory(history);
+        if (resHistory?.status == 200 && response?.status == 200) {
+          handleSuccessMessage();
+          setMessage("you have successfuly edited!");
+        }
+        setTaskDescription("");
+        setApplicationId("");
+        setTeamMember("");
+        setTaskDueDate("");
+        setTaskPriventApplication(false);
+        setTaskEditable(false);
+        handleCloseTask();
+      } else {
+        setTaskError(response?.response?.data?.message);
+      }
+    }
+  };
+
+  const getApplications = async () => {
+    try {
+      const res = await _getApplications();
+      setApplications(res?.data?.data?.Items);
+      console.log("_getApplications", res);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const [openDeleteConfirm, setOpenDeleteConfirm] = useState(false);
+  const handleClickOpenDeleteConfirm = () => {
+    setOpenDeleteConfirm(true);
+  };
+  const handleCloseDeleteConfirm = () => {
+    setOpenDeleteConfirm(false);
   };
 
   const newShade = (hexColor, magnitude) => {
@@ -239,6 +379,7 @@ const Tasks = () => {
   };
 
   useEffect(() => {
+    getApplications();
     fetchTasks();
     getUsers();
   }, []);
@@ -266,8 +407,12 @@ const Tasks = () => {
 
     setLoading(false);
     if (response?.status === 200) {
+      handleCloseModify();
+      handleCloseDeleteConfirm();
       setError({ type: "success", message: "Task deleted" });
     } else {
+      handleCloseModify();
+      handleCloseDeleteConfirm();
       setError({ type: "error", message: "Error fetching data" });
     }
   };
@@ -280,31 +425,17 @@ const Tasks = () => {
       console.log(err);
     }
   };
-  const [page, setPage] = React.useState(0);
-  const [rowsPerPage, setRowsPerPage] = React.useState(5);
 
-  // Avoid a layout jump when reaching the last page with empty rows.
-  const emptyRows =
-    page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
-
-  const handleChangePage = (event, newPage) => {
-    setPage(newPage);
-  };
-
-  const handleChangeRowsPerPage = (event) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
-  };
   return (
     <>
       <Box
         sx={{
-          width: {
-            sm: 300,
-            md: 600,
-            lg: 900,
-            xl: 1236,
-          },
+          // width: {
+          //   sm: 300,
+          //   md: 600,
+          //   lg: 900,
+          //   xl: 1236,
+          // },
           padding: "10px  20px ",
         }}
       >
@@ -326,9 +457,8 @@ const Tasks = () => {
                   <Alert severity={error.type}>{error.message}</Alert>
                 </Snackbar>
               )}
-
               <Grid container ml={2}>
-                <Grid item xs={4} mt={8}>
+                <Grid item xs={4} mt={6} mb={2}>
                   {/* <div style={{ paddingLeft: '10px' }}> */}
                   <h1 className="page_header">Tasks</h1>
                   {/* </div> */}
@@ -336,24 +466,23 @@ const Tasks = () => {
               </Grid>
               <Grid container mt={2} mb={4} ml={2}>
                 <Grid item xs={4}>
-                  <SearchBox />
-                  {/* <TextField
-                  id='input-with-icon-textfield'
-                  variant='standard'
-                  fullWidth
-                  onChange={(e)=>{
-                    setSearchKey(e.target.value)
-                  }}
-                  sx={{ width: 300 }}
-                  placeholder={'Search'}
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position='start'>
-                        <SearchOutlinedIcon fontSize='medium' />
-                      </InputAdornment>
-                    ),
-                  }}
-                /> */}
+                  <TextField
+                    id="input-with-icon-textfield"
+                    variant="standard"
+                    fullWidth
+                    onChange={(e) => {
+                      setSearchKey(e.target.value);
+                    }}
+                    sx={{ width: 300 }}
+                    placeholder={"Search"}
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <SearchOutlinedIcon fontSize="medium" />
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
                 </Grid>
                 <Grid item xs={4}>
                   <div>
@@ -372,9 +501,28 @@ const Tasks = () => {
                   </div>
                 </Grid>
                 <Grid item xs={4} alignItems="flex-end">
-                  {/* <div style={{ paddingLeft: 20, marginLeft: 300 }}>
-                  <TuneIcon />
-                </div> */}
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "right",
+                      marginRight: 40,
+                    }}
+                  >
+                    <Button
+                      variant="contained"
+                      sx={{ padding: "10px 40px" }}
+                      style={{
+                        marginLeft: 20,
+                        textTransform: "capitalize",
+                        fontWeight: 700,
+                      }}
+                      onClick={() => {
+                        handleClickOpenTask();
+                      }}
+                    >
+                      Add Task
+                    </Button>
+                  </div>
                 </Grid>
               </Grid>
 
@@ -470,138 +618,158 @@ const Tasks = () => {
                         </TableRow>
                       </TableHead>
                       <TableBody>
-                        {taskData
-                          ?.filter((data) => {
-                            if (searchKey == "") {
-                              return data;
-                            } else {
-                              return data?.description
-                                .toLowerCase()
-                                .includes(searchKey.toLocaleLowerCase());
-                            }
-                          })
-                          .map((task, key) => {
-                            return (
-                              <TableRow
-                                key={key}
-                                container
-                                mt={1}
-                                onClick={() => {
-                                  console.log(task);
-                                  setSelectTask(task);
-                                  handleOpenModify();
-                                }}
-                              >
-                                <TableCell key={key} p={0} m={0} style={{wordBreak: "break-all"}}>
-                                  <span
-                                    className="verified_label task_tbl_cell"
-                                    style={{
-                                      fontSize: 14,
-                                      fontWeight: 500,
-                                      color:
-                                        task?.status.toLowerCase() == "not done"
-                                          ? "#FF0000"
-                                          : task?.status.toLowerCase() == "done"
-                                          ? "#00FF00"
-                                          : "#0000FF",
-                                      backgroundColor:
-                                        task?.status.toLowerCase() == "not done"
-                                          ? `${newShade("#FF0000", 180)}`
-                                          : task?.status.toLowerCase() == "done"
-                                          ? `${newShade("#00FF00", 180)}`
-                                          : `${newShade("#0000FF", 180)}`,
-                                    }}
+                        {taskData &&
+                          taskData
+                            ?.filter((data) => {
+                              if (searchKey == "") {
+                                return data;
+                              } else {
+                                return data?.description
+                                  .toLowerCase()
+                                  .includes(searchKey.toLocaleLowerCase());
+                              }
+                            })
+                            .slice(
+                              pages * rowsPerPage,
+                              pages * rowsPerPage + rowsPerPage
+                            )
+                            .map((task, key) => {
+                              return (
+                                <TableRow
+                                  key={key}
+                                  container
+                                  mt={1}
+                                  onClick={() => {
+                                    console.log(task);
+                                    setSelectTask(task);
+                                    handleOpenModify();
+                                  }}
+                                >
+                                  <TableCell
+                                    key={key}
+                                    p={0}
+                                    m={0}
+                                    style={{ wordBreak: "break-all" }}
                                   >
-                                    {task?.status || ""}
-                                  </span>
-                                </TableCell>
-                                <TableCell className="task_tbl_cell" style={{wordBreak: "break-all"}}>
-                                  {/* <AvatarGroup max={3} sx={{ width: 30, height: 5 }}>
+                                    <span
+                                      className="verified_label task_tbl_cell"
+                                      style={{
+                                        fontSize: 14,
+                                        fontWeight: 500,
+                                        color:
+                                          task?.status.toLowerCase() ==
+                                          "not done"
+                                            ? "#FF0000"
+                                            : task?.status.toLowerCase() ==
+                                              "done"
+                                            ? "#00FF00"
+                                            : "#0000FF",
+                                        backgroundColor:
+                                          task?.status.toLowerCase() ==
+                                          "not done"
+                                            ? `${newShade("#FF0000", 180)}`
+                                            : task?.status.toLowerCase() ==
+                                              "done"
+                                            ? `${newShade("#00FF00", 180)}`
+                                            : `${newShade("#0000FF", 180)}`,
+                                      }}
+                                    >
+                                      {task?.status || ""}
+                                    </span>
+                                  </TableCell>
+                                  <TableCell
+                                    className="task_tbl_cell"
+                                    style={{ wordBreak: "break-all" }}
+                                  >
+                                    {/* <AvatarGroup max={3} sx={{ width: 30, height: 5 }}>
                                 <Avatar alt='avatar2' src='./images/avatar2.png ' />
                                 <Avatar alt='avatar1' src='./images/avatar1.png' />
                                 <Avatar alt='avatar3' src='./images/avatar3.png' />
                                 <Avatar alt='avatar4' src='./images/avatar4.png' />
                                 </AvatarGroup> */}
-                                  <Typography
-                                    sx={{ color: "#858585" }}
-                                    style={{ fontSize: 14, fontWeight: 500 }}
-                                    pr={1}
+                                    <Typography
+                                      sx={{ color: "#858585" }}
+                                      style={{ fontSize: 14, fontWeight: 500 }}
+                                      pr={1}
+                                    >
+                                      {task?.assignTo}
+                                    </Typography>
+                                  </TableCell>
+                                  <TableCell
+                                    className="task_tbl_cell"
+                                    style={{ wordBreak: "break-all" }}
                                   >
-                                    {task?.assignTo}
-                                  </Typography>
-                                </TableCell>
-                                <TableCell className="task_tbl_cell" style={{wordBreak: "break-all"}}>
-                                  <Typography
-                                    sx={{ color: "#858585" }}
-                                    style={{ fontSize: 14, fontWeight: 500 }}
+                                    <Typography
+                                      sx={{ color: "#858585" }}
+                                      style={{ fontSize: 14, fontWeight: 500 }}
+                                    >
+                                      {task?.description}
+                                    </Typography>
+                                  </TableCell>
+                                  <TableCell
+                                    className="task_tbl_cell"
+                                    style={{ wordBreak: "break-all" }}
                                   >
-                                    {task?.description}
-                                  </Typography>
-                                </TableCell>
-                                <TableCell className="task_tbl_cell" style={{wordBreak: "break-all"}}>
-                                  <Typography sx={{ color: "#858585" }}>
-                                    {task?.application}
-                                  </Typography>
-                                </TableCell>
-                                <TableCell className="task_tbl_cell" style={{wordBreak: "break-all"}}>
-                                  <Typography
-                                    sx={{ color: "#858585", textAlign: "left" }}
-                                    style={{ fontSize: 14, fontWeight: 500 }}
+                                    <Typography
+                                      sx={{ color: "#858585" }}
+                                      style={{ fontSize: 14, fontWeight: 500 }}
+                                      pr={1}
+                                    >
+                                      {task?.PK}
+                                    </Typography>
+                                  </TableCell>
+                                  <TableCell
+                                    className="task_tbl_cell"
+                                    style={{ wordBreak: "break-all" }}
                                   >
-                                    {task.dueDate &&
-                                      moment(task.dueDate).format("YYYY-MM-DD")}
-                                  </Typography>
-                                </TableCell>
-                                <TableCell className="task_tbl_cell" style={{wordBreak: "break-all"}}>
-                                  <Typography
-                                    sx={{ color: "#858585", textAlign: "left" }}
-                                    style={{ fontSize: 14, fontWeight: 500 }}
+                                    <Typography
+                                      sx={{
+                                        color: "#858585",
+                                        textAlign: "left",
+                                      }}
+                                      style={{ fontSize: 14, fontWeight: 500 }}
+                                    >
+                                      {task.dueDate &&
+                                        moment(task.dueDate).format(
+                                          "YYYY-MM-DD"
+                                        )}
+                                    </Typography>
+                                  </TableCell>
+                                  <TableCell
+                                    className="task_tbl_cell"
+                                    style={{ wordBreak: "break-all" }}
                                   >
-                                    {task.updateTime &&
-                                      moment(task.updateTime).format(
-                                        "YYYY-MM-DD hh:MM A"
-                                      )}
-                                  </Typography>
-                                </TableCell>
+                                    <Typography
+                                      sx={{
+                                        color: "#858585",
+                                        textAlign: "left",
+                                      }}
+                                      style={{ fontSize: 14, fontWeight: 500 }}
+                                    >
+                                      {task.updateTime &&
+                                        moment(task.updateTime).format(
+                                          "YYYY-MM-DD hh:MM A"
+                                        )}
+                                    </Typography>
+                                  </TableCell>
 
-                                {/* <TableCell  xs={12} mt={1}>
+                                  {/* <TableCell  xs={12} mt={1}>
                          <Divider />
                        </TableCell> */}
-                              </TableRow>
-                            );
-                          })}
-                        {emptyRows > 0 && (
-                          <TableRow style={{ height: 53 * emptyRows }}>
-                            <TableCell colSpan={6} />
-                          </TableRow>
-                        )}
+                                </TableRow>
+                              );
+                            })}
                       </TableBody>
-                      <TableFooter>
-                        <TableRow>
-                          <TablePagination
-                            rowsPerPageOptions={[
-                              5,
-                              10,
-                              25,
-                              { label: "All", value: -1 },
-                            ]}
-                            colSpan={3}
-                            count={rows.length}
-                            rowsPerPage={rowsPerPage}
-                            page={page}
-                            SelectProps={{
-                              inputProps: {
-                                "aria-label": "rows per page",
-                              },
-                              native: true,
-                            }}
-                            onPageChange={handleChangePage}
-                            onRowsPerPageChange={handleChangeRowsPerPage}
-                            ActionsComponent={TablePaginationActions}
-                          />
-                        </TableRow>
-                      </TableFooter>
                     </Table>
+                    <TablePagination
+                      rowsPerPageOptions={[5, 10, 25, 100]}
+                      component="div"
+                      count={taskData.length}
+                      rowsPerPage={rowsPerPage}
+                      page={pages}
+                      onPageChange={handleChangePage}
+                      onRowsPerPageChange={handleChangeRowsPerPage}
+                    />
                   </TableContainer>
                 </Box>
               </Grid>
@@ -653,7 +821,8 @@ const Tasks = () => {
                   variant="contained"
                   className="myButtonClzStyle"
                   onClick={() => {
-                    deleteTask(selectTask);
+                    handleCloseModify();
+                    handleClickOpenDeleteConfirm();
                   }}
                 >
                   {" "}
@@ -665,6 +834,176 @@ const Tasks = () => {
             </Box>
           </Modal>
         </div>
+        <div>
+          {/* <Button variant="outlined" onClick={handleClickOpen}>
+        Open alert dialog
+      </Button> */}
+          <Dialog
+            open={openDeleteConfirm}
+            onClose={handleCloseDeleteConfirm}
+            aria-labelledby="alert-dialog-title"
+            aria-describedby="alert-dialog-description"
+          >
+            <DialogTitle id="alert-dialog-title">{"task delete"}</DialogTitle>
+            <DialogContent>
+              <DialogContentText id="alert-dialog-description">
+                Are you sure you want to delete this task?
+              </DialogContentText>
+            </DialogContent>
+            <DialogActions>
+              <Button variant="contained" onClick={handleCloseDeleteConfirm}>
+                Close
+              </Button>
+              <Button
+                variant="contained"
+                onClick={() => {
+                  deleteTask(selectTask);
+                }}
+                autoFocus
+              >
+                delete
+              </Button>
+            </DialogActions>
+          </Dialog>
+        </div>
+        <Dialog open={openTask} onClose={handleCloseTask} fullWidth m={4}>
+          <DialogTitle>
+            <Typography
+              variant="h6"
+              style={{
+                fontSize: 21,
+                fontWeight: 700,
+                fontStyle: "normal",
+              }}
+            >
+              Create Task
+            </Typography>
+          </DialogTitle>
+          <DialogContent>
+            <Stack direction="column" spacing={2}>
+              <FormControl>
+                <label style={{ marginBottom: 6 }}>Description</label>
+                <TextField
+                  onChange={(e) => {
+                    setTaskDescription(e.target.value);
+                  }}
+                  size="small"
+                  value={taskDescription}
+                />
+              </FormControl>
+              <FormControl>
+                <label style={{ marginBottom: 6 }}>Select Application</label>
+                <Autocomplete
+                  value={applicationId || ""}
+                  renderInput={(params) => (
+                    <TextField {...params} size="small" label="Application" />
+                  )}
+                  onChange={(e, val) => {
+                    setApplicationId(val?.split(" - ")[1]?.split("|")[0] || "");
+                    setTeamMembers(
+                      (applications &&
+                        applications.filter((application) => {
+                          return (
+                            application?.PK ==
+                            val?.split(" - ")[1]?.split("|")[0]
+                          );
+                        })[0]?.members) ||
+                        []
+                    );
+                    setTeamMember("");
+                  }}
+                  options={applications?.map((application) => {
+                    let s = `ID - ${application?.PK}|Status - ${application?.status_}`;
+                    return s;
+                  })}
+                ></Autocomplete>
+              </FormControl>
+              <FormControl>
+                <label style={{ marginBottom: 6 }}>Assign to</label>
+                <Autocomplete
+                  value={teamMember}
+                  renderInput={(params) => (
+                    <TextField {...params} size="small" label="User" />
+                  )}
+                  onChange={(e, val) => {
+                    setTeamMember(val);
+                  }}
+                  options={teamMembers && teamMembers.map((member) => member)}
+                ></Autocomplete>
+              </FormControl>
+              <FormControl>
+                <label style={{ marginBottom: 6 }}>Due Date</label>
+                <TextField
+                  value={taskDueDate}
+                  onChange={(e) => {
+                    setTaskDueDate(e.target.value);
+                  }}
+                  size="small"
+                />
+              </FormControl>
+              <FormControl>
+                <Stack direction="row" spacing={2} alignItems="center">
+                  <Switch
+                    value={taskPriventApplication}
+                    onChange={(e) => {
+                      setTaskPriventApplication(e.target.checked);
+                    }}
+                  />
+                  <Typography fontSize={14}>
+                    Prevent applications from entering status(es) if task is not
+                    done
+                  </Typography>
+                </Stack>
+              </FormControl>
+              <FormControl>
+                <Stack direction="row" spacing={2} alignItems="center">
+                  <Switch
+                    value={taskEditable}
+                    onChange={(e) => {
+                      setTaskEditable(e.target.checked);
+                    }}
+                  />
+                  <Typography fontSize={14}>
+                    Include editable application data within the task
+                  </Typography>
+                </Stack>
+              </FormControl>
+              {taskError && <Typography color="error">{taskError}</Typography>}
+              <FormControl>
+                <Button
+                  onClick={() => {
+                    let taskData = {
+                      description: taskDescription,
+                      assignedTo: teamMember,
+                      dueDate: taskDueDate,
+                      prevert: taskPriventApplication,
+                      editable: taskEditable,
+                    };
+                    handleTaskCreate(taskData);
+                  }}
+                  variant="contained"
+                  sx={{ maxWidth: 200, marginTop: 2, marginBottom: 2 }}
+                >
+                  Create Task
+                </Button>
+              </FormControl>
+            </Stack>
+          </DialogContent>
+        </Dialog>
+        <Snackbar
+          open={openSuccessMessage}
+          autoHideDuration={6000}
+          onClose={handleCloseSuccessMessage}
+        >
+          <Alert
+            onClose={handleCloseSuccessMessage}
+            severity="success"
+            sx={{ width: "100%" }}
+            style={{ backgroundColor: "lightgreen" }}
+          >
+            {message}
+          </Alert>
+        </Snackbar>
       </Box>
     </>
   );

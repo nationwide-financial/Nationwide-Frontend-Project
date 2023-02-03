@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
-import {Alert,Avatar,Backdrop,Box,Button, Chip, CircularProgress, FormControlLabel, Grid, IconButton, Typography,} from "@mui/material";
+import { Alert, Avatar, Backdrop, Box, Button, Chip, CircularProgress, FormControlLabel, Grid, IconButton, Typography, } from "@mui/material";
 import Paper from "@mui/material/Paper";
 import { styled } from "@mui/material/styles";
 import AvatarGroup from "@mui/material/AvatarGroup";
-import { TuneOutlined } from "@mui/icons-material";
+import { SettingsPhoneTwoTone, TuneOutlined } from "@mui/icons-material";
 import Switch from "@mui/material/Switch";
 import FormGroup from "@mui/material/FormGroup";
 import Stack from "@mui/material/Stack";
@@ -34,8 +34,10 @@ import moment from "moment";
 import { Snackbar } from "@material-ui/core";
 import DialogContentText from '@mui/material/DialogContentText';
 import TextField from '@mui/material/TextField';
+import { Autocomplete } from "@mui/material";
 import { _getAllPlatformUserByAdmin } from '../../services/authServices'
 import { _listLabel } from '../../services/labelService'
+import { _gatReason } from '../../services/rejectionOptionService'
 
 
 const Item = styled(Paper)(({ theme }) => ({
@@ -83,27 +85,33 @@ function LoanApplication() {
   const [apiStatus, setApiStatus] = useState();
   const [rejectionUpdateMsg, setRejectionUpdateMsg] = useState();
   const [teamMembersArr, setTeamMembersArr] = useState([]);
-  const [platfromUsers, setPlatfromUsers] =useState([]);
+  const [platfromUsers, setPlatfromUsers] = useState([]);
+  const [rejectionReason, setRejectionReason] = useState("");
+  const [selectedRejectionObj, setSelectedRejectionObj] = useState({})
+  const [reasonsLoading, setReasonsLoading] = useState(false);
 
-
-  const [appId,setAppId]=useState('');
+  const [appId, setAppId] = useState('');
   const [days, setDays] = useState(0);
-  const [reason,setReason]=useState('');
+  const [reasons, setReasons] = useState([]);
   const [checkedReasonAuto, setCheckedReasonAuto] = useState(false);
+  const [show, setShow] = useState('hidden')
+
+  const [applicationIdForRejection, setApplicationIdForRejection] = useState();
+  const [bodyDataIdForRejection, setBodyDataIdForRejection] = useState();
 
   const handleChangeReasonAuto = (event) => {
     setCheckedReasonAuto(event.target.checked);
   };
 
-  useEffect(()=>{
+  useEffect(() => {
     getUsers();
-  },[])
+  }, [])
 
   useEffect(() => {
     getWorkflowStatus();
     getLoanType();
     getApplications();
-    
+    getRejections();
   }, [trigger]);
 
   const getLoanType = async () => {
@@ -136,7 +144,7 @@ function LoanApplication() {
       }
     } catch (err) {
       console.log("Error ", err);
-      setError(err);
+      //setError(err);
     }
   }
 
@@ -147,71 +155,92 @@ function LoanApplication() {
       if (response?.status === 200) {
         setApplications(response.data.data.Items.length > 0 && response.data.data.Items);
         getTeamMembers(response.data.data.Items);
-        console.log("platfromUsers inside getApplications",res)
       }
     } catch (err) {
       console.log("Error ", err);
-      setError(err);
+      // setError(err);
     }
   }
-  const addRejection = async (id,days,auto,reason) =>{
-    try{
+  const addRejection = async (id, data) => {
+    try {
+      let { PK, auto, description, days } = data;
       let body = {
-          applicationRejection: {
-          auto: auto,
+        applicationRejection: {
+          auto: auto == "auto" ? true : false,
           days: days,
-          reason: reason
+          reason: description
         }
       }
-      const res = await _updateRejections(id,body)
-      if(res?.status == 200){
+      setReasonsLoading(true)
+      const res = await _updateRejections(id, body)
+      if (res?.status == 200) {
         handleCloseRejectionPopup();
         setRejectionUpdateMsg({ severity: 'success', message: 'Rejection Reasion updated' })
-      }else{
+        const response = await _updateApplicationStatus(id, bodyDataIdForRejection);
+        //  setLoading(false);
+        if (response?.status === 200) {
+          setReasonsLoading(false)
+          setBodyDataIdForRejection({})
+          setApiStatus({ severity: 'success', message: 'Status updated' })
+        } else {
+          setReasonsLoading(false)
+          setBodyDataIdForRejection({})
+          setApiStatus({ severity: 'error', message: 'Status update failed' })
+          setTrigger(moment())
+        }
+      } else {
         setRejectionUpdateMsg({ severity: 'error', message: 'Rejection Reasion update failed' })
       }
-    }catch(err){
+    } catch (err) {
       console.log(err)
     }
   }
 
-  const getUsers = async()=>{
-    try{
+  const getUsers = async () => {
+    try {
       const res = await _getAllPlatformUserByAdmin()
-      console.log("_getAllPlatformUserByAdmin",res)
       setPlatfromUsers(res?.data?.users)
-    }catch(err){
+    } catch (err) {
       console.log(err)
     }
   }
 
-  const getTeamMembers = async (tempApplications) =>{
-    try{
-     const res = await _getAllPlatformUserByAdmin()
+  const getRejections = async () => {
+    try {
+      const res = await _gatReason()
+      setReasons(res?.data?.data?.Items)
+    } catch (err) {
+      console.log(err)
+    }
+  }
+
+  const getTeamMembers = async (tempApplications) => {
+    try {
+      const res = await _getAllPlatformUserByAdmin()
       let tempUsers = res?.data?.users;
       let userIds = [];
       let teamMembers = [];
 
-      await tempApplications.map((tempApplications)=>{
-        if(tempApplications?.members){
+      await tempApplications.map((tempApplications) => {
+        if (tempApplications?.members) {
           userIds.push(...tempApplications?.members)
         }
       })
       let removedduplicatesUsers = [...new Set(userIds)];
-      await removedduplicatesUsers.map( async (id)=>{
-        let tempU = await tempUsers.filter((user)=> user?.PK == 'USER#'+id)
+      await removedduplicatesUsers.map(async (id) => {
+        let tempU = await tempUsers.filter((user) => user?.PK == 'USER#' + id)
         teamMembers.push(...tempU)
       })
       setTeamMembersArr([...teamMembers])
-    }catch(err){
+    } catch (err) {
       console.log(err)
     }
   }
 
-  
 
   const onDragEnd = async (result) => {
     const { source, destination } = result;
+    setShow('hidden')
     if (!destination) {
       return;
     } else {
@@ -223,17 +252,20 @@ function LoanApplication() {
         const applicationCopy = [...applications];
         const updatedIndex = applicationCopy.findIndex(application => application.PK === applicationId);
         const updated = [...applications, applications[updatedIndex].status_ = newStatus];
-        setLoading(true);
-        if (newStatus=="closed" ||newStatus=="won"){
+        // setLoading(true);
+        if (newStatus.toLowerCase() == "closed") {
           handleClickOpenRejectionPopup()
-        }
-        const response = await _updateApplicationStatus(applicationId, body);
-        setLoading(false);
-        if (response?.status === 200) {
-          setApiStatus({ severity: 'success', message: 'Status updated' })
+          setApplicationIdForRejection(applicationId)
+          setBodyDataIdForRejection(body)
         } else {
-          setApiStatus({ severity: 'error', message: 'Status update failed' })
-          setTrigger(moment())
+          const response = await _updateApplicationStatus(applicationId, body);
+          // setLoading(false);
+          if (response?.status === 200) {
+            setApiStatus({ severity: 'success', message: 'Status updated' })
+          } else {
+            setApiStatus({ severity: 'error', message: 'Status update failed' })
+            setTrigger(moment())
+          }
         }
       }
     }
@@ -261,7 +293,7 @@ function LoanApplication() {
           <Typography variant="h6" sx={{ fontWeight: 400 }}>$ {total}</Typography>
           <Droppable droppableId={status.name} key={status.name} type="status">
             {(provided, snapshot) => (
-              <div {...provided.droppableProps} ref={provided.innerRef} style={{ height: 400, overflow: 'scroll', ...getListStyle(snapshot.isDraggingOver) }}>
+              <div {...provided.droppableProps} ref={provided.innerRef} style={{ ...getListStyle(snapshot.isDraggingOver) }}>
                 <Stack direction='column' spacing={1}>
                   {componentList}
                 </Stack>
@@ -275,8 +307,8 @@ function LoanApplication() {
 
     return statusList;
   }
-console.log("applications",applications)
-  const renderApplications =  (status, varaint) => {
+
+  const renderApplications = (status, varaint) => {
     const applicationList = [];
     let total = 0;
     applications && applications.map((application, index) => {
@@ -338,8 +370,7 @@ console.log("applications",applications)
   };
 
   const handleCloseRejectionPopup = () => {
-    setDays(0);
-    setReason('');
+    // setDays(0);
     setCheckedReasonAuto(false);
     setAppId('');
     setOpenRejectionPopup(false);
@@ -429,9 +460,8 @@ console.log("applications",applications)
   }));
 
   const applicationsWon = renderApplications('won', 'mini');
-  const applicationsLost = renderApplications('lost', 'mini');
+  const applicationsLost = renderApplications('closed', 'mini');
   const applicationsAbandoned = renderApplications('abandoned', 'mini');
-
   return (
     <div>
       {apiStatus && <Snackbar anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }} open={apiStatus} autoHideDuration={3000} onClose={() => setApiStatus()}>
@@ -492,7 +522,7 @@ console.log("applications",applications)
               </Button>
 
               <Dialog open={open} onClose={handleClose} fullWidth m={4}>
-                <Box sx={{ width: 1000, maxWidth: "100%" }} p={2}>
+                <Box sx={{ maxWidth: "100%" }} p={2}>
                   <BootstrapDialogTitle
                     id="customized-dialog-title"
                     onClose={handleClose}
@@ -548,12 +578,12 @@ console.log("applications",applications)
                                   <Grid
                                     xs={6}
                                     align="left"
-                                   // color={"#393939"}
+                                    // color={"#393939"}
                                     textTransform="capitalize"
                                   >
                                     <Typography
-                                    //  className="page_sub_content_header"
-                                    style={{fontSize:20,fontWeight:700,textTransform:"capitalize"}}
+                                      //  className="page_sub_content_header"
+                                      style={{ fontSize: 20, fontWeight: 700, textTransform: "capitalize" }}
                                       p={1}
                                     >
                                       {row.loanName}
@@ -588,7 +618,7 @@ console.log("applications",applications)
                       </Box>
                     </FormControl>
                   </DialogContent>
-                  <div style={{ marginBottom: 100 , marginLeft:16}}>
+                  <div style={{ marginBottom: 100, marginLeft: 16 }}>
                     <DialogActions
                       style={{ display: "flex", justifyContent: "left" }}
                       mt={2}
@@ -617,8 +647,8 @@ console.log("applications",applications)
           {/* active-user-display-section */}
           <Grid item xs={12} md={2} pl={2}>
             <AvatarGroup total={teamMembersArr.length}>
-              {teamMembersArr && teamMembersArr.map((user, key)=>{
-                return(
+              {teamMembersArr && teamMembersArr.map((user, key) => {
+                return (
                   <Avatar key={key} alt={user?.PK.split("#")[1]} src={`${s3URL}/${user?.imageId}`} />
                 )
               })}
@@ -705,13 +735,21 @@ console.log("applications",applications)
 
         {/*body-content  */}
         <Grid container overflow='scroll' sx={{ marginTop: 2 }}>
-          <DragDropContext onDragEnd={onDragEnd}>
+          <DragDropContext onDragEnd={onDragEnd} onDragStart={() => setShow('inline')}>
             <Grid item xs={12}>
               <Stack direction={'row'} spacing={2} overflow='scroll'>
                 {renderWorkFlows()}
               </Stack>
             </Grid>
-            <Grid container>
+            <Grid container sx={{
+              marginTop: 2,
+              visibility: show,
+              position: 'absolute',
+              bottom: 0,
+              maxWidth: window.innerWidth - 300,
+              boxShadow: '1px 1px 10px #d6d6d6',
+              borderRadius: '15px 15px 0px 0px'
+            }}>
               <Grid item xs={4}>
                 <Box
                   sx={{
@@ -724,13 +762,10 @@ console.log("applications",applications)
                     <Typography variant="h6" sx={{ fontWeight: 600 }} color='#4a794c'>Won</Typography>
                     <Typography variant="h6" sx={{ fontWeight: 400, color: '#a1a1a1' }}>{applicationsWon.componentList.length}</Typography>
                   </Stack>
-                  <Typography variant="h6" sx={{ fontWeight: 400 }}>$ {applicationsWon.total}</Typography>
+                  {/* <Typography variant="h6" sx={{ fontWeight: 400 }}>$ {applicationsWon.total}</Typography> */}
                   <Droppable droppableId='won' key='won' type="status">
                     {(provided, snapshot) => (
-                      <div {...provided.droppableProps} ref={provided.innerRef} style={{ height: 170, overflow: 'scroll', ...getListStyle(snapshot.isDraggingOver), background: snapshot.isDraggingOver && "#9bd79e" }}>
-                        <Stack direction='column' spacing={1}>
-                          {applicationsWon.componentList}
-                        </Stack>
+                      <div {...provided.droppableProps} ref={provided.innerRef} style={{ height: 100, overflow: 'scroll', ...getListStyle(snapshot.isDraggingOver), background: snapshot.isDraggingOver && "#9bd79e" }}>
                         {provided.placeholder}
                       </div>
                     )}
@@ -749,13 +784,13 @@ console.log("applications",applications)
                     <Typography variant="h6" sx={{ fontWeight: 600 }} color='#c8a524'>ABANDONED</Typography>
                     <Typography variant="h6" sx={{ fontWeight: 400, color: '#a1a1a1' }}>{applicationsAbandoned.componentList.length}</Typography>
                   </Stack>
-                  <Typography variant="h6" sx={{ fontWeight: 400 }}>$ {applicationsAbandoned.total}</Typography>
+                  {/* <Typography variant="h6" sx={{ fontWeight: 400 }}>$ {applicationsAbandoned.total}</Typography> */}
                   <Droppable droppableId='abandoned' key='abandoned' type="status">
                     {(provided, snapshot) => (
-                      <div {...provided.droppableProps} ref={provided.innerRef} style={{ height: 170, overflow: 'scroll', ...getListStyle(snapshot.isDraggingOver), background: snapshot.isDraggingOver && '#ffcdcd' }}>
-                        <Stack direction='column' spacing={1}>
+                      <div {...provided.droppableProps} ref={provided.innerRef} style={{ height: 100, overflow: 'scroll', ...getListStyle(snapshot.isDraggingOver), background: snapshot.isDraggingOver && '#ffcdcd' }}>
+                        {/* <Stack direction='column' spacing={1}>
                           {applicationsAbandoned.componentList}
-                        </Stack>
+                        </Stack> */}
                         {provided.placeholder}
                       </div>
                     )}
@@ -771,16 +806,16 @@ console.log("applications",applications)
                   }}
                 >
                   <Stack direction='row' justifyContent='space-between'>
-                    <Typography variant="h6" sx={{ fontWeight: 600 }} color='#d72700'>Lost</Typography>
+                    <Typography variant="h6" sx={{ fontWeight: 600 }} color='#d72700'>Closed</Typography>
                     <Typography variant="h6" sx={{ fontWeight: 400, color: '#a1a1a1' }}>{applicationsLost.componentList.length}</Typography>
                   </Stack>
-                  <Typography variant="h6" sx={{ fontWeight: 400 }}>$ {applicationsLost.total}</Typography>
-                  <Droppable droppableId='lost' key='lost' type="status">
+                  {/* <Typography variant="h6" sx={{ fontWeight: 400 }}>$ {applicationsLost.total}</Typography> */}
+                  <Droppable droppableId='closed' key='closed' type="status">
                     {(provided, snapshot) => (
-                      <div {...provided.droppableProps} ref={provided.innerRef} style={{ height: 170, overflow: 'scroll', ...getListStyle(snapshot.isDraggingOver), background: snapshot.isDraggingOver && '#ffcdcd' }}>
-                        <Stack direction='column' spacing={1}>
+                      <div {...provided.droppableProps} ref={provided.innerRef} style={{ height: 100, overflow: 'scroll', ...getListStyle(snapshot.isDraggingOver), background: snapshot.isDraggingOver && '#ffcdcd' }}>
+                        {/* <Stack direction='column' spacing={1}>
                           {applicationsLost.componentList}
-                        </Stack>
+                        </Stack> */}
                         {provided.placeholder}
                       </div>
                     )}
@@ -792,19 +827,49 @@ console.log("applications",applications)
         </Grid>
       </Box>
       <div>
-      <Dialog open={openRejectionPopup} >
-        <DialogTitle>Rejection</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-          please enter the reason
-          </DialogContentText>
-          <TextField
+        <Grid container><Grid item xs={12}>
+          <Dialog open={openRejectionPopup} >
+            <DialogTitle>Rejection</DialogTitle>
+            <DialogContent>
+              <div>
+                <FormControl>
+                  <label style={{ marginBottom: 6 }}>Select the Reasion</label>
+                  <Autocomplete
+                    style={{ width: "500px" }}
+                    value={rejectionReason}
+                    renderInput={(params) => (
+                      <TextField {...params} size='small' label="reason" />
+                    )}
+                    onChange={(e, val) => {
+                      setSelectedRejectionObj({
+                        PK: val?.split(" | ")[0],
+                        auto: val?.split(" | ")[1],
+                        description: val?.split(" | ")[2],
+                        days: val?.split(" | ")[3]
+                      })
+                      setRejectionReason(val?.split(" | ")[2])
+                    }}
+                    options={reasons?.map((reasion) => {
+                      let s = `${reasion?.PK} | ${reasion?.auto_ ? "auto" : "manual"} | ${reasion?.description} | ${reasion?.days}`
+                      return s;
+                    })}
+                  >
+                  </Autocomplete>
+                </FormControl>
+              </div>
+              {/* {Object.keys(selectedRejectionObj).length > 1  && <div style={{marginTop:20}}>
+            <p>ID - {selectedRejectionObj?.PK}</p><br/>
+            <p>Rejection type - {selectedRejectionObj?.auto}</p><br/>
+            <p>Reason - {selectedRejectionObj?.description}</p><br/>
+            <p>Days - {selectedRejectionObj?.days}</p>
+          </div>}  */}
+              {/* <TextField
             name="reason"
             type="text"
             onChange={(e)=>{
               setReason(e.target.value)
             }}
-           // value={}
+            //value={""}
             fullWidth
             size="small"
             margin="normal"
@@ -814,16 +879,16 @@ console.log("applications",applications)
             style={{width:500}}
             multiline
             rows={4}
-            />
-          <FormControlLabel
-          style={{marginLeft:0}}
-          value="start"
-          control={<Switch color="primary" />}
-          label="Auto"
-          labelPlacement="start"
-          onChange={handleChangeReasonAuto}
-        />
-        {checkedReasonAuto && <TextField
+            /> */}
+              {/* <FormControlLabel
+            style={{marginLeft:0}}
+            value="start"
+            control={<Switch color="primary" />}
+            label="Auto"
+            labelPlacement="start"
+            onChange={handleChangeReasonAuto}
+          /> */}
+              {/* {checkedReasonAuto && <TextField
             name="days"
             type="number"
             onChange={(e)=>{
@@ -836,16 +901,28 @@ console.log("applications",applications)
             id="outlined-basic"
             placeholder="Days"
             variant="outlined"
-            style={{width:500}}
-          /> }
-       
-        </DialogContent>
-        <DialogActions>
-          <Button variant="contained" onClick={()=>{
-             addRejection(appId,days,checkedReasonAuto,reason)
-          }}>Add Reason</Button>
-        </DialogActions>
-      </Dialog>
+            // style={{width:500}}
+          /> } */}
+
+            </DialogContent>
+            <DialogActions>
+              <Button variant="contained" onClick={() => {
+                addRejection(appId, selectedRejectionObj)
+              }}>Add Reason
+                {reasonsLoading && (
+                  <CircularProgress
+                    style={{
+                      height: 20,
+                      width: 20,
+                      marginLeft: 10,
+                      color: "white",
+                    }}
+                  />
+                )}
+              </Button>
+            </DialogActions>
+          </Dialog>
+        </Grid></Grid>
       </div>
     </div>
   );

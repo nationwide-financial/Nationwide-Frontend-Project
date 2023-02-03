@@ -19,6 +19,7 @@ import {
 } from "../../../services/loanTaskServices";
 import moment from "moment";
 import Stack from "@mui/material/Stack";
+import InputAdornment from "@mui/material/InputAdornment";
 
 const ViewTask = () => {
   const router = useRouter();
@@ -399,6 +400,8 @@ const ViewTask = () => {
                       fontWeight={600}
                       fontSize={16}
                       color="#858585"
+                      pt={3}
+                      pb={3}
                     >
                       {task?.description}
                     </Typography>
@@ -442,7 +445,12 @@ const ViewTask = () => {
                       }}
                     />
                   ) : (
-                    <Typography sx={{ color: "#858585" }} ml={10}>
+                    <Typography
+                      sx={{ color: "#858585" }}
+                      //  ml={10}
+                      pt={3}
+                      pb={3}
+                    >
                       {task?.assignTo}
                     </Typography>
                   )}
@@ -486,6 +494,8 @@ const ViewTask = () => {
                       fontWeight={600}
                       fontSize={16}
                       color="#858585"
+                      pt={3}
+                      pb={3}
                     >
                       {task?.status}
                     </Typography>
@@ -531,6 +541,8 @@ const ViewTask = () => {
                       fontWeight={600}
                       fontSize={16}
                       color="#858585"
+                      pt={3}
+                      pb={3}
                     >
                       {task?.dueDate &&
                         moment(task.dueDate).format("YYYY-MM-DD")}
@@ -627,6 +639,8 @@ const ViewTask = () => {
                       fontWeight={600}
                       fontSize={16}
                       color="#858585"
+                      pt={3}
+                      pb={3}
                     >
                       ${task?.taskData?.startedIncome || ""}
                     </Typography>
@@ -672,6 +686,8 @@ const ViewTask = () => {
                       color="#858585"
                       fontWeight={600}
                       fontSize={16}
+                      pt={3}
+                      pb={3}
                     >
                       ${task?.taskData?.bureauIncome || ""}
                     </Typography>
@@ -717,6 +733,8 @@ const ViewTask = () => {
                       color="#858585"
                       fontWeight={600}
                       fontSize={16}
+                      pt={3}
+                      pb={3}
                     >
                       ${task?.taskData?.verifiedStatus || ""}
                     </Typography>
@@ -744,7 +762,7 @@ const ViewTask = () => {
                     Comments
                   </Typography>
                 </Grid>
-                <Grid item xs={8}>
+                <Grid item xs={8} p={1}>
                   {commentEditMode ? (
                     <Button
                       variant="contained"
@@ -758,29 +776,32 @@ const ViewTask = () => {
                       Add comment
                     </Button>
                   ) : (
-                    <Typography
-                      ml={3}
-                      align="left"
-                      // fontSize="1.0rem"
-                      // fontWeight="bold"
-                      fontWeight={600}
-                      fontSize={16}
-                      color="#1478F1"
-                      onClick={() => {
-                        setCommentEditMode(
-                          (commentEditMode) => !commentEditMode
-                        );
-                      }}
-                    >
-                      <AddIcon
-                        sx={{
-                          color: "#1478F1",
-                          margin: "1px",
-                          padding: "1px",
+                    <Stack direction="row" spacing={1}>
+                      <AddIcon style={{ color: "#1478F1" }} />
+                      <Typography
+                        // ml={3}
+                        align="left"
+                        // fontSize="1.0rem"
+                        // fontWeight="bold"
+                        fontWeight={600}
+                        fontSize={16}
+                        color="#1478F1"
+                        onClick={() => {
+                          setCommentEditMode(
+                            (commentEditMode) => !commentEditMode
+                          );
                         }}
-                      />
-                      Add Comments
-                    </Typography>
+                      >
+                        {/* <AddIcon
+                      sx={{
+                        color: "#1478F1",
+                        margin: "1px",
+                        padding: "1px",
+                      }}
+                      /> */}
+                        Add Comments
+                      </Typography>
+                    </Stack>
                   )}
                 </Grid>
                 {commentEditMode && (
@@ -796,7 +817,9 @@ const ViewTask = () => {
                   />
                 )}
               </Grid>
-              {task?.comments && task?.comments.sort((a, b) =>
+              {task?.comments &&
+                task?.comments
+                  .sort((a, b) =>
                     a.createTime < b.createTime
                       ? 1
                       : b.createTime < a.createTime
@@ -807,37 +830,49 @@ const ViewTask = () => {
                     return (
                       <Grid container columns={16} key={key}>
                         <Grid item xs={8}>
-                          <AvatarGroup
-                            max={1}
-                            sx={{ width: 30, height: 5, paddingLeft: 5 }}
-                          >
-                            <Avatar alt="avatar1" src="./images/avatar1.png" />
-                          </AvatarGroup>
-                          <Typography
-                            sx={{
-                              color: "black",
-                              fontWeight: "bold",
-                              fontSize: "1.2rem",
-                            }}
-                            ml={10}
-                          >
-                            {comment?.commentBy || ""}
-                            <div style={{ color: "#858585" }}>
-                              {`${comment?.commentId || ""}|${
-                                getTime(comment?.createTime) || ""
-                              }`}
-                            </div>
-                          </Typography>
+                          {/* <AvatarGroup max={1} sx={{ width: 30, height: 5 }}>
+                            <Avatar alt="avatar1" src="/images/avatar1.png" max={1} sx={{ width: 30, height: 5 }} />
+                          </AvatarGroup> */}
+                          <Stack direction="row" spacing={1} mb={2} mt={2}>
+                            <Avatar
+                              alt="avatar1"
+                              src="/images/avatar1.png"
+                              style={{ paddingLeft: 0 }}
+                            />
+                            <Typography
+                              sx={{
+                                color: "black",
+                                // fontWeight: "bold",
+                                // fontSize: "1.2rem",
+                              }}
+                              style={{ fontSize: 14, fontWeight: 700 }}
+                              // ml={10}
+                            >
+                              {comment?.commentBy || ""}
+                              <div
+                                style={{
+                                  color: "#858585",
+                                  fontWeight: 500,
+                                  fontSize: 14,
+                                }}
+                              >
+                                {`${comment?.commentId || ""}\t|\t${
+                                  getTime(comment?.createTime) || ""
+                                }`}
+                              </div>
+                            </Typography>
+                          </Stack>
                         </Grid>
                         <Grid container columns={16}>
                           <Grid item xs={8}>
                             <Typography
                               sx={{
                                 color: "black",
-                                fontWeight: "bold",
-                                fontSize: "1.2rem",
+                                // fontWeight: "bold",
+                                // fontSize: "1.2rem",
                               }}
-                              ml={10}
+                              style={{ fontSize: 14, fontWeight: 500 }}
+                              // ml={10}
                             >
                               {comment?.comment || ""}
                             </Typography>

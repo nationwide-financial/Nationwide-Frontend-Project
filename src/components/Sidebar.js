@@ -138,7 +138,7 @@ const Sidebar = () => {
       icon: TaskIcon
     },
     {
-      path: "/view-email-content",
+      path: "/email",
       name: "Emails",
       icon: MailOutlineIcon
     },

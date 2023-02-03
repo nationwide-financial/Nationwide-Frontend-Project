@@ -43,7 +43,8 @@ const AdminLayout = ({ children }) => {
             <Sidebar />
             <main className='pagecontainer'>
               {children}
-              <div className="footer_content">© 2022 National Finance</div>
+              {/* <div className="footer_content">© 2022 National Finance</div> */}
+              <div className="footer_content">Nationwide LLC</div>
             </main>
           </div>
           {/* <div className="footer">

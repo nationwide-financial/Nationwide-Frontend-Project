@@ -335,7 +335,14 @@ function ApplicationLabel() {
   };
   return (
     <>
-      <Box style={{ padding: 40 }}>
+      <Box
+        style={{
+          paddingTop: 40,
+          paddingRight: 40,
+          paddingBottom: 40,
+          paddingLeft: 40,
+        }}
+      >
         <Grid container p={6} mt={1} mb={4}>
           <Snackbar
             open={openSuccessMessage}
@@ -569,20 +576,30 @@ function ApplicationLabel() {
             </Dialog>
           </Grid>
 
-          <Grid item xs={12} md={12} mt={1}>
+          <Grid item xs={12} md={8} mt={4}>
             <Grid container spacing={1} alignItems="flex-end">
-              <Grid item>
-                <SearchOutlinedIcon fontSize="medium" />
-              </Grid>
+              {/* <Stack direction="row" spacing={1}> */}
+              {/* <Grid p={2}> */}
+              {/* <SearchOutlinedIcon fontSize="medium" /> */}
+              {/* </Grid> */}
               <TextField
                 id="input-with-icon-textfield"
-                label="Search"
+                // label="Search"
+                placeholder="Search"
                 variant="standard"
-                style={{width:"100%"}}
+                style={{ width: "100%" }}
                 onChange={(e) => {
                   setSearchKey(e.target.value);
                 }}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchOutlinedIcon fontSize="medium" />
+                    </InputAdornment>
+                  ),
+                }}
               />
+              {/* </Stack> */}
             </Grid>
           </Grid>
           <TableContainer

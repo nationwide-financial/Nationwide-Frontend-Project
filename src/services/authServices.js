@@ -20,3 +20,6 @@ export const _upoadProfilePic = async(profileImg) => {
     const res = await BackendClient.post(`${baseURL}/upload-profile-image`, formData);
     return res;
 };
+export const _authMS = async() => await BackendClient.get(`${baseURL}/authms`);
+export const _authMSToken = async(id) => await BackendClient.get(`${baseURL}/getAuthToken/${id}`);
+export const _sendMail = async(body) => await BackendClient.post(`${baseURL}/sendEmail`, body);

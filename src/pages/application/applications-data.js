@@ -57,6 +57,7 @@ import Autocomplete from "@mui/material/Autocomplete";
 import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
 import MuiAlert, { AlertProps } from "@mui/material/Alert";
+import {_authMS} from '../../services/authServices'
 
 import {
   _addApplicationNote,
@@ -79,6 +80,7 @@ import {
 import { _fetchWorkflowStatuses } from "../../services/loanWorkflowStatusServices.js";
 import { assign } from "lodash";
 import ApplicationTaskPopup from "../../components/ApplicationTaskPopup/index.js";
+import { getCookie, removeCookie } from 'cookies-next';
 
 function TablePaginationActions(props) {
   const theme = useTheme();
@@ -802,9 +804,12 @@ function ApplicationDate() {
     setValue(newValue);
   };
 
-  const handleEditDetails = () => {
+  const handleEditDetails = async () => {
     // setShowContent(true)
-    setShowContent(!showContent);
+    // setShowContent(!showContent);
+    const res = await _authMS();
+    // const res: { url: string } = await ky.get('/api/auth/twitter/generate-auth-link').json()
+    window.location.href = res?.data?.url
   };
 
   const [open, setOpen] = useState(false);
@@ -852,6 +857,7 @@ function ApplicationDate() {
 
   const [note, setNote] = useState("");
   const [formError, setformError] = useState("");
+  const [emaildatarows, setEmaildatarows] = useState([]);
 
   const addApplicationNotes = async (id) => {
     try {
@@ -1241,6 +1247,28 @@ function ApplicationDate() {
 
   useEffect(() => {
     async function getData() {
+
+      const accessToken =  getCookie('accessToken');
+      console.log(accessToken, "accessToken")
+    if (accessToken) {
+      fetch('https://graph.microsoft.com/v1.0/me/messages', {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${accessToken}`
+        },
+      })
+        .then(response => response.json())
+        .then((res) => {
+          console.log(res,  "sssss");
+          console.log(res?.value, "dddd", res?.error?.code);
+          setEmaildatarows(res?.value || []);
+          setShowContent(true);
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    }
+
       if (!router.isReady) return;
       const query = router.query;
       let id = query.applicationId;
@@ -2399,8 +2427,6 @@ function ApplicationDate() {
                   <Box>
                     <Grid container>
                       {/* email  table */}
-
-                      <Grid item>
                         <Grid container p={0} mb={2}>
                           <Grid item xs={12} md={6}>
                             <Typography
@@ -2409,8 +2435,15 @@ function ApplicationDate() {
                               Email
                             </Typography>
                           </Grid>
-                        </Grid>
-
+                          <Grid item xs={12} md={6}>
+                            <Button
+                              variant="contained"
+                              sx={{ padding: "10px 40px", marginLeft: "5px" }}
+                              onClick={()=> window.location = 'mailto:'}
+                              >
+                              Send Email
+                            </Button>
+                          </Grid>
                         {/* sub-section */}
                         <Grid
                           container
@@ -2452,9 +2485,9 @@ function ApplicationDate() {
                                 </TableRow>
                               </TableHead>
                               <TableBody>
-                                {emaildatarows.map((row) => (
+                                {emaildatarows?.map((row, i) => (
                                   <TableRow
-                                    key={row.datedata}
+                                    key={i}
                                     sx={{
                                       "&:last-child td, &:last-child th": {
                                         border: 0,
@@ -2462,13 +2495,13 @@ function ApplicationDate() {
                                     }}
                                   >
                                     <TableCell component="th" scope="row">
-                                      {row.datedata}
+                                      {row.createdDateTime}
                                     </TableCell>
                                     <TableCell align="left">
-                                      {row.fromdata}
+                                    {row.sender.emailAddress.address}
                                     </TableCell>
                                     <TableCell align="left">
-                                      {row.todata}
+                                      {row.toRecipients[0].emailAddress.address}
                                     </TableCell>
 
                                     <TableCell align="left">

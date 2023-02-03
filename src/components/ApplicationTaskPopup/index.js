@@ -19,24 +19,6 @@ const ApplicationTaskPopup = ({ open, onClose, applicationId, team, applicationD
 
     });
 
-    const renderUsers = () => {
-        const team = [{
-            "info": {},
-            "password": "$2a$08$XI0pfFFDbYz3RqvOw8hD1OQi8yE2kKe2T2SSKkV/l6YunP/tG5mHq",
-            "imageId": null,
-            "organization": null,
-            "role": "OWNER",
-            "updateTime": 1673891834601,
-            "status": "ACTIVE",
-            "SK": "USER#",
-            "createTime": 1673891801959,
-            "PK": "USER#buddhikapbandara@gmail.com",
-            "owner_": "USER#buddhika@gmail.com"
-        }];
-
-        return team;
-    }
-
     const handleUpdate = (type, value) => {
         switch (type) {
             case 'descripition': {

@@ -290,7 +290,8 @@ TablePaginationActions.propTypes = {
 //   ),
 // ].sort((a, b) => (a.contact < b.contact ? -1 : 1));
 
-function TableNW({applications}) {
+function TableNW({applications,searchKey=""}) {
+  console.log(searchKey)
   const router = useRouter();
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
@@ -400,7 +401,18 @@ function TableNW({applications}) {
             </TableRow>
           </TableHead>
           <TableBody>
-            {applications.map((row,key) => (
+            {applications?.filter((data) => {
+                    if (searchKey == "") {
+                      return data;
+                    } else {
+                      return data?.application?.PK.toLowerCase().includes(searchKey.toLocaleLowerCase()) 
+                      || data?.contact?.basicInformation?.first_name.toLowerCase().includes(searchKey.toLocaleLowerCase()) 
+                      ||  data?.contact?.basicInformation?.last_name.toLowerCase().includes(searchKey.toLocaleLowerCase()) 
+                      ||  data?.application?.status_ .toLowerCase().includes(searchKey.toLocaleLowerCase()) 
+                      || data?.contact?.basicInformation?.email .toLowerCase().includes(searchKey.toLocaleLowerCase()) 
+                      || data?.application?.applicationBasicInfo?.loan_amount .toLowerCase().includes(searchKey.toLocaleLowerCase());
+                    }
+                  }).map((row,key) => (
               <TableRow
                 key={key}
                 sx={{ "&:last-child td, &:last-child th": { border: 0 } }}

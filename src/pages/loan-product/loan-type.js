@@ -36,7 +36,7 @@ import Image from 'next/image';
 import styles from '../../../src/components/searchBox/searchBox.module.scss'
 import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
 import { _getAllPlatformUserByAdmin } from '../../services/authServices'
-
+import { FileUploader } from "react-drag-drop-files";
 
 import { _gatLoanType, _addLoanType } from "../../services/loanTypeService";
 
@@ -221,8 +221,11 @@ const LoanType = () => {
   };
   const handleClose = () => {
     setOpen(false);
+    setLoanName('')
+    setLoanIcon(null)
+    setLoanStatus('')
   };
-
+  const fileTypes = ["JPEG", "PNG", "GIF"];
   const currencies = [
     {
       value: "status 01",
@@ -429,53 +432,65 @@ const LoanType = () => {
                       >
                         Upload from computer <FileUploadOutlinedIcon />
                       </a>
-
-                      <div
-                        style={{
+                      <FileUploader
+                      
+                        multiple={true}
+                        handleChange={(file)=>{
+                          setLoanIcon(file[0])
+                          console.log(file[0])
+                        }}
+                        classes = "file-drag-and-drop"
+                        name="file"
+                        label="Upload or drop a file right here"
+                        types={fileTypes}
+                      >  
+                      
+                        <div  style={{
                           borderStyle: "dashed",
                           border: "5 solid #fff ",
                           borderColor: "grey",
                           padding: 5,
                           display: "flex",
                           justifyContent: "center",
-                        }}
-                      >
-                        <Stack
-                          direction="row"
-                          alignItems="center"
-                          spacing={2}
-                          margin="normal"
-                        >
-                          <IconButton
-                            color="primary"
-                            aria-label="upload picture"
-                            component="label"
+                          height:100
+                        }}>
+                          <Stack
+                            direction="row"
+                            alignItems="center"
+                            spacing={2}
+                            margin="normal"
                           >
-                            <input
-                              hidden
-                              accept="image/*"
-                              type="file"
-                              name="loanIcon"
-                              onChange={(event) => {
-                                setLoanIcon(event.target.files[0]);
-                              }}
-                            />
-
+                            <IconButton
+                              color="primary"
+                              aria-label="upload picture"
+                              component="label"
+                            >
                             <Grid container>
-                              <Grid item xs={12}>
-                                <PhotoCamera color="disabled" />
-                              </Grid>
-                              <Grid item xs={12}>
-                             
-                                <Typography style={{ color: "#E0DCDC"}} >
-                                  Drag & Drop here
-                                </Typography>
-                              </Grid>
+                              {loanIcon ? (
+                                <Avatar
+                                  style={{ width: "100px", height: "100px", borderRadius:0  }}
+                                  //className="uploadImg"
+                                // alt="profile image"
+                                  src={URL.createObjectURL(loanIcon)}
+                                />
+                              ) : (
+                                <div>
+                                  <Grid item xs={12}>
+                                    <PhotoCamera color="disabled" />
+                                  </Grid>
+                                  <Grid item xs={12}>
+                                    <Typography style={{ color: "#E0DCDC" }}>
+                                      Drag & Drop here
+                                      
+                                    </Typography>
+                                  </Grid>
+                                </div>
+                              )}
                             </Grid>
-                          </IconButton>
-                        </Stack>
-                      </div>
-
+                            </IconButton>
+                          </Stack>
+                        </div>
+                      </FileUploader>
                       <label style={{ marginTop: 10 }}>
                         <Typography
                           variant="h6"
@@ -539,24 +554,32 @@ const LoanType = () => {
               <Grid item xs={7}>
                 {/* <SearchBox /> */}
                 <div className={styles.search}>
-                  <SearchOutlinedIcon className={styles.icon} fontSize='medium' />
-                  <TextField className={styles.input} id="input-with-icon-textfield" label="Search" variant="standard" onChange={(e)=>{
-                    setSearchKey(e.target.value)
-                  }}/>
-
+                  <SearchOutlinedIcon
+                    className={styles.icon}
+                    fontSize="medium"
+                  />
+                  <TextField
+                    className={styles.input}
+                    id="input-with-icon-textfield"
+                    label="Search"
+                    variant="standard"
+                    onChange={(e) => {
+                      setSearchKey(e.target.value);
+                    }}
+                  />
                 </div>
               </Grid>
               <Grid item xs={5}>
                 <AvatarGroup total={users.length}>
                   {users &&
                     users.map((user, key) => {
-                    return (
-                      <Avatar
-                      key={key}
-                      alt={user?.PK.split("#")[1]}
-                      src={`${s3URL}/${user?.imageId}`}
-                      />
-                    );
+                      return (
+                        <Avatar
+                          key={key}
+                          alt={user?.PK.split("#")[1]}
+                          src={`${s3URL}/${user?.imageId}`}
+                        />
+                      );
                     })}
                 </AvatarGroup>
               </Grid>
@@ -592,63 +615,65 @@ const LoanType = () => {
           rowSpacing={2}
           columnSpacing={{ xs: 2, sm: 3, md: 4 }}
         >
-          {row?.filter((data) => {
-            if (searchKey == "") {
-              return data;
-            } else {
-              return data?.loanName
-                .toLowerCase()
-                .includes(searchKey.toLocaleLowerCase());
-            }
-          }).map((row, key) => {
-            return (
-              <Grid item xs={12} md={6} spacing={2} key={key}>
-                <Card
-                  variant="outlined"
-                  style={{ backgroundColor: "transparent" }}
-                >
-                  <Grid container p={1}>
-                    <Grid item xs={9} ml={2}>
-                      <CardContent style={{}}>
-                        <Typography
-                          variant="h6"
-                          component="div"
-                          style={{
-                            fontSize: 20,
-                            fontWeight: 700,
-                          }}
-                        >
-                          {" "}
-                          {row.loanName}{" "}
-                          <span className="verified_label" color="success">
+          {row
+            ?.filter((data) => {
+              if (searchKey == "") {
+                return data;
+              } else {
+                return data?.loanName
+                  .toLowerCase()
+                  .includes(searchKey.toLocaleLowerCase());
+              }
+            })
+            .map((row, key) => {
+              return (
+                <Grid item xs={12} md={6} spacing={2} key={key}>
+                  <Card
+                    variant="outlined"
+                    style={{ backgroundColor: "transparent" }}
+                  >
+                    <Grid container p={1}>
+                      <Grid item xs={9} ml={2}>
+                        <CardContent style={{}}>
+                          <Typography
+                            variant="h6"
+                            component="div"
+                            style={{
+                              fontSize: 20,
+                              fontWeight: 700,
+                            }}
+                          >
                             {" "}
-                            {row.loanStatus}{" "}
-                          </span>
-                        </Typography>
-                        <Typography
-                          variant="body2"
-                          style={{ fontSize: 16, fontWeight: 500 }}
-                        >
-                          {getTime(row.updateTime)}
-                        </Typography>
-                      </CardContent>
+                            {row.loanName}{" "}
+                            <span className="verified_label" color="success">
+                              {" "}
+                              {row.loanStatus}{" "}
+                            </span>
+                          </Typography>
+                          <Typography
+                            variant="body2"
+                            style={{ fontSize: 16, fontWeight: 500 }}
+                          >
+                            {getTime(row.updateTime)}
+                          </Typography>
+                        </CardContent>
+                      </Grid>
+                      <Grid item xs={1} mt={3} ml={0}>
+                        {" "}
+                        <Box sx={{ textAlign: "right" }}>
+                          <Image
+                            src={`${s3URL}/${row.img}`}
+                            alt="product icon"
+                            width={100}
+                            height={100}
+                          />
+                        </Box>
+                      </Grid>
                     </Grid>
-                    <Grid item xs={1} mt={3} ml={0}>
-                      {" "}
-                      <Box sx={{ textAlign: "right" }}>
-                        <Image
-                          src={`${s3URL}/${row.img}`}
-                          alt="product icon"
-                          width={100}
-                          height={100}
-                        />
-                      </Box>
-                    </Grid>
-                  </Grid>
-                </Card>
-              </Grid>
-            );
-          })}
+                  </Card>
+                </Grid>
+              );
+            })}
 
           {/* <Grid item xs={12} md={6} spacing={2}>
             <Card variant="outlined" style={{ backgroundColor: "transparent" }}>

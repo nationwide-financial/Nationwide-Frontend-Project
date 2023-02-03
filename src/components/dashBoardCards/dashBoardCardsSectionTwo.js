@@ -25,7 +25,11 @@ import Stack from "@mui/material/Stack";
 import styles from "./dashBoardCards.module.scss";
 import { Scale } from "@mui/icons-material";
 
-function DashBoardCardsSectionTwo({closedApplications ,lostApplications, givenApplications}) {
+function DashBoardCardsSectionTwo({
+  closedApplications,
+  lostApplications,
+  givenApplications,
+}) {
   //   let cdNo = this.cdNo;
   //   let cdnm = this.cdnm;
   //   let bgclr = this.bgclr;
@@ -47,8 +51,8 @@ function DashBoardCardsSectionTwo({closedApplications ,lostApplications, givenAp
                     <Grid
                       xs={12}
                       style={{
-                        height: 100,
-                        width: 120,
+                        height: 90,
+                        width: 105,
                         // backgroundColor: { setOnecrdVal.bgclr },
                         padding: 5,
                         color: "white",

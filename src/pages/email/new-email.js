@@ -21,23 +21,20 @@ import CardContent from "@mui/material/CardContent";
 import AlternateEmailIcon from "@mui/icons-material/AlternateEmail";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
-// import { Table, TableContainer } from "@material-ui/core";
-import Table from "@mui/material/Table";
-import TableBody from "@mui/material/TableBody";
-import TableCell from "@mui/material/TableCell";
-import TableContainer from "@mui/material/TableContainer";
-import TableHead from "@mui/material/TableHead";
-import TableRow from "@mui/material/TableRow";
-import DownloadIcon from "@mui/icons-material/Download";
-import PhotoIcon from "@mui/icons-material/Photo";
-import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
-// import { Editor } from "react-draft-wysiwyg";
-// import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
+
+import dynamic from "next/dynamic";
+const Editor = dynamic(() => import('react-draft-wysiwyg').then((module) => module.Editor), {
+  ssr: false
+});
+import { EditorState } from "draft-js";
+import { convertToHTML, convertFromHTML } from 'draft-convert';
 import {_sendMail} from '../../services/authServices'
+import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
 
 function NewEmail() {
-
+  const router = useRouter();
   const [mail, setMail] = useState({});
+  const [mailBody, setMailBody] = useState(EditorState.createEmpty());
 
   const onChangeHandler = useCallback(({ target }) => {
     setMail((state) => ({ ...state, [target.name]: target.value }));
@@ -45,12 +42,12 @@ function NewEmail() {
 
 
   const onSend = async() => {
-    console.log(mail);
-    const res = await _sendMail(mail);
-    console.log(res, "emailemail")
-    if (res.status === 'ok') {
+    // console.log(JSON.stringify({...mail, htmlBody: convertToHTML(mailBody.getCurrentContent())}))
+    const res = await _sendMail({...mail, htmlBody: convertToHTML(mailBody.getCurrentContent())});
+    console.log(res.status, "emailemail")
+    if (res.status === 200) {
       console.log("email");
-      window.location.href = '/email'
+      router.push("/email");
     }
 
   }
@@ -66,7 +63,7 @@ function NewEmail() {
             paddingBottom: 100,
           }}
         >
-          {/* <Grid container>
+          <Grid container>
             <Grid item xs={12}>
               <Typography
                 style={{ fontSize: 36, fontWeight: 700 }}
@@ -76,13 +73,13 @@ function NewEmail() {
                 Send Email
               </Typography>
             </Grid>
-          </Grid> */}
+          </Grid>
 
           <Grid container>
             <Grid item xs={12}>
               <Card elevation={0}>
                 <CardContent style={{ backgroundColor: "#F0F7FF" }}>
-                  <CardContent>
+                  {/* <CardContent>
                     <Grid container>
                       <Grid xs={9}>
                         <Stack direction="row" spacing={2}>
@@ -116,7 +113,7 @@ function NewEmail() {
                         </Typography>
                       </Grid>
                     </Grid>
-                  </CardContent>
+                  </CardContent> */}
 
                   <CardContent>
                     <Grid container>
@@ -162,10 +159,16 @@ function NewEmail() {
                 </CardContent>
                 <CardContent>
                   <Stack direction="column">
-                    <textarea
+                    {/* <textarea
                     name="htmlBody"
                     onChange={onChangeHandler}
-                    >{(mail && mail["htmlBody"]) || ""}</textarea>
+                    >{(mail && mail["htmlBody"]) || ""}</textarea> */}
+                    <div style={{ border: "1px solid #ccc", padding: '2px', minHeight: '400px' }}>
+                      <Editor
+                        editorState={mailBody}
+                        onEditorStateChange={setMailBody}
+                      />
+                    </div>
 
                   {/* <Editor
                     editorState={""}
@@ -183,7 +186,7 @@ function NewEmail() {
                       sx={{ padding: "10px 40px", marginLeft: "5px" }}
                       onClick={onSend}
                       >
-                      Send Email
+                      Send
                   </Button>
                 </CardContent>
 

@@ -77,7 +77,7 @@ const Login = () => {
 
   return (
     <Box>
-      <Grid className="gridroot" p={3}>
+      <Grid className="gridroot">
         <Card style={{ width: "100%" }}>
           <Grid
             container

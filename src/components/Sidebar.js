@@ -21,6 +21,8 @@ import Button from '@mui/material/Button';
 import Router from 'next/router';
 import { Avatar } from '@mui/material';
 import { Context } from "../context";
+import {_logout} from "../services/authServices"
+
 
 
 // declare module 'react' {
@@ -295,7 +297,8 @@ const Sidebar = () => {
         
 
       <Button size='small' variant="contained" sx={{ mt:4, ml:2 }} onClick={()=>{
-        document.cookie = "token" + '=; Max-Age=0';
+        // document.cookie = "token" + '=; Max-Age=0';
+        _logout();
         Router.push('/login');
       }}>Logout</Button>
     

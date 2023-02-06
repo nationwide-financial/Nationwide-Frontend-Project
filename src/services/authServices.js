@@ -23,3 +23,4 @@ export const _upoadProfilePic = async(profileImg) => {
 export const _authMS = async() => await BackendClient.get(`${baseURL}/authms`);
 export const _authMSToken = async(id) => await BackendClient.get(`${baseURL}/getAuthToken/${id}`);
 export const _sendMail = async(body) => await BackendClient.post(`${baseURL}/sendEmail`, body);
+export const _logout = () => BackendClient.post(`${baseURL}/sign-out`);

@@ -464,20 +464,35 @@ function LoanApplication() {
   const applicationsAbandoned = renderApplications('abandoned', 'mini');
   return (
     <div>
-      {apiStatus && <Snackbar anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }} open={apiStatus} autoHideDuration={3000} onClose={() => setApiStatus()}>
-        <Alert variant='filled' severity={apiStatus.severity}>
-          {apiStatus.message}
-        </Alert>
-      </Snackbar>}
-      {rejectionUpdateMsg && <Snackbar anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }} open={rejectionUpdateMsg} autoHideDuration={3000} onClose={() => setRejectionUpdateMsg()}>
-        <Alert variant='filled' severity={rejectionUpdateMsg.severity}>
-          {rejectionUpdateMsg.message}
-        </Alert>
-      </Snackbar>}
+      {apiStatus && (
+        <Snackbar
+          anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+          open={apiStatus}
+          autoHideDuration={3000}
+          onClose={() => setApiStatus()}
+        >
+          <Alert variant="filled" severity={apiStatus.severity}>
+            {apiStatus.message}
+          </Alert>
+        </Snackbar>
+      )}
+      {rejectionUpdateMsg && (
+        <Snackbar
+          anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+          open={rejectionUpdateMsg}
+          autoHideDuration={3000}
+          onClose={() => setRejectionUpdateMsg()}
+        >
+          <Alert variant="filled" severity={rejectionUpdateMsg.severity}>
+            {rejectionUpdateMsg.message}
+          </Alert>
+        </Snackbar>
+      )}
 
       <Backdrop
-        sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
-        open={false}>
+        sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        open={false}
+      >
         <CircularProgress color="inherit" />
         <h3>Updating Status...</h3>
       </Backdrop>
@@ -503,7 +518,7 @@ function LoanApplication() {
                 }}
                 aria-label="save"
                 onClick={() => {
-                  setTrigger(moment())
+                  setTrigger(moment());
                 }}
               >
                 <SyncOutlinedIcon fontSize="large" sx={{ color: "gray" }} />
@@ -556,25 +571,34 @@ function LoanApplication() {
 
                       {loanTypeData.map((row, key) => (
                         <div key={key}>
-                          <Box sx={{ maxWidth: "100%" }} className="hover_effect" >
+                          <Box
+                            sx={{ maxWidth: "100%" }}
+                            className="hover_effect"
+                          >
                             <Stack spacing={2} direction="row">
                               <Button
                                 fullWidth
                                 variant="outlined"
                                 borderColor="#393939"
                                 style={{
-                                  backgroundColor: row.PK == product ? '#1478F1' : '',
-                                  color: row.PK == product ? '#FFFFFF' : '#393939',
+                                  backgroundColor:
+                                    row.PK == product ? "#1478F1" : "",
+                                  color:
+                                    row.PK == product ? "#FFFFFF" : "#393939",
                                 }}
                                 onMouseOver={() => {
                                   backgroundColor: "#1478F1";
                                   color: "#FFFFFF";
                                 }}
                                 onClick={() => {
-                                  handelSelectProduct(row.PK)
+                                  handelSelectProduct(row.PK);
                                 }}
                               >
-                                <Grid container display={"flex"} fontWeight={700}>
+                                <Grid
+                                  container
+                                  display={"flex"}
+                                  fontWeight={700}
+                                >
                                   <Grid
                                     xs={6}
                                     align="left"
@@ -583,14 +607,24 @@ function LoanApplication() {
                                   >
                                     <Typography
                                       //  className="page_sub_content_header"
-                                      style={{ fontSize: 20, fontWeight: 700, textTransform: "capitalize" }}
+                                      style={{
+                                        fontSize: 20,
+                                        fontWeight: 700,
+                                        textTransform: "capitalize",
+                                      }}
                                       p={1}
                                     >
                                       {row.loanName}
                                     </Typography>
                                   </Grid>{" "}
                                   <Grid xs={6} align="right" color={"#393939"}>
-                                    {row.img != null && <img src={`${s3URL}/${row.img}`} height='40' width='40' />}
+                                    {row.img != null && (
+                                      <img
+                                        src={`${s3URL}/${row.img}`}
+                                        height="40"
+                                        width="40"
+                                      />
+                                    )}
                                   </Grid>
                                 </Grid>
                               </Button>
@@ -608,9 +642,13 @@ function LoanApplication() {
                       <Box sx={{ maxWidth: "100%" }}>
                         <FormGroup>
                           <FormControlLabel
-                            control={<Checkbox onChange={(e) => {
-                              setCoContact(e.target.checked)
-                            }} />}
+                            control={
+                              <Checkbox
+                                onChange={(e) => {
+                                  setCoContact(e.target.checked);
+                                }}
+                              />
+                            }
                             className="check_box_label_subtext"
                             label="Include Co-Borrower Page"
                           />
@@ -647,11 +685,16 @@ function LoanApplication() {
           {/* active-user-display-section */}
           <Grid item xs={12} md={2} pl={2}>
             <AvatarGroup total={teamMembersArr.length}>
-              {teamMembersArr && teamMembersArr.map((user, key) => {
-                return (
-                  <Avatar key={key} alt={user?.PK.split("#")[1]} src={`${s3URL}/${user?.imageId}`} />
-                )
-              })}
+              {teamMembersArr &&
+                teamMembersArr.map((user, key) => {
+                  return (
+                    <Avatar
+                      key={key}
+                      alt={user?.PK.split("#")[1]}
+                      src={`${s3URL}/${user?.imageId}`}
+                    />
+                  );
+                })}
             </AvatarGroup>
           </Grid>
           {/* other-icon-set */}
@@ -734,38 +777,64 @@ function LoanApplication() {
         </Grid>
 
         {/*body-content  */}
-        <Grid container overflow='scroll' sx={{ marginTop: 2 }}>
-          <DragDropContext onDragEnd={onDragEnd} onDragStart={() => setShow('inline')}>
+        <Grid container overflow="scroll" sx={{ marginTop: 2 }}>
+          <DragDropContext
+            onDragEnd={onDragEnd}
+            onDragStart={() => setShow("inline")}
+          >
             <Grid item xs={12}>
-              <Stack direction={'row'} spacing={2} overflow='scroll'>
+              <Stack direction={"row"} spacing={2} overflow="scroll">
                 {renderWorkFlows()}
               </Stack>
             </Grid>
-            <Grid container sx={{
-              marginTop: 2,
-              visibility: show,
-              position: 'absolute',
-              bottom: 0,
-              maxWidth: window.innerWidth - 300,
-              boxShadow: '1px 1px 10px #d6d6d6',
-              borderRadius: '15px 15px 0px 0px'
-            }}>
-              <Grid item xs={4}>
+            <Grid
+              container
+              spacing={1}
+              sx={{
+                zIndex:200,
+                visibility: show,
+                position: 'absolute',
+                bottom: 0,
+                maxWidth: window.innerWidth - 300,
+              }}
+            >
+              <Grid item xs={4} >
                 <Box
                   sx={{
-                    backgroundColor: '#ffffff',
+                    backgroundColor: "green",
                     padding: 2,
-                    borderRadius: 2
+                    borderRadius: '12px 12px 12px 12px',
                   }}
                 >
-                  <Stack direction='row' justifyContent='space-between'>
+                  {/* <Stack direction='row' justifyContent='space-between'>
                     <Typography variant="h6" sx={{ fontWeight: 600 }} color='#4a794c'>Won</Typography>
                     <Typography variant="h6" sx={{ fontWeight: 400, color: '#a1a1a1' }}>{applicationsWon.componentList.length}</Typography>
-                  </Stack>
+                  </Stack> */}
                   {/* <Typography variant="h6" sx={{ fontWeight: 400 }}>$ {applicationsWon.total}</Typography> */}
-                  <Droppable droppableId='won' key='won' type="status">
+                  <Droppable droppableId="won" key="won" type="status">
                     {(provided, snapshot) => (
-                      <div {...provided.droppableProps} ref={provided.innerRef} style={{ height: 100, overflow: 'scroll', ...getListStyle(snapshot.isDraggingOver), background: snapshot.isDraggingOver && "#9bd79e" }}>
+                      <div
+                      className="hideScroll"
+                        {...provided.droppableProps}
+                        ref={provided.innerRef}
+                        style={{
+                          height: 75,
+                          overflowX: 'scroll',
+                          overflowY: 'hidden',
+                          width: '100%',
+                          ...getListStyle(snapshot.isDraggingOver),
+                          background: snapshot.isDraggingOver && "green",
+                        }}
+                      >
+                        <p
+                          style={{
+                            color: "white",
+                            textAlign: "center",
+                            fontSize: 24,
+                          }}
+                        >
+                          WON
+                        </p>
                         {provided.placeholder}
                       </div>
                     )}
@@ -775,47 +844,115 @@ function LoanApplication() {
               <Grid item xs={4}>
                 <Box
                   sx={{
-                    backgroundColor: '#ffffff',
+                    backgroundColor: "#d9d9d9",
                     padding: 2,
-                    borderRadius: 2
+                    borderRadius: 2,
                   }}
                 >
-                  <Stack direction='row' justifyContent='space-between'>
-                    <Typography variant="h6" sx={{ fontWeight: 600 }} color='#c8a524'>ABANDONED</Typography>
-                    <Typography variant="h6" sx={{ fontWeight: 400, color: '#a1a1a1' }}>{applicationsAbandoned.componentList.length}</Typography>
+                  <Stack direction="row" justifyContent="space-between">
+                    {/* <Typography
+                      variant="h6"
+                      sx={{ fontWeight: 600 }}
+                      color="#c8a524"
+                    >
+                      ABANDONED
+                    </Typography>
+                    <Typography
+                      variant="h6"
+                      sx={{ fontWeight: 400, color: "#a1a1a1" }}
+                    >
+                      {applicationsAbandoned.componentList.length}
+                    </Typography> */}
                   </Stack>
                   {/* <Typography variant="h6" sx={{ fontWeight: 400 }}>$ {applicationsAbandoned.total}</Typography> */}
-                  <Droppable droppableId='abandoned' key='abandoned' type="status">
+                  <Droppable
+                    droppableId="abandoned"
+                    key="abandoned"
+                    type="status"
+                  >
                     {(provided, snapshot) => (
-                      <div {...provided.droppableProps} ref={provided.innerRef} style={{ height: 100, overflow: 'scroll', ...getListStyle(snapshot.isDraggingOver), background: snapshot.isDraggingOver && '#ffcdcd' }}>
+                      <div
+                      className="hideScroll"
+                        {...provided.droppableProps}
+                        ref={provided.innerRef}
+                        style={{
+                          height: 75,
+                          overflowX: 'scroll',
+                          overflowY: 'hidden',
+                          width: '100%',
+                          ...getListStyle(snapshot.isDraggingOver),
+                          background: snapshot.isDraggingOver && "#d9d9d9",
+                        }}
+                      >
                         {/* <Stack direction='column' spacing={1}>
                           {applicationsAbandoned.componentList}
                         </Stack> */}
+                        <p
+                          style={{
+                            color: "#666666",
+                            textAlign: "center",
+                            fontSize: 24,
+                          }}
+                        >
+                          ABANDONED
+                        </p>
                         {provided.placeholder}
                       </div>
                     )}
                   </Droppable>
                 </Box>
               </Grid>
-              <Grid item xs={4}>
+              <Grid item xs={4} >
                 <Box
                   sx={{
-                    backgroundColor: '#ffffff',
+                    backgroundColor: "red",
                     padding: 2,
-                    borderRadius: 2
+                    borderRadius: 2,
                   }}
                 >
-                  <Stack direction='row' justifyContent='space-between'>
-                    <Typography variant="h6" sx={{ fontWeight: 600 }} color='#d72700'>Closed</Typography>
-                    <Typography variant="h6" sx={{ fontWeight: 400, color: '#a1a1a1' }}>{applicationsLost.componentList.length}</Typography>
+                  <Stack direction="row" justifyContent="space-between">
+                    {/* <Typography
+                      variant="h6"
+                      sx={{ fontWeight: 600 }}
+                      color="#d72700"
+                    >
+                      Closed
+                    </Typography>
+                    <Typography
+                      variant="h6"
+                      sx={{ fontWeight: 400, color: "#a1a1a1" }}
+                    >
+                      {applicationsLost.componentList.length}
+                    </Typography> */}
                   </Stack>
                   {/* <Typography variant="h6" sx={{ fontWeight: 400 }}>$ {applicationsLost.total}</Typography> */}
-                  <Droppable droppableId='closed' key='closed' type="status">
+                  <Droppable droppableId="closed" key="closed" type="status">
                     {(provided, snapshot) => (
-                      <div {...provided.droppableProps} ref={provided.innerRef} style={{ height: 100, overflow: 'scroll', ...getListStyle(snapshot.isDraggingOver), background: snapshot.isDraggingOver && '#ffcdcd' }}>
+                      <div
+                      className="hideScroll"
+                        {...provided.droppableProps}
+                        ref={provided.innerRef}
+                        style={{
+                          height: 75,
+                          overflowX: 'scroll',
+                          overflowY: 'hidden',
+                          width: '100%',
+                          ...getListStyle(snapshot.isDraggingOver),
+                          background: snapshot.isDraggingOver && "red",
+                        }}
+                      >
                         {/* <Stack direction='column' spacing={1}>
                           {applicationsLost.componentList}
                         </Stack> */}
+                         <p
+                          style={{
+                            color: "white",
+                            textAlign: "center",
+                            fontSize: 24,
+                          }}
+                        >
+                          ClOSED
+                        </p>
                         {provided.placeholder}
                       </div>
                     )}
@@ -827,43 +964,47 @@ function LoanApplication() {
         </Grid>
       </Box>
       <div>
-        <Grid container><Grid item xs={12}>
-          <Dialog open={openRejectionPopup} >
-            <DialogTitle>Rejection</DialogTitle>
-            <DialogContent>
-              <div>
-                <FormControl>
-                  <label style={{ marginBottom: 6 }}>Select the Reasion</label>
-                  <Autocomplete
-                    style={{ width: "500px" }}
-                    value={rejectionReason}
-                    renderInput={(params) => (
-                      <TextField {...params} size='small' label="reason" />
-                    )}
-                    onChange={(e, val) => {
-                      setSelectedRejectionObj({
-                        PK: val?.split(" | ")[0],
-                        auto: val?.split(" | ")[1],
-                        description: val?.split(" | ")[2],
-                        days: val?.split(" | ")[3]
-                      })
-                      setRejectionReason(val?.split(" | ")[2])
-                    }}
-                    options={reasons?.map((reasion) => {
-                      let s = `${reasion?.PK} | ${reasion?.auto_ ? "auto" : "manual"} | ${reasion?.description} | ${reasion?.days}`
-                      return s;
-                    })}
-                  >
-                  </Autocomplete>
-                </FormControl>
-              </div>
-              {/* {Object.keys(selectedRejectionObj).length > 1  && <div style={{marginTop:20}}>
+        <Grid container>
+          <Grid item xs={12}>
+            <Dialog open={openRejectionPopup}>
+              <DialogTitle>Rejection</DialogTitle>
+              <DialogContent>
+                <div>
+                  <FormControl>
+                    <label style={{ marginBottom: 6 }}>
+                      Select the Reasion
+                    </label>
+                    <Autocomplete
+                      style={{ width: "500px" }}
+                      value={rejectionReason}
+                      renderInput={(params) => (
+                        <TextField {...params} size="small" label="reason" />
+                      )}
+                      onChange={(e, val) => {
+                        setSelectedRejectionObj({
+                          PK: val?.split(" | ")[0],
+                          auto: val?.split(" | ")[1],
+                          description: val?.split(" | ")[2],
+                          days: val?.split(" | ")[3],
+                        });
+                        setRejectionReason(val?.split(" | ")[2]);
+                      }}
+                      options={reasons?.map((reasion) => {
+                        let s = `${reasion?.PK} | ${
+                          reasion?.auto_ ? "auto" : "manual"
+                        } | ${reasion?.description} | ${reasion?.days}`;
+                        return s;
+                      })}
+                    ></Autocomplete>
+                  </FormControl>
+                </div>
+                {/* {Object.keys(selectedRejectionObj).length > 1  && <div style={{marginTop:20}}>
             <p>ID - {selectedRejectionObj?.PK}</p><br/>
             <p>Rejection type - {selectedRejectionObj?.auto}</p><br/>
             <p>Reason - {selectedRejectionObj?.description}</p><br/>
             <p>Days - {selectedRejectionObj?.days}</p>
           </div>}  */}
-              {/* <TextField
+                {/* <TextField
             name="reason"
             type="text"
             onChange={(e)=>{
@@ -880,7 +1021,7 @@ function LoanApplication() {
             multiline
             rows={4}
             /> */}
-              {/* <FormControlLabel
+                {/* <FormControlLabel
             style={{marginLeft:0}}
             value="start"
             control={<Switch color="primary" />}
@@ -888,7 +1029,7 @@ function LoanApplication() {
             labelPlacement="start"
             onChange={handleChangeReasonAuto}
           /> */}
-              {/* {checkedReasonAuto && <TextField
+                {/* {checkedReasonAuto && <TextField
             name="days"
             type="number"
             onChange={(e)=>{
@@ -903,26 +1044,30 @@ function LoanApplication() {
             variant="outlined"
             // style={{width:500}}
           /> } */}
-
-            </DialogContent>
-            <DialogActions>
-              <Button variant="contained" onClick={() => {
-                addRejection(appId, selectedRejectionObj)
-              }}>Add Reason
-                {reasonsLoading && (
-                  <CircularProgress
-                    style={{
-                      height: 20,
-                      width: 20,
-                      marginLeft: 10,
-                      color: "white",
-                    }}
-                  />
-                )}
-              </Button>
-            </DialogActions>
-          </Dialog>
-        </Grid></Grid>
+              </DialogContent>
+              <DialogActions>
+                <Button
+                  variant="contained"
+                  onClick={() => {
+                    addRejection(appId, selectedRejectionObj);
+                  }}
+                >
+                  Add Reason
+                  {reasonsLoading && (
+                    <CircularProgress
+                      style={{
+                        height: 20,
+                        width: 20,
+                        marginLeft: 10,
+                        color: "white",
+                      }}
+                    />
+                  )}
+                </Button>
+              </DialogActions>
+            </Dialog>
+          </Grid>
+        </Grid>
       </div>
     </div>
   );

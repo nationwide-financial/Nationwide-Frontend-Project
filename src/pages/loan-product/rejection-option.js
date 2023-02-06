@@ -23,23 +23,22 @@ import Stack from "@mui/material/Stack";
 import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
-import DialogContentText from '@mui/material/DialogContentText';
+import DialogContentText from "@mui/material/DialogContentText";
 import Switch from "@mui/material/Switch";
 import DialogActions from "@mui/material/DialogActions";
 
-import CircularProgress from '@mui/material/CircularProgress';
-import { _getApplications } from '../../services/applicationService'
-import { _addRejection, _gatReason, _updateRejection } from '../../services/rejectionOptionService'
+import CircularProgress from "@mui/material/CircularProgress";
+import { _getApplications } from "../../services/applicationService";
+import {
+  _addRejection,
+  _gatReason,
+  _updateRejection,
+} from "../../services/rejectionOptionService";
 import { FastForward, Flag } from "@mui/icons-material";
 import { Snackbar } from "@material-ui/core";
-import {Alert} from "@mui/material";
-
-
-
-
+import { Alert } from "@mui/material";
 
 function RejectionOption() {
-	
   const [openRejectionPopup, setOpenRejectionPopup] = useState(false);
   const handleClickOpenRejectionPopup = () => {
     setOpenRejectionPopup(true);
@@ -47,9 +46,9 @@ function RejectionOption() {
 
   const handleClickCloseRejectionPopup = () => {
     setRejectionDays(0);
-    setRejectionReason('');
+    setRejectionReason("");
     setRejectionCheckedReasonAuto(false);
-    setFormError('')
+    setFormError("");
     setOpenRejectionPopup(false);
   };
 
@@ -58,117 +57,133 @@ function RejectionOption() {
   };
   const [reasions, setReasons] = useState([]);
   const [rejectionDays, setRejectionDays] = useState(0);
-  const [rejectionReason,setRejectionReason]=useState('');
- // const [rejectionLabel,setRejectionLabel]=useState('');
-  const [rejectionCheckedReasonAuto, setRejectionCheckedReasonAuto] = useState(false);
-  const [formError,setFormError]=useState("");
+  const [rejectionReason, setRejectionReason] = useState("");
+  // const [rejectionLabel,setRejectionLabel]=useState('');
+  const [rejectionCheckedReasonAuto, setRejectionCheckedReasonAuto] =
+    useState(false);
+  const [formError, setFormError] = useState("");
   const [addRejectionLoading, setAddRejectionLoading] = useState(false);
-  
+
   const [applications, setApplications] = useState([]);
-  const [loading, setLoading] = useState('');
+  const [loading, setLoading] = useState("");
   const [message, setMessage] = useState();
-  const [trigger,setTrigger] = useState(false)
-  const [appId,setAppId]=useState('');
+  const [trigger, setTrigger] = useState(false);
+  const [appId, setAppId] = useState("");
   const [days, setDays] = useState(0);
-  const [reason,setReason]=useState('');
+  const [reason, setReason] = useState("");
   const [checkedReasonAuto, setCheckedReasonAuto] = useState(false);
   const [userInputs, setUserInputs] = useState({});
 
-  const [declineRejectionsUpdateSwitch, setdeclineRejectionsUpdateSwitch] = useState(false);
-  const [automatedRejectionsUpdateSwitch, setAutomatedRejectionsUpdateSwitch] = useState(false);
+  const [declineRejectionsUpdateSwitch, setdeclineRejectionsUpdateSwitch] =
+    useState(false);
+  const [automatedRejectionsUpdateSwitch, setAutomatedRejectionsUpdateSwitch] =
+    useState(false);
 
   async function getRejections() {
-    try{
-      let inputs={}
+    try {
+      let inputs = {};
       const data = await _gatReason();
-      //console.log("_gatReason",data) 
+      //console.log("_gatReason",data)
 
       setReasons(data.data.data.Items);
-      data.data.data.Items.map((val)=>{
+      data.data.data.Items.map((val) => {
         inputs[`REASOIN_${val.PK}`] = val?.description;
         inputs[`LABEL_${val.PK}`] = val?.label;
         inputs[`DAYS_${val.PK}`] = val?.days;
         inputs[`AUTO_${val.PK}`] = val?.auto_;
-      })
+      });
       //console.log("input************",inputs)
-      setUserInputs({...inputs})
-    }catch(err){
-      console.log(err)
+      setUserInputs({ ...inputs });
+    } catch (err) {
+      console.log(err);
     }
   }
 
-  
   const onChangeHandler = useCallback(({ target }) => {
     setUserInputs((state) => ({ ...state, [target.name]: target.value }));
   }, []);
-  const updateRejection = async (id,days,auto,reason) =>{
+  const updateRejection = async (id, days, auto, reason) => {
     //console.log("id,days,auto,reason",id,"  ",days,"  ",auto,"  ",reason)
-    try{
+    try {
       let body = {
-          auto_: auto,
-          days: days,
-          description: reason,
-          label:"Decline Reason"
-      }
-      setLoading(id)
-      const res = await _updateRejection(id,body)
-      setLoading("")
+        auto_: auto,
+        days: days,
+        description: reason,
+        label: "Decline Reason",
+      };
+      setLoading(id);
+      const res = await _updateRejection(id, body);
+      setLoading("");
       //console.log("_updateRejections",res)
-      if(res?.status == 200){
+      if (res?.status == 200) {
         handleCloseRejectionPopup();
-        setMessage({ severity: 'success', message: 'Rejection Reasion updated' })
-      }else{
-        setMessage({ severity: 'error', message: 'Rejection Reasion update failed' })
+        setMessage({
+          severity: "success",
+          message: "Rejection Reasion updated",
+        });
+      } else {
+        setMessage({
+          severity: "error",
+          message: "Rejection Reasion update failed",
+        });
       }
       setDays(0);
-      setReason('');
-     // console.log("updateRejection",res)
+      setReason("");
+      // console.log("updateRejection",res)
+    } catch (err) {
+      console.log(err);
     }
-    catch(err){
-      console.log(err)
-    }
-  }
+  };
 
-  const addRejection = async () =>{
-    try{
-      let body={
-        label:"Decline Reason",
-        description:rejectionReason,
-        auto_:rejectionCheckedReasonAuto,
-        days:rejectionDays
-      }
-     // console.log(body)
-      if(!rejectionReason || rejectionReason == "" || rejectionReason == null){
-        setFormError("Reasion can not be empty!")
-      }else if((rejectionDays == 0) && rejectionCheckedReasonAuto){
-        setFormError("Days can not be zero!")
-      }else if((Math.sign(rejectionDays) == -1) && rejectionCheckedReasonAuto){
-        setFormError("Days can not be negative!")
-      }else{
-        setFormError("")
-        setAddRejectionLoading(true)
+  const addRejection = async () => {
+    try {
+      let body = {
+        label: "Decline Reason",
+        description: rejectionReason,
+        auto_: rejectionCheckedReasonAuto,
+        days: rejectionDays,
+      };
+      // console.log(body)
+      if (
+        !rejectionReason ||
+        rejectionReason == "" ||
+        rejectionReason == null
+      ) {
+        setFormError("Reasion can not be empty!");
+      } else if (rejectionDays == 0 && rejectionCheckedReasonAuto) {
+        setFormError("Days can not be zero!");
+      } else if (Math.sign(rejectionDays) == -1 && rejectionCheckedReasonAuto) {
+        setFormError("Days can not be negative!");
+      } else {
+        setFormError("");
+        setAddRejectionLoading(true);
         const res = await _addRejection(body);
         //console.log(res)
-        if(res?.status == 200){
-          setAddRejectionLoading(false)
-          handleClickCloseRejectionPopup()
-          getRejections()
-          setMessage({ severity: 'success', message: 'Rejection Reasion Added' })
-        }else{
-          setAddRejectionLoading(false)
-          setMessage({ severity: 'error', message: 'Rejection Reasion Adding is failed' })
-          getRejections()
+        if (res?.status == 200) {
+          setAddRejectionLoading(false);
+          handleClickCloseRejectionPopup();
+          getRejections();
+          setMessage({
+            severity: "success",
+            message: "Rejection Reasion Added",
+          });
+        } else {
+          setAddRejectionLoading(false);
+          setMessage({
+            severity: "error",
+            message: "Rejection Reasion Adding is failed",
+          });
+          getRejections();
         }
       }
-    }catch(err){
-      console.log(err)
+    } catch (err) {
+      console.log(err);
     }
-  }
+  };
   useEffect(() => {
-   // getData();
+    // getData();
     getRejections();
   }, [trigger]);
-
 
   return (
     <Box
@@ -179,11 +194,18 @@ function RejectionOption() {
         margin: 20,
       }}
     >
-       {message && <Snackbar anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }} open={message} autoHideDuration={3000} onClose={() => setMessage()}>
-        <Alert variant='filled' severity={message.severity}>
-          {message.message}
-        </Alert>
-      </Snackbar>}
+      {message && (
+        <Snackbar
+          anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+          open={message}
+          autoHideDuration={3000}
+          onClose={() => setMessage()}
+        >
+          <Alert variant="filled" severity={message.severity}>
+            {message.message}
+          </Alert>
+        </Snackbar>
+      )}
       <Grid container mb={5}>
         <Grid item xs={12} md={6} mb={2}>
           <h1 className="page_header">Rejection Options</h1>
@@ -258,17 +280,14 @@ function RejectionOption() {
 
         <Grid item xs={12} mt={4}>
           <TableContainer style={{ backgroundColor: "transparent" }}>
-            <Grid item xs={8} sx={{ paddingTop: 1, paddingBottom: 1 }}>
+            <Grid item xs={10} sx={{ paddingTop: 1, paddingBottom: 1 }}>
               <Divider />
             </Grid>
             <Table aria-label="simple table">
               <TableBody>
                 {reasions &&
                   reasions?.map((reasion, key) => {
-                    if (
-                      reasion &&
-                      reasion?.auto_ == false
-                    ) {
+                    if (reasion && reasion?.auto_ == false) {
                       return (
                         <TableRow
                           key={key}
@@ -284,6 +303,7 @@ function RejectionOption() {
                               fontWeight: 500,
                               color: "#858585",
                               paddingLeft: 0,
+                              width: 400,
                             }}
                           >
                             {"Decline Reason"}
@@ -355,7 +375,7 @@ function RejectionOption() {
                   })}
               </TableBody>
             </Table>
-            <Grid item xs={8} sx={{ paddingTop: 1, paddingBottom: 1 }}>
+            <Grid item xs={10} sx={{ paddingTop: 1, paddingBottom: 1 }}>
               <Divider />
             </Grid>
           </TableContainer>
@@ -415,19 +435,23 @@ function RejectionOption() {
 
         <Grid item xs={12} mt={4}>
           <TableContainer style={{ backgroundColor: "transparent" }}>
-            <Grid item xs={8} sx={{ paddingTop: 1, paddingBottom: 1 }}>
+            {/* <Grid item xs={8} sx={{ paddingTop: 1, paddingBottom: 1 }}>
               <Divider />
-            </Grid>
+            </Grid> */}
             <Table aria-label="simple table">
               <TableBody>
                 {reasions &&
                   reasions.map((reasion, key) => {
-                    if (
-                      reasion &&
-                      reasion?.auto_ == true
-                    ) {
+                    if (reasion && reasion?.auto_ == true) {
                       return (
                         <div key={key}>
+                          <Grid
+                            item
+                            xs={10}
+                            sx={{ paddingTop: 1, paddingBottom: 1 }}
+                          >
+                            <Divider />
+                          </Grid>
                           <TableRow
                             sx={{
                               "&:last-child td, &:last-child th": { border: 0 },
@@ -442,6 +466,7 @@ function RejectionOption() {
                                 fontWeight: 500,
                                 color: "#858585",
                                 paddingLeft: 0,
+                                width: 400,
                               }}
                             >
                               {"Reject in Process Applications After"}
@@ -478,7 +503,15 @@ function RejectionOption() {
                                 {`${reasion?.days} days`}
                               </TableCell>
                             )}
+                            <Grid
+                              item
+                              xs={10}
+                              sx={{ paddingTop: 1, paddingBottom: 1 }}
+                            >
+                              <Divider />
+                            </Grid>
                           </TableRow>
+
                           <TableRow
                             sx={{
                               "&:last-child td, &:last-child th": { border: 0 },
@@ -493,6 +526,7 @@ function RejectionOption() {
                                 fontWeight: 500,
                                 color: "#858585",
                                 paddingLeft: 0,
+                                width: 400,
                               }}
                             >
                               {"Decline Reason"}
@@ -506,9 +540,7 @@ function RejectionOption() {
                                   onChange={onChangeHandler}
                                   value={
                                     (userInputs &&
-                                      userInputs[
-                                        `REASOIN_${reasion.PK}`
-                                      ]) ||
+                                      userInputs[`REASOIN_${reasion.PK}`]) ||
                                     ""
                                   }
                                   fullWidth
@@ -572,7 +604,7 @@ function RejectionOption() {
                   })}
               </TableBody>
             </Table>
-            <Grid item xs={8} sx={{ paddingTop: 1, paddingBottom: 1 }}>
+            <Grid item xs={10} sx={{ paddingTop: 1, paddingBottom: 1 }}>
               <Divider />
             </Grid>
           </TableContainer>
@@ -617,7 +649,7 @@ function RejectionOption() {
                     variant="outlined"
                     multiline
                     rows={4}
-                    style={{width:500}}
+                    style={{ width: 500 }}
                   />
                   <FormControlLabel
                     style={{ marginLeft: 0 }}
@@ -641,10 +673,10 @@ function RejectionOption() {
                       id="outlined-basic"
                       placeholder="Days"
                       variant="outlined"
-                       style={{width:500}}
+                      style={{ width: 500 }}
                     />
                   )}
-                  <p style={{color:"red"}}>{formError}</p>
+                  <p style={{ color: "red" }}>{formError}</p>
                 </DialogContent>
                 <DialogActions>
                   <Button

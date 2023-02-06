@@ -514,3 +514,21 @@ color: #fff !important;
   text-align: center;
   font-size: 16px;
 }
+
+.rejections-won{
+  background-color: lightgreen;
+}
+
+.rejections-won :hover{
+  background-color: "green";
+}
+
+.hideScroll {
+  overflow: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.hideScroll::-webkit-scrollbar {
+  display: none;
+}

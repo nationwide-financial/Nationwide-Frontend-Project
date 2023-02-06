@@ -34,10 +34,15 @@ const Email = () => {
     const {code, client_info} = router.query
 
     useEffect(() => {
+
+        const accessToken =  getCookie('accessToken');
+
+        if (accessToken) setShowContent(true);
+
         code && _authMSToken(code)
         .then((res) => {
             router.push("/email")
-            const accessToken =  getCookie('tokenMS');
+            
             console.log(accessToken, "accessToken", res.data.token);
             if (accessToken || res.data.token) {
                 fetch('https://graph.microsoft.com/v1.0/me/messages', {

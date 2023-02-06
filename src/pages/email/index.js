@@ -37,37 +37,38 @@ const Email = () => {
 
         code && _authMSToken(code)
         .then((res) => {
-            router.push("/email");
+            router.push("/email")
+            const accessToken =  getCookie('accessToken');
+            console.log(accessToken, "accessToken")
+            if (accessToken || res.token) {
+            fetch('https://graph.microsoft.com/v1.0/me/messages', {
+                method: 'GET',
+                headers: {
+                Authorization: `Bearer ${accessToken || res.token}`
+                },
+            })
+                .then(response => response.json())
+                .then((res) => {
+                    console.log(res,  "sssss");
+                    console.log(res?.value, "dddd", res?.error?.code);
+                    if (res?.error?.code === "InvalidAuthenticationToken") {
+                        deleteCookie('accessToken');
+                    } else {
+                        setShowContent(true);
+                        setEmaildatarows(res?.value || []);
+                    }
+                
+                })
+                .catch((error) => {
+                console.error(error);
+                });
+            }
         })
         .catch((error) => {
             console.error(error);
         });
 
-        const accessToken =  getCookie('accessToken');
-        console.log(accessToken, "accessToken")
-        if (accessToken) {
-          fetch('https://graph.microsoft.com/v1.0/me/messages', {
-            method: 'GET',
-            headers: {
-              Authorization: `Bearer ${accessToken}`
-            },
-          })
-            .then(response => response.json())
-            .then((res) => {
-                console.log(res,  "sssss");
-                console.log(res?.value, "dddd", res?.error?.code);
-                if (res?.error?.code === "InvalidAuthenticationToken") {
-                    deleteCookie('accessToken');
-                } else {
-                    setEmaildatarows(res?.value || []);
-                    setShowContent(true);
-                }
-              
-            })
-            .catch((error) => {
-              console.error(error);
-            });
-        }
+        
     }, []);
 
   return (

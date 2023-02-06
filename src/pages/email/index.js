@@ -34,19 +34,18 @@ const Email = () => {
     const {code, client_info} = router.query
 
     useEffect(() => {
-
         code && _authMSToken(code)
         .then((res) => {
             router.push("/email")
             const accessToken =  getCookie('accessToken');
-            console.log(accessToken, "accessToken")
+            console.log(accessToken, "accessToken", res.token);
             if (accessToken || res.token) {
-            fetch('https://graph.microsoft.com/v1.0/me/messages', {
-                method: 'GET',
-                headers: {
-                Authorization: `Bearer ${accessToken || res.token}`
-                },
-            })
+                fetch('https://graph.microsoft.com/v1.0/me/messages', {
+                    method: 'GET',
+                    headers: {
+                    Authorization: `Bearer ${accessToken || res.token}`
+                    },
+                })
                 .then(response => response.json())
                 .then((res) => {
                     console.log(res,  "sssss");
@@ -59,16 +58,14 @@ const Email = () => {
                     }
                 
                 })
-                .catch((error) => {
-                console.error(error);
+                    .catch((error) => {
+                    console.error(error);
                 });
-            }
+        }
         })
         .catch((error) => {
             console.error(error);
         });
-
-        
     }, []);
 
   return (

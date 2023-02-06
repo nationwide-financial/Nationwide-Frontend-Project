@@ -37,13 +37,13 @@ const Email = () => {
         code && _authMSToken(code)
         .then((res) => {
             router.push("/email")
-            const accessToken =  getCookie('accessToken');
-            console.log(accessToken, "accessToken", res.token);
-            if (accessToken || res.token) {
+            const accessToken =  getCookie('tokenMS');
+            console.log(accessToken, "accessToken", res.data.token);
+            if (accessToken || res.data.token) {
                 fetch('https://graph.microsoft.com/v1.0/me/messages', {
                     method: 'GET',
                     headers: {
-                    Authorization: `Bearer ${accessToken || res.token}`
+                    Authorization: `Bearer ${accessToken || res.data.token}`
                     },
                 })
                 .then(response => response.json())

@@ -568,9 +568,10 @@ const ViewTask = () => {
                     <div>
                       {teamArr?.length > 1 ? (
                         <AvatarGroup total={teamArr?.length}>
-                          {teamArr?.map((member) => {
+                          {teamArr?.map((member, key) => {
                             return (
                               <Avatar
+                                key={key}
                                 alt={member?.PK.split("#")[1]}
                                 src={`${s3URL}/${member?.imageId}`}
                               />

@@ -750,9 +750,10 @@ const Tasks = () => {
                                       <AvatarGroup
                                         total={task?.task?.assignTo?.length}
                                       >
-                                        {task?.teamArr?.map((member) => {
+                                        {task?.teamArr?.map((member, key) => {
                                           return (
                                             <Avatar
+                                              key={key}
                                               alt={member?.PK.split("#")[1]}
                                               src={`${s3URL}/${member?.imageId}`}
                                             />

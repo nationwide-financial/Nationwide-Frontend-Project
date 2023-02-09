@@ -1890,8 +1890,8 @@ function ApplicationDate() {
                               <TableCell align="left">
                                 {/* {row?.assignTo || ""} */}
                                 {row?.task?.assignTo?.length > 1 ? <AvatarGroup total={row?.task?.assignTo?.length}>
-                                {row?.teamArr?.map((member)=>{
-                                  return <Avatar alt={member?.PK.split("#")[1]} src={`${s3URL}/${member?.imageId}`} 
+                                {row?.teamArr?.map((member, key)=>{
+                                  return <Avatar key={key} alt={member?.PK.split("#")[1]} src={`${s3URL}/${member?.imageId}`} 
                                 />
                                 })}
                                

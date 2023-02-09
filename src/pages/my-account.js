@@ -10,7 +10,7 @@ import FormGroup from '@mui/material/FormGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Switch, { SwitchProps } from '@mui/material/Switch';
 import Stack from '@mui/material/Stack';
-import { _getUser, _resetPassword, _updateNoficationPreference, _updateUserField } from '../services/authServices';
+import { _getUser, _resetPassword, _updateNoficationPreference, _updateUserField, _editUserDetails } from '../services/authServices';
 import { Context } from "../context";
 import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
@@ -18,19 +18,29 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
 import CloseIcon from "@mui/icons-material/Close";
 import PhotoCamera from "@mui/icons-material/PhotoCamera";
+import { FormControl } from "@mui/material";
+
 import { _upoadProfilePic } from '../services/authServices';
 import { s3URL } from "../utils/config";
 
 const MyAccount = () => {
     const { state, dispatch} = useContext(Context);
 
+    const[firstName,setFirstName] = useState("");
+    const[lastName,setLastName] = useState("");
+    const[designation,setDesignation] = useState("");
+
     useEffect(() => {
+        console.log("state",state)
         setProfileInfo({
             id: state?.user?.PK?.split('#')[1],
             email: state?.user?.info?.email,
             phone: state?.user?.info?.phone,
             notification: state?.user?.info?.notification
         })
+        setFirstName(state?.user?.info?.firstName)
+        setLastName(state?.user?.info?.lastName)
+        setDesignation(state?.user?.info?.designation)
     }, [state])
 
     const defaultProfileState = {
@@ -56,10 +66,60 @@ const MyAccount = () => {
     const [editable, setEditable] = useState({ email: false, phone: false, password: false });
     const [profileInfo, setProfileInfo] = useState(defaultProfileState)
     const [loading, setLoading] = useState(false);
+    const [loadingUpdateProfileData, setLoadingUpdateProfileData] = useState(false);
     const [apiStatus, setApiStatus] = useState();
     const [open, setOpen] = useState(false);
     const [profileImg, setProfileImg] = useState("");
+    const [error,setError]=useState("");
+
+
     // console.log("Profile info ", profileInfo)
+
+    const [openTaskEditProfile, setOpenEditProfile] = useState(false);
+    const handleClickOpenEditProfile = () => {
+      setOpenEditProfile(true);
+    };
+    const handleCloseEditProfile = () => {
+      setOpenEditProfile(false);
+    };
+    
+
+    const updateProfileInfo = async () =>{
+        try{
+            if(!setError || firstName == "" || firstName == null){
+                setError("First name can not be empty!")
+            }else if(!lastName || lastName == "" || lastName == null ){
+                setError("Last name can not be empty!")
+            }else if(!designation || designation == "" || designation == null ){
+                setError("Designation name can not be empty!")
+            }else{
+                setError("")
+                let id = state?.user?.PK.split("#")[1]
+                let body = {
+                    info:{
+                        email: state?.user?.info?.email,
+                        notification: profileInfo?.notification,
+                        firstName:firstName,
+                        lastName:lastName,
+                        designation:designation
+                    }
+                }
+                setLoadingUpdateProfileData(false)
+                const response = await _editUserDetails(id,body)
+                setLoadingUpdateProfileData(true)
+                if(response?.status == 200){
+                    dispatch({
+                        type: "LOGGED_IN_USER",
+                        payload: {...profile, info: response?.data?.data}
+                    })
+                    handleCloseEditProfile();
+                }
+                console.log("_editUserDetails",response)
+            }
+        }catch(err){
+            console.log(err)
+        }
+    }
 
     const handleChange = (field, value) => {
         switch (field) {
@@ -144,6 +204,9 @@ const MyAccount = () => {
             case 'applicationCreated':
                 if (response?.status === 200) {
                     setProfileInfo({
+                        ...profileInfo, notification: { ...notification, applicationCreated: notification.applicationCreated }
+                    })
+                    console.log("applicationCreated",{
                         ...profileInfo, notification: { ...notification, applicationCreated: notification.applicationCreated }
                     })
                     setApiStatus({ severity: 'success', message: 'Notification preference changed' })
@@ -362,7 +425,8 @@ const MyAccount = () => {
                             <path d="M25.1903 3.15314C25.3421 3.30544 25.4274 3.51172 25.4274 3.72676C25.4274 3.94181 25.3421 4.14809 25.1903 4.30039L23.4954 5.99689L20.2454 2.74689L21.9403 1.05039C22.0927 0.898069 22.2993 0.8125 22.5147 0.8125C22.7302 0.8125 22.9368 0.898069 23.0892 1.05039L25.1903 3.15151V3.15314ZM22.3465 7.14414L19.0965 3.89414L8.02541 14.9669C7.93598 15.0563 7.86865 15.1654 7.82879 15.2854L6.52066 19.2081C6.49694 19.2797 6.49357 19.3564 6.51093 19.4297C6.5283 19.503 6.56571 19.57 6.61899 19.6233C6.67227 19.6766 6.73931 19.714 6.81263 19.7314C6.88595 19.7487 6.96265 19.7454 7.03416 19.7216L10.9569 18.4135C11.0768 18.3741 11.1858 18.3074 11.2754 18.2185L22.3465 7.14576V7.14414Z" fill="#1478F1" />
                             <path fill-rule="evenodd" clip-rule="evenodd" d="M1.625 21.9375C1.625 22.584 1.88181 23.204 2.33893 23.6611C2.79605 24.1182 3.41603 24.375 4.0625 24.375H21.9375C22.584 24.375 23.204 24.1182 23.6611 23.6611C24.1182 23.204 24.375 22.584 24.375 21.9375V12.1875C24.375 11.972 24.2894 11.7653 24.137 11.613C23.9847 11.4606 23.778 11.375 23.5625 11.375C23.347 11.375 23.1403 11.4606 22.988 11.613C22.8356 11.7653 22.75 11.972 22.75 12.1875V21.9375C22.75 22.153 22.6644 22.3597 22.512 22.512C22.3597 22.6644 22.153 22.75 21.9375 22.75H4.0625C3.84701 22.75 3.64035 22.6644 3.48798 22.512C3.3356 22.3597 3.25 22.153 3.25 21.9375V4.0625C3.25 3.84701 3.3356 3.64035 3.48798 3.48798C3.64035 3.3356 3.84701 3.25 4.0625 3.25H14.625C14.8405 3.25 15.0472 3.1644 15.1995 3.01202C15.3519 2.85965 15.4375 2.65299 15.4375 2.4375C15.4375 2.22201 15.3519 2.01535 15.1995 1.86298C15.0472 1.7106 14.8405 1.625 14.625 1.625H4.0625C3.41603 1.625 2.79605 1.88181 2.33893 2.33893C1.88181 2.79605 1.625 3.41603 1.625 4.0625V21.9375Z" fill="#1478F1" />
                         </svg>
-                        <Typography ml={1} className='edit_profile'>Edit Personal Profile</Typography>
+                        <Typography onClick={handleClickOpenEditProfile} ml={1} className='edit_profile'>Edit Personal Profile</Typography>
+                        
                     </Box>
                 </div>
             </Box>
@@ -647,6 +711,58 @@ const MyAccount = () => {
                     </Button>
                   </DialogActions>
                 </Box>
+            </Dialog>
+            <Dialog open={openTaskEditProfile} onClose={handleCloseEditProfile} fullWidth m={4}>
+            <DialogTitle>
+                <Typography
+                variant="h6"
+                style={{
+                    fontSize: 21,
+                    fontWeight: 700,
+                    fontStyle: "normal",
+                }}
+                >
+                Update Profile
+                </Typography>
+            </DialogTitle>
+            <DialogContent>
+                <Stack direction="column" spacing={2}>
+                <FormControl>
+                    <label style={{ marginBottom: 6 }}>First Name</label>
+                    <TextField
+                    onChange={(e) => {setFirstName(e.target.value)}}
+                    size="small"
+                    value={firstName}
+                    />
+                </FormControl>
+                <FormControl>
+                    <label style={{ marginBottom: 6 }}>Last Name</label>
+                    <TextField
+                    onChange={(e) => {setLastName(e.target.value)}}
+                    size="small"
+                    value={lastName}
+                    />
+                </FormControl>
+                <FormControl>
+                    <label style={{ marginBottom: 6 }}>Designation</label>
+                    <TextField
+                    onChange={(e) => {setDesignation(e.target.value)}}
+                    size="small"
+                    value={designation}
+                    />
+                </FormControl>
+                {error && <Typography color="error">{error}</Typography>}
+                <FormControl>
+                    <Button
+                    onClick={() => {updateProfileInfo()}}
+                    variant="contained"
+                    sx={{ maxWidth: 200, marginTop: 2, marginBottom: 2 }}
+                    >
+                    Update Profile 
+                    </Button>
+                </FormControl>
+                </Stack>
+            </DialogContent>
             </Dialog>
         </div>
     )

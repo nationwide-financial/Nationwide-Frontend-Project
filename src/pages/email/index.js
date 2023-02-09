@@ -36,12 +36,11 @@ const Email = () => {
     useEffect(() => {
 
         const accessToken =  getCookie('accessToken');
-
         if (accessToken) setShowContent(true);
 
         code && _authMSToken(code)
         .then((res) => {
-            router.push("/email")
+            router.push("/email");
             
             console.log(accessToken, "accessToken", res.data.token);
             if (accessToken || res.data.token) {

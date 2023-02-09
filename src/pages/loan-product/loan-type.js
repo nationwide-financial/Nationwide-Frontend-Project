@@ -228,16 +228,12 @@ const LoanType = () => {
   const fileTypes = ["JPEG", "PNG", "GIF"];
   const currencies = [
     {
-      value: "status 01",
-      label: "status 01",
+      value: "active",
+      label: "active",
     },
     {
-      value: "status 02",
-      label: "status 02",
-    },
-    {
-      value: "status 03",
-      label: "status 03",
+      value: "inactive",
+      label: "inactive",
     },
   ];
 

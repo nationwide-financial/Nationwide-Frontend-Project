@@ -17,9 +17,15 @@ import {
   _fetchTaskById,
   _updateTaskByid,
 } from "../../../services/loanTaskServices";
+import{_getAllPlatformUserByAdmin,_getUser}from '../../../services/authServices'
 import moment from "moment";
 import Stack from "@mui/material/Stack";
 import InputAdornment from "@mui/material/InputAdornment";
+import Select from "@mui/material/Select";
+import MenuItem from "@mui/material/MenuItem";
+import Chip from "@mui/material/Chip";
+import {FormControl } from "@mui/material";
+import { s3URL } from '../../../utils/config'
 
 const ViewTask = () => {
   const router = useRouter();
@@ -33,12 +39,15 @@ const ViewTask = () => {
   const [error, setError] = useState();
   const [task, setTask] = useState();
   const [loading, setLoading] = useState(false);
-
+  const [users,setUsers]=useState([]);
   const [taskAssignTo, setTaskAssignTo] = useState("");
+  const [personName, setPersonName] = useState([]);
   const [tasDescription, setTaskDescription] = useState("");
   const [taskStatus, setTaskStatus] = useState("");
   const [taskDueDate, setTaskDueDate] = useState("");
-
+  const [loginUserData,setLoginUserData]=useState({});
+  const [usersData, setUsersData] = useState([]);
+  
   const [taskStartedIncome, setStartedIncome] = useState("");
   const [taskBureauIncome, setBureauIncome] = useState("");
   const [taskVerifiedStatus, setVerifiedStatus] = useState("");
@@ -65,21 +74,48 @@ const ViewTask = () => {
   };
 
   useEffect(() => {
+    getUsers();
     fetchData();
   }, [taskId]);
+
+  const getUsers = async () =>{
+    try{
+      const res = await _getAllPlatformUserByAdmin();
+      setUsers([...res?.data?.users])
+      //console.log("getUsers*****",res?.data?.users)
+      return res?.data?.users;
+    }catch(err){
+      console.log(err)
+    }
+  }
 
   function getTime(ts) {
     let date = new Date(ts);
     return date.toDateString();
   }
+
+  const [teamArr,setTeamArr]=useState([])
+ // console.log("teamArr",teamArr)
   const fetchData = async () => {
     setLoading(true);
+    const loginUser = await _getUser()
+    console.log(loginUser?.data)
+    setLoginUserData(loginUser?.data)
+    const platformUsers = await _getAllPlatformUserByAdmin();
+    let usersData = [...platformUsers?.data?.users,loginUser?.data]
+    console.log("usersData",usersData)
+    setUsersData([...usersData])
     const response = await _fetchTaskById(taskId);
-    console.log(response);
+    console.log("_fetchTaskById",response);
     setLoading(false);
     if (response?.status === 200) {
       if (response?.data?.task.Count > 0) {
-        setTaskAssignTo(response?.data?.task?.Items[0]?.assignTo);
+        let team=[]
+        await response?.data?.task?.Items[0]?.assignTo.map((member)=>{
+          team.push(...usersData.filter((user)=>{ return user?.PK == `USER#${member}`}))
+        })
+        setTeamArr([...team])
+        setPersonName(response?.data?.task?.Items[0]?.assignTo);
         setTaskDescription(response?.data?.task?.Items[0]?.description);
         setTaskStatus(response?.data?.task?.Items[0]?.status);
         setTaskDueDate(response?.data?.task?.Items[0]?.dueDate);
@@ -91,12 +127,37 @@ const ViewTask = () => {
       setError(response?.response?.data["message"]);
     }
   };
+
+  const ITEM_HEIGHT = 48;
+  const ITEM_PADDING_TOP = 8;
+  const MenuProps = {
+    PaperProps: {
+      style: {
+        maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+        width: 250,
+      },
+    },
+  };
+
+  
+  const setInitialStateOfTeam = (ids) => {
+    setPersonName([...ids]);
+  };
+  const handleChangeEditTeamMember = async (event) => {
+    const {
+      target: { value },
+    } = event;
+    let users = typeof value === "string" ? value.split(",") : value;
+    setPersonName(users);
+  };
+  
+
   const updateOverVeiw = async (applicationId, taskId) => {
-    console.log("id", applicationId, taskId);
+    //console.log("id", applicationId, taskId);
     try {
       let body = {
         description: tasDescription,
-        assignTo: taskAssignTo,
+        assignTo: personName,
         status: taskStatus,
         dueDate: taskDueDate,
         prevert: task?.prevert,
@@ -107,14 +168,14 @@ const ViewTask = () => {
       };
       const response = await _updateTaskByid(applicationId, taskId, body);
       fetchData();
-      console.log(response);
+     // console.log(response);
     } catch (err) {
       console.log(err);
     }
   };
 
   const changeState = async (applicationId, taskId) => {
-    console.log("id", applicationId, taskId);
+    //console.log("id", applicationId, taskId);
     try {
       let body = {
         description: task?.description,
@@ -129,14 +190,14 @@ const ViewTask = () => {
       };
       const response = await _updateTaskByid(applicationId, taskId, body);
       fetchData();
-      console.log(response);
+    //  console.log(response);
     } catch (err) {
       console.log(err);
     }
   };
 
   const addComment = async (applicationId, taskId) => {
-    console.log("id", applicationId, taskId);
+   // console.log("id", applicationId, taskId);
 
     try {
       if (!comment || comment == "" || comment == null) {
@@ -147,9 +208,9 @@ const ViewTask = () => {
           commentId: `COMMENT_${Date.now()}`,
           comment: comment,
           createTime: Date.now(),
-          commentBy: "kuhan",
+          commentBy: `${loginUserData?.info?.firstName || ""} ${loginUserData?.info?.lastName || ""}`,
         };
-        console.log(commentBody);
+        //console.log(commentBody);
         let body = {
           description: task?.description,
           assignTo: task?.assignTo,
@@ -163,15 +224,16 @@ const ViewTask = () => {
         };
         const response = await _updateTaskByid(applicationId, taskId, body);
         fetchData();
-        console.log(response);
+       // console.log(response);
       }
     } catch (err) {
       console.log(err);
     }
   };
 
+
   const adddata = async (applicationId, taskId) => {
-    console.log("id", applicationId, taskId);
+  //  console.log("id", applicationId, taskId);
 
     try {
       if (
@@ -211,12 +273,14 @@ const ViewTask = () => {
         };
         const response = await _updateTaskByid(applicationId, taskId, body);
         fetchData();
-        console.log(response);
+      //  console.log(response);
       }
     } catch (err) {
       console.log(err);
     }
   };
+
+
   return (
     <div
       style={{
@@ -250,9 +314,10 @@ const ViewTask = () => {
                     </Typography>
                     {/* <Grid item xs={12} ml={5}> */}
                     <Stack direction="row">
+                      { }
                       <Avatar
                         alt="avatar1"
-                        src="/images/avatar1.png"
+                        src={`${s3URL}/${usersData?.filter((user)=>{ return user?.PK == task?.createdBy})[0]?.imageId}`}
                         style={{ paddingLeft: 0 }}
                       />
 
@@ -264,9 +329,6 @@ const ViewTask = () => {
                           {moment(task?.createTime).format(
                             "YYYY-MM-DD HH:MM A"
                           )}
-                          {/* <Button size='small' variant='outlined' color={task?.status === 'NEW' ? 'success' : task?.status === 'INPROGRESS' ? 'warning' : 'error'}>
-                  {task?.status}
-                </Button> */}
                         </Typography>
                         <Typography
                           sx={{ color: "#858585", fontWeight: "bold" }}
@@ -334,17 +396,30 @@ const ViewTask = () => {
                 </Grid>
                 <Grid item xs={8}>
                   {overViewEditMode ? (
-                    <Button
-                      onClick={() => {
-                        setOverViewEditMode(
-                          (overViewEditMode) => !overViewEditMode
-                        );
-                        updateOverVeiw(task?.PK, task?.id);
-                      }}
-                      variant="contained"
-                    >
-                      Save
-                    </Button>
+                    <div>
+                      <Button
+                        style={{ marginRight: 10 }}
+                        onClick={() => {
+                          setOverViewEditMode(
+                            (overViewEditMode) => !overViewEditMode
+                          );
+                          updateOverVeiw(task?.PK, task?.id);
+                        }}
+                        variant="contained"
+                      >
+                        Save
+                      </Button>
+                      <Button
+                        onClick={() => {
+                          setOverViewEditMode(
+                            (overViewEditMode) => !overViewEditMode
+                          );
+                        }}
+                        variant="contained"
+                      >
+                        Close
+                      </Button>
+                    </div>
                   ) : (
                     <Typography
                       ml={3}
@@ -433,26 +508,87 @@ const ViewTask = () => {
                     <Avatar alt="avatar1" src="/images/avatar1.png" />
                   </AvatarGroup> */}
                   {overViewEditMode ? (
-                    <TextField
-                      fullWidth
-                      size="small"
-                      margin="normal"
-                      id="outlined-basic"
-                      variant="outlined"
-                      value={taskAssignTo}
-                      onChange={(event) => {
-                        setTaskAssignTo(event.target.value);
-                      }}
-                    />
+                    // <TextField
+                    //   fullWidth
+                    //   size="small"
+                    //   margin="normal"
+                    //   id="outlined-basic"
+                    //   variant="outlined"
+                    //   value={taskAssignTo}
+                    //   onChange={(event) => {
+                    //     setTaskAssignTo(event.target.value);
+                    //   }}
+                    // />
+                    <div>
+                      <FormControl sx={{ width: 530 }}>
+                        {/* <InputLabel id="demo-multiple-chip-label">Chip</InputLabel> */}
+                        <Select
+                          // labelId="demo-multiple-chip-label"
+                          id="demo-multiple-chip"
+                          multiple
+                          value={personName}
+                          onChange={handleChangeEditTeamMember}
+                          // input={<OutlinedInput id="select-multiple-chip" label="Chip" />}
+                          renderValue={(selected) => (
+                            <Box
+                              sx={{
+                                display: "flex",
+                                flexWrap: "wrap",
+                                gap: 0.5,
+                              }}
+                            >
+                              {selected.map((value) => (
+                                <Chip
+                                  key={value}
+                                  label={value}
+                                  avatar={
+                                    <Avatar
+                                      alt="Natacha"
+                                      src="../images/img1.png"
+                                    />
+                                  }
+                                />
+                              ))}
+                            </Box>
+                          )}
+                          MenuProps={MenuProps}
+                        >
+                          {users.map((object, key) => (
+                            <MenuItem
+                              key={key}
+                              value={object?.PK?.split("#")[1] || ""}
+                            >
+                              {object?.PK?.split("#")[1] || ""}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
+                    </div>
                   ) : (
-                    <Typography
-                      sx={{ color: "#858585" }}
-                      //  ml={10}
-                      pt={3}
-                      pb={3}
-                    >
-                      {task?.assignTo}
-                    </Typography>
+                    <div>
+                      {teamArr?.length > 1 ? (
+                        <AvatarGroup total={teamArr?.length}>
+                          {teamArr?.map((member) => {
+                            return (
+                              <Avatar
+                                alt={member?.PK.split("#")[1]}
+                                src={`${s3URL}/${member?.imageId}`}
+                              />
+                            );
+                          })}
+                        </AvatarGroup>
+                      ) : (
+                        task?.assignTo || ""
+                      )}
+                    </div>
+                    // <Typography
+                    //   sx={{ color: "#858585" }}
+                    //   //  ml={10}
+                    //   pt={3}
+                    //   pb={3}
+                    // >
+                    //   {task?.assignTo}
+                    // </Typography>
                   )}
                 </Grid>
               </Grid>
@@ -572,15 +708,26 @@ const ViewTask = () => {
                 </Grid>
                 <Grid item xs={8}>
                   {dataEditMode ? (
-                    <Button
-                      onClick={() => {
-                        setDataEditMode((dataEditMode) => !dataEditMode);
-                        adddata(task?.PK, task?.id);
-                      }}
-                      variant="contained"
-                    >
-                      Save
-                    </Button>
+                    <div>
+                      <Button
+                        style={{ marginRight: 10 }}
+                        onClick={() => {
+                          setDataEditMode((dataEditMode) => !dataEditMode);
+                          adddata(task?.PK, task?.id);
+                        }}
+                        variant="contained"
+                      >
+                        Save
+                      </Button>
+                      <Button
+                        onClick={() => {
+                          setDataEditMode((dataEditMode) => !dataEditMode);
+                        }}
+                        variant="contained"
+                      >
+                        Close
+                      </Button>
+                    </div>
                   ) : (
                     <Typography
                       ml={3}
@@ -764,17 +911,30 @@ const ViewTask = () => {
                 </Grid>
                 <Grid item xs={8} p={1}>
                   {commentEditMode ? (
-                    <Button
-                      variant="contained"
-                      onClick={() => {
-                        addComment(task?.PK, task?.id);
-                        setCommentEditMode(
-                          (commentEditMode) => !commentEditMode
-                        );
-                      }}
-                    >
-                      Add comment
-                    </Button>
+                    <div>
+                      <Button
+                        style={{marginRight:10}}
+                        variant="contained"
+                        onClick={() => {
+                          addComment(task?.PK, task?.id);
+                          setCommentEditMode(
+                            (commentEditMode) => !commentEditMode
+                          );
+                        }}
+                      >
+                        Add comment
+                      </Button>
+                      <Button
+                        variant="contained"
+                        onClick={() => {
+                          setCommentEditMode(
+                            (commentEditMode) => !commentEditMode
+                          );
+                        }}
+                      >
+                        Close
+                      </Button>
+                    </div>
                   ) : (
                     <Stack direction="row" spacing={1}>
                       <AddIcon style={{ color: "#1478F1" }} />
@@ -856,9 +1016,9 @@ const ViewTask = () => {
                                   fontSize: 14,
                                 }}
                               >
-                                {`${comment?.commentId || ""}\t|\t${
-                                  getTime(comment?.createTime) || ""
-                                }`}
+                                {`#${
+                                  comment?.commentId.split("_")[1] || ""
+                                }\t|\t${getTime(comment?.createTime) || ""}`}
                               </div>
                             </Typography>
                           </Stack>

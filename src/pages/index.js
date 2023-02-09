@@ -374,8 +374,6 @@ const HomePage = () => {
 
   useEffect(() => {
     fetchAllData();
-
-
   }, []);
 
   return (
@@ -449,11 +447,11 @@ const HomePage = () => {
                     justifyContent: "center",
                   }}
                 >
-                  <DashBoardCards
+                  {/* <DashBoardCards
                     totalLoans={totalLoans}
                     perchase={10}
                     references={10}
-                  />
+                  /> */}
                 </Grid>
               </CardContent>
 

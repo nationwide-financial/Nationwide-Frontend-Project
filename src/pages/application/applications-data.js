@@ -1,16 +1,5 @@
-import React, { useEffect } from "react";
-import {
-  Avatar,
-  Box,
-  Button,
-  FormControlLabel,
-  Grid,
-  IconButton,
-  InputAdornment,
-  TablePagination,
-  TextField,
-  Typography,
-} from "@mui/material";
+import React, { use, useEffect } from "react";
+import {Avatar,Box, Button, FormControlLabel, Grid,IconButton, InputAdornment,TablePagination, TextField, Typography} from "@mui/material";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
@@ -57,30 +46,23 @@ import Autocomplete from "@mui/material/Autocomplete";
 import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
 import MuiAlert, { AlertProps } from "@mui/material/Alert";
-import {_authMS} from '../../services/authServices'
+import { assign } from "lodash";
+import { s3URL } from '../../utils/config'
 
-import {
-  _addApplicationNote,
-  _getApplicationNotesByApplicationId,
-} from "../../services/applictionNotes.js";
+
+
+import {_authMS,_getUser} from '../../services/authServices'
+import {_addApplicationNote, _getApplicationNotesByApplicationId} from "../../services/applictionNotes.js";
 import { _getAppHistoryByApplicationId } from "../../services/applicationHistory.js";
 import { _addHistory } from "../../services/applicationHistory.js";
-import {
-  _getApplicationById,
-  _applicationAddLabel,
-  _changeApplicationStatus,
-  _manageApplicationData,
-} from "../../services/applicationService.js";
+import {_getApplicationById, _applicationAddLabel, _changeApplicationStatus,_manageApplicationData } from "../../services/applicationService.js";
 import { _fetchSingleContacts } from "../../services/contactServices.js";
 import { _listLabel, _getSingleLabel } from "../../services/labelService.js";
-import {
-  _addTask,
-  _fetchTaskByapplicationId,
-} from "../../services/loanTaskServices.js";
+import { _addTask, _fetchTaskByapplicationId} from "../../services/loanTaskServices.js";
 import { _fetchWorkflowStatuses } from "../../services/loanWorkflowStatusServices.js";
-import { assign } from "lodash";
 import ApplicationTaskPopup from "../../components/ApplicationTaskPopup/index.js";
 import { getCookie, removeCookie } from 'cookies-next';
+import { _getAllPlatformUserByAdmin } from '../../services/authServices'
 
 function TablePaginationActions(props) {
   const theme = useTheme();
@@ -152,13 +134,6 @@ TablePaginationActions.propTypes = {
   rowsPerPage: PropTypes.number.isRequired,
 };
 
-const Item = styled(Paper)(({ theme }) => ({
-  backgroundColor: theme.palette.mode === "dark" ? "#1A2027" : "#fff",
-  ...theme.typography.body2,
-  padding: theme.spacing(1),
-  textAlign: "center",
-  color: theme.palette.text.secondary,
-}));
 
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -187,508 +162,6 @@ function a11yProps(index) {
   };
 }
 
-function createData(name, calories, fat, carbs, protein) {
-  return { name, calories, fat, carbs, protein };
-}
-
-const avatarSet = (
-  <React.Fragment>
-    <Grid container className="avatarPicSet">
-      <Grid item md={1} align="right" sx={{ width: 5, height: 5 }}>
-        <AvatarGroup total={5}>
-          <Avatar alt="Remy Sharp" src="/static/images/avatar/1.jpg" />
-          <Avatar alt="Travis Howard" src="/static/images/avatar/2.jpg" />
-          <Avatar alt="Agnes Walker" src="/static/images/avatar/4.jpg" />
-        </AvatarGroup>
-      </Grid>
-    </Grid>
-  </React.Fragment>
-);
-
-const rows = [
-  createData(
-    <span
-      className="verified_label"
-      style={{ color: "green", backgroundColor: " #6fbf73 " }}
-    >
-      {" "}
-      AUTO DECISION{" "}
-    </span>,
-    <Stack direction="row" spacing={2}>
-      <Avatar alt="Remy Sharp" src="/Ellise 179(1).png" />
-      <span>Dec 19,2021 11.24 AM</span>
-    </Stack>,
-    <Stack direction="row" spacing={2}>
-      <Avatar alt="Remy Sharp" src="/Ellise 179(1).png" />
-      <span>Dec 19,2021 11.24 AM</span>
-    </Stack>
-  ),
-  createData(
-    <span
-      className="verified_label"
-      style={{ color: "blue", backgroundColor: "#9bc0ff" }}
-    >
-      {" "}
-      ONLINE LEAD{" "}
-    </span>,
-    <Stack direction="row" spacing={2}>
-      <Avatar alt="Remy Sharp" src="/Ellise 179(1).png" />
-      <span>Dec 19,2021 11.24 AM</span>
-    </Stack>,
-    <Stack direction="row" spacing={2}>
-      <Avatar alt="Remy Sharp" src="/Ellise 179(1).png" />
-      <span>Dec 19,2021 11.24 AM</span>
-    </Stack>
-  ),
-  createData(
-    <span
-      className="verified_label"
-      style={{ color: "orange", backgroundColor: "#ffffa3" }}
-    >
-      {" "}
-      PHONE LEAD{" "}
-    </span>,
-    <Stack direction="row" spacing={2}>
-      <Avatar alt="Remy Sharp" src="/Ellise 179(1).png" />
-      <span>Dec 19,2021 11.24 AM</span>
-    </Stack>,
-    <Stack direction="row" spacing={2}>
-      <Avatar alt="Remy Sharp" src="/Ellise 179(1).png" />
-      <span>Dec 19,2021 11.24 AM</span>
-    </Stack>
-  ),
-  createData(
-    <span
-      className="verified_label"
-      style={{ color: "dark blue", backgroundColor: "#8c9eff" }}
-    >
-      {" "}
-      EMAIL LEAD{" "}
-    </span>,
-    <Stack direction="row" spacing={2}>
-      <Avatar alt="Remy Sharp" src="/Ellise 179(1).png" />
-      <span>Dec 19,2021 11.24 AM</span>
-    </Stack>,
-    <Stack direction="row" spacing={2}>
-      <Avatar alt="Remy Sharp" src="/Ellise 179(1).png" />
-      <span>Dec 19,2021 11.24 AM</span>
-    </Stack>
-  ),
-  createData(
-    <span
-      className="verified_label"
-      style={{ color: "red", backgroundColor: "#ffa199" }}
-    >
-      {" "}
-      HIGH PROPRITY{" "}
-    </span>,
-    <Stack direction="row" spacing={2}>
-      <Avatar alt="Remy Sharp" src="/Ellise 179(1).png" />
-      <span>Dec 19,2021 11.24 AM</span>
-    </Stack>,
-    <Stack direction="row" spacing={2}>
-      <Avatar alt="Remy Sharp" src="/Ellise 179(1).png" />
-      <span>Dec 19,2021 11.24 AM</span>
-    </Stack>
-  ),
-  createData(
-    <span
-      className="verified_label"
-      style={{ color: "orange", backgroundColor: "#ffffa3" }}
-    >
-      {" "}
-      LOW PRIORITY{" "}
-    </span>,
-    <Stack direction="row" spacing={2}>
-      <Avatar alt="Remy Sharp" src="/Ellise 179(1).png" />
-      <span>Dec 19,2021 11.24 AM</span>
-    </Stack>,
-    <Stack direction="row" spacing={2}>
-      <Avatar alt="Remy Sharp" src="/Ellise 179(1).png" />
-      <span>Dec 19,2021 11.24 AM</span>
-    </Stack>
-  ),
-  createData(
-    <span
-      className="verified_label"
-      style={{ color: "violat", backgroundColor: "#c29fff" }}
-    >
-      {" "}
-      HELP WANTED{" "}
-    </span>,
-    <Stack direction="row" spacing={2}>
-      <Avatar alt="Remy Sharp" src="/Ellise 179(1).png" />
-      <span>Dec 19,2021 11.24 AM</span>
-    </Stack>,
-    <Stack direction="row" spacing={2}>
-      <Avatar alt="Remy Sharp" src="/Ellise 179(1).png" />
-      <span>Dec 19,2021 11.24 AM</span>
-    </Stack>
-  ),
-  createData(
-    <span
-      className="verified_label"
-      style={{ color: "blue", backgroundColor: "#9bc0ff" }}
-    >
-      {" "}
-      EXISTING CUSTOMER{" "}
-    </span>,
-    <Stack direction="row" spacing={2}>
-      <Avatar alt="Remy Sharp" src="/Ellise 179(1).png" />
-      <span>Dec 19,2021 11.24 AM</span>
-    </Stack>,
-    <Stack direction="row" spacing={2}>
-      <Avatar alt="Remy Sharp" src="/Ellise 179(1).png" />
-      <span>Dec 19,2021 11.24 AM</span>
-    </Stack>
-  ),
-];
-
-// TopLeft
-
-function topfirsttblcreateData(leftData, rightData) {
-  return { leftData, rightData };
-}
-
-const topfirstrows = [
-  topfirsttblcreateData("Application Date", " Oct. 17, 2021, 9:48 AM"),
-  topfirsttblcreateData("Team Members", avatarSet),
-  topfirsttblcreateData("Intermediary", " ABC Broker (1.5%)"),
-];
-
-// second---
-
-function topsecondtblcreateData(leftData, rightData) {
-  return { leftData, rightData };
-}
-
-const topsecondrows = [
-  topsecondtblcreateData("Email", " "),
-  topsecondtblcreateData("Phone", ""),
-  topfirsttblcreateData("ID Number", ""),
-  topfirsttblcreateData("Date of Birth", ""),
-  topfirsttblcreateData("Address", ""),
-];
-
-function topthirdtblcreateData(leftData, rightData) {
-  return { leftData, rightData };
-}
-
-const topthirdrows = [
-  topsecondtblcreateData("Email", ""),
-  topsecondtblcreateData("Phone", ""),
-  topfirsttblcreateData("ID Number", ""),
-  topfirsttblcreateData("Date of Birth", ""),
-  topfirsttblcreateData("Address", ""),
-];
-
-// down
-
-function downfirsttblcreateData(leftData, rightData) {
-  return { leftData, rightData };
-}
-
-const downfirstrows = [
-  downfirsttblcreateData("Stated Income", " $90,000"),
-  downfirsttblcreateData("Job Title", "Data Engineer"),
-  downfirsttblcreateData("Company", "ABC Company"),
-  downfirsttblcreateData("Employed since", "02/01/2019"),
-  downfirsttblcreateData("Active Military?", "FALSE"),
-];
-
-function downsecondtblcreateData(leftData, rightData) {
-  return { leftData, rightData };
-}
-
-const downsecondrows = [
-  downsecondtblcreateData("Credit Score", " 726"),
-  downsecondtblcreateData("Recent Credit Inquiries", "1"),
-  downsecondtblcreateData("Number of Open Accountsr", " 4"),
-  downsecondtblcreateData("Total Debt Outstanding", " $284,019"),
-  downsecondtblcreateData("None Mortgage Debt Outsta..", " $8201"),
-];
-
-function downthirdtblcreateData(leftData, rightData) {
-  return { leftData, rightData };
-}
-
-const downthirdrows = [
-  downthirdtblcreateData("Property Type", " Apartment"),
-  downthirdtblcreateData("Estimated Property Value", "$410,000"),
-];
-
-function taskcreateData(
-  status,
-  assignto,
-  description,
-  blockstatus,
-  duedate,
-  updated
-) {
-  return { status, assignto, description, blockstatus, duedate, updated };
-}
-
-const taskrows = [
-  taskcreateData(
-    <span
-      className="verified_label"
-      style={{ color: "red", backgroundColor: " #ffa199 " }}
-    >
-      {" "}
-      NOT DONE{" "}
-    </span>,
-    "ABC Loan Broker",
-    "Review the Borrower’s ID doc...",
-    "Approved",
-    "Dec. 19, 2021",
-    <Stack direction="row" spacing={2}>
-      <Avatar alt="Remy Sharp" src="/Ellise 179(1).png" />
-      <span>Dec 19,2021 11.24 AM</span>
-    </Stack>,
-    <Stack direction="row" spacing={2}>
-      <Avatar alt="Remy Sharp" src="/Ellise 179(1).png" />
-      <span>Dec 19,2021 11.24 AM</span>
-    </Stack>
-  ),
-  taskcreateData(
-    <span
-      className="verified_label"
-      style={{ color: "red", backgroundColor: "#ffa199 " }}
-    >
-      {" "}
-      NOT DONE
-    </span>,
-    "ABC Loan Broker",
-    "Upload your financial Statement",
-    "Approved",
-    "Dec. 19, 2021",
-    <Stack direction="row" spacing={2}>
-      <Avatar alt="Remy Sharp" src="/Ellise 179(1).png" />
-      <span>Dec 19,2021 11.24 AM</span>
-    </Stack>,
-    <Stack direction="row" spacing={2}>
-      <Avatar alt="Remy Sharp" src="/Ellise 179(1).png" />
-      <span>Dec 19,2021 11.24 AM</span>
-    </Stack>
-  ),
-  taskcreateData(
-    <span
-      className="verified_label"
-      style={{ color: "red", backgroundColor: "#ffa199 " }}
-    >
-      {" "}
-      NOT DONE{" "}
-    </span>,
-    "ABC Loan Broker",
-    "Select loan amount",
-    "Approved",
-    "Dec. 19, 2021",
-    <Stack direction="row" spacing={2}>
-      <Avatar alt="Remy Sharp" src="/Ellise 179(1).png" />
-      <span>Dec 19,2021 11.24 AM</span>
-    </Stack>,
-    <Stack direction="row" spacing={2}>
-      <Avatar alt="Remy Sharp" src="/Ellise 179(1).png" />
-      <span>Dec 19,2021 11.24 AM</span>
-    </Stack>
-  ),
-  taskcreateData(
-    <span
-      className="verified_label"
-      style={{ color: "blue", backgroundColor: "#9bc0ff" }}
-    >
-      {" "}
-      IN REVIEW
-    </span>,
-    "ABC Loan Broker",
-    "Request all documents",
-    "Underwriting",
-    "Dec. 19, 2021",
-    <Stack direction="row" spacing={2}>
-      <Avatar alt="Remy Sharp" src="/Ellise 179(1).png" />
-      <span>Dec 19,2021 11.24 AM</span>
-    </Stack>,
-    <Stack direction="row" spacing={2}>
-      <Avatar alt="Remy Sharp" src="/Ellise 179(1).png" />
-      <span>Dec 19,2021 11.24 AM</span>
-    </Stack>
-  ),
-  taskcreateData(
-    <span
-      className="verified_label"
-      style={{ color: "green", backgroundColor: "#9bc0ff" }}
-    >
-      {" "}
-      DONE
-    </span>,
-    "ABC Loan Broker",
-    "Complete application forms",
-    "Underwriting",
-    "Dec. 19, 2021",
-    <Stack direction="row" spacing={2}>
-      <Avatar alt="Remy Sharp" src="/Ellise 179(1).png" />
-      <span>Dec 19,2021 11.24 AM</span>
-    </Stack>,
-    <Stack direction="row" spacing={2}>
-      <Avatar alt="Remy Sharp" src="/Ellise 179(1).png" />
-      <span>Dec 19,2021 11.24 AM</span>
-    </Stack>
-  ),
-].sort((a, b) => (a.assignto < b.assignto ? -1 : 1));
-
-// history-related-table-data------
-function createHistoryData(leftdata, rightdata) {
-  return { leftdata, rightdata };
-}
-
-const historyrelatedrows = [
-  createHistoryData(
-    <Stack direction="row" spacing={1}>
-      <DatasetRoundedIcon
-        fontSize="large"
-        style={{
-          borderRadius: 50,
-          backgroundColor: "#1478F1",
-          color: "#fff",
-          marginTop: 5,
-        }}
-      />{" "}
-      <Grid>
-        <Typography align="left" style={{ fontSize: 16, fontWeight: 600 }}>
-          Application Created
-        </Typography>
-        <Typography align="left" style={{ fontSize: 16, fontWeight: 400 }}>
-          The application for Cameron Williamson was created.
-        </Typography>
-      </Grid>
-    </Stack>,
-    <Stack direction="row" spacing={2}>
-      <Avatar alt="Remy Sharp" src="/Ellise 179(1).png" />
-      <span style={{ marginTop: 5 }}>Feb 23, 2022 8:38 PM</span>
-    </Stack>
-  ),
-  createHistoryData(
-    <Stack direction="row" spacing={1}>
-      <DatasetRoundedIcon
-        fontSize="large"
-        style={{
-          borderRadius: 50,
-          backgroundColor: "#1478F1",
-          color: "#fff",
-          marginTop: 5,
-        }}
-      />{" "}
-      <Grid>
-        <Typography align="left" style={{ fontSize: 16, fontWeight: 600 }}>
-          Changed Application Status
-        </Typography>
-        <Typography align="left" style={{ fontSize: 16, fontWeight: 400 }}>
-          This status of Cameron Williamson’s application was updated from
-          Received to New Opportunities
-        </Typography>
-      </Grid>
-    </Stack>,
-    <Stack direction="row" spacing={2}>
-      <Avatar alt="Remy Sharp" src="/Ellise 179(1).png" />
-      <span style={{ marginTop: 5 }}>Feb 23, 2022 8:38 PM</span>
-    </Stack>
-  ),
-  createHistoryData(
-    <Stack direction="row" spacing={1}>
-      <DatasetRoundedIcon
-        fontSize="large"
-        style={{
-          borderRadius: 50,
-          backgroundColor: "#1478F1",
-          color: "#fff",
-          marginTop: 5,
-        }}
-      />{" "}
-      <Grid>
-        <Typography align="left" style={{ fontSize: 16, fontWeight: 600 }}>
-          Added New Task
-        </Typography>
-        <Typography align="left" style={{ fontSize: 16, fontWeight: 400 }}>
-          The following task was created. “Verify identification documents”.
-        </Typography>
-      </Grid>
-    </Stack>,
-    <Stack direction="row" spacing={2}>
-      <Avatar alt="Remy Sharp" src="/Ellise 179(1).png" />
-      <span style={{ marginTop: 5 }}>Feb 23, 2022 8:38 PM</span>
-    </Stack>
-  ),
-  createHistoryData(
-    <Stack direction="row" spacing={1}>
-      <DatasetRoundedIcon
-        fontSize="large"
-        style={{
-          borderRadius: 50,
-          backgroundColor: "#1478F1",
-          color: "#fff",
-          marginTop: 5,
-        }}
-      />{" "}
-      <Grid>
-        <Typography align="left" style={{ fontSize: 16, fontWeight: 600 }}>
-          Updated Task Status
-        </Typography>
-        <Typography align="left" style={{ fontSize: 16, fontWeight: 400 }}>
-          The status the following task was updated from Not Done to In Review:
-          “Verify identification documents”.
-        </Typography>
-      </Grid>
-    </Stack>,
-    <Stack direction="row" spacing={2}>
-      <Avatar alt="Remy Sharp" src="/Ellise 179(1).png" />
-      <span style={{ marginTop: 5 }}>Feb 23, 2022 8:38 PM</span>
-    </Stack>
-  ),
-].sort((a, b) => (a.leftdata < b.leftdata ? -1 : 1));
-
-// note-related-table-data
-function createNoteData(leftdata, middledata, rightdata) {
-  return { leftdata, middledata, rightdata };
-}
-
-const noterelatedrows = [
-  createNoteData(
-    <Typography>Feb 23, 2022 8:38 PM</Typography>,
-    <Typography>
-      The borrower called to discuss their income documentation. They indicated
-      that more....<span style={{ color: "#1478F1" }}>Read more</span>{" "}
-    </Typography>,
-    <Stack direction="row" spacing={2}>
-      <Avatar alt="Remy Sharp" src="/Ellise 179(1).png" />
-      <span style={{ marginTop: 5 }}>Debra Holt</span>
-    </Stack>
-  ),
-  createNoteData(
-    <Typography>Feb 23, 2022 8:38 PM</Typography>,
-    <Typography>
-      I reached out to the borrower about their income. They will call back.{" "}
-    </Typography>,
-    <Stack direction="row" spacing={2}>
-      <Avatar alt="Remy Sharp" src="/Ellise 179(1).png" />
-      <span style={{ marginTop: 5 }}>Debra Holt</span>
-    </Stack>
-  ),
-].sort((a, b) => (a.leftdata < b.leftdata ? -1 : 1));
-
-const style = {
-  width: "100%",
-  maxWidth: 360,
-  bgcolor: "background.paper",
-};
-
-const BootstrapDialog = styled(Dialog)(({ theme }) => ({
-  "& .MuiDialogContent-root": {
-    padding: theme.spacing(2),
-  },
-  "& .MuiDialogActions-root": {
-    padding: theme.spacing(1),
-  },
-}));
 
 function BootstrapDialogTitle(props) {
   const { children, onClose, ...other } = props;
@@ -715,6 +188,7 @@ function BootstrapDialogTitle(props) {
 }
 
 function ApplicationDate() {
+  const [users, setUsers]=useState([]);
   const [applicationData, setApplicationData] = useState([]);
   const [contactData, setContactData] = useState({});
   const [cocontactData, setCocontactData] = useState([]);
@@ -1125,19 +599,45 @@ function ApplicationDate() {
           getTaskByApplicationId(applicationId);
           getHistoryByapplicationId(applicationId);
         }
-        console.log("_addTask****", res);
+        console.log("_addTask****", res);rows
       }
     } catch (err) {
       console.log(err);
     }
   }
 
+  const getLoginUser = async () => {
+    try{
+      const res = await _getUser()
+      return res?.data
+    }catch(err){
+      console.log(err)
+    }
+  }
+
   async function getTaskByApplicationId(id) {
     try {
+      let loginUser = await getLoginUser();
+      let users = await getUsers();
       const res = await _fetchTaskByapplicationId(id)
-      console.log("Fetch Tasks ", res)
-      setTaskList([...res?.data?.loanTasks?.Items]);
-      console.log("_fetchTaskByapplicationId****", res)
+      let taskDataArray = [];
+      await res?.data?.loanTasks?.Items?.map( async (task)=>{
+        let object ={}
+        let temp=[]
+        object.task = task;
+        await task?.assignTo?.map((member)=>{
+          if (loginUser?.PK == `USER#${member}`){
+            temp.push(loginUser)
+            temp.push(...users.filter((user)=>{ return user?.PK == `USER#${member}`}))
+          }else{
+            temp.push(...users.filter((user)=>{ return user?.PK == `USER#${member}`}))
+          }
+          
+        })
+        object.teamArr = temp;
+        taskDataArray.push(object)
+      })
+      setTaskList([...taskDataArray]);
     } catch (err) {
       console.log(err)
     }
@@ -1225,8 +725,9 @@ function ApplicationDate() {
       const response = await _addTask(body);
 
       if (response?.status === 200) {
-        const newTask = response?.data?.loanTask
-        newTask && setTaskList([...taskList, newTask])
+        // const newTask = response?.data?.loanTask
+        // newTask && setTaskList([...taskList, newTask])
+        getTaskByApplicationId(applicationId);
         let history = {
           action: "Task Created",
           description: `The Task created`,
@@ -1243,6 +744,17 @@ function ApplicationDate() {
 
   const isNull = (val) => {
     return (!val || val.length === 0) ? true : false;
+  }
+
+  const getUsers = async () =>{
+    try{
+      const res = await _getAllPlatformUserByAdmin();
+      setUsers([...res?.data?.users])
+      console.log("getUsers*****",res?.data?.users)
+      return res?.data?.users;
+    }catch(err){
+      console.log(err)
+    }
   }
 
   useEffect(() => {
@@ -1521,12 +1033,12 @@ function ApplicationDate() {
                               },
                             }}
                           >
-                            <TableCell component="th" scope="row">
+                            {/* <TableCell component="th" scope="row">
                               {"Intermediary"}
                             </TableCell>
                             <TableCell align="left" p={1}>
                               {""}
-                            </TableCell>
+                            </TableCell> */}
                           </TableRow>
                         </TableBody>
                       </Table>
@@ -2359,39 +1871,46 @@ function ApplicationDate() {
                                   className="verified_label"
                                   style={{
                                     color:
-                                      row?.status.toLowerCase() == "not done"
+                                      row?.task?.status.toLowerCase() == "not done"
                                         ? "#FF0000"
-                                        : row?.status.toLowerCase() == "done"
+                                        : row?.task?.status.toLowerCase() == "done"
                                           ? "#00FF00"
                                           : "#0000FF",
                                     backgroundColor:
-                                      row?.status.toLowerCase() == "not done"
+                                      row?.task?.status.toLowerCase() == "not done"
                                         ? `${newShade("#FF0000", 180)}`
-                                        : row?.status.toLowerCase() == "done"
+                                        : row?.task?.status.toLowerCase() == "done"
                                           ? `${newShade("#00FF00", 180)}`
                                           : `${newShade("#0000FF", 180)}`,
                                   }}
                                 >
-                                  {row?.status || ""}
+                                  {row?.task?.status || ""}
                                 </span>
                               </TableCell>
                               <TableCell align="left">
-                                {row?.assignTo || ""}
+                                {/* {row?.assignTo || ""} */}
+                                {row?.task?.assignTo?.length > 1 ? <AvatarGroup total={row?.task?.assignTo?.length}>
+                                {row?.teamArr?.map((member)=>{
+                                  return <Avatar alt={member?.PK.split("#")[1]} src={`${s3URL}/${member?.imageId}`} 
+                                />
+                                })}
+                               
+                              </AvatarGroup> :row?.task?.assignTo || "" }
                               </TableCell>
                               <TableCell align="left">
-                                {row?.description || ""}
+                                {row?.task?.description || ""}
                               </TableCell>
                               <TableCell align="left">
                                 {"BLOCKED STATUSES"}
                               </TableCell>
-                              <TableCell align="left">{row?.dueDate}</TableCell>
+                              <TableCell align="left">{row?.task?.dueDate}</TableCell>
                               <TableCell align="left">
                                 <Stack direction="row" spacing={2}>
                                   <Avatar
                                     alt="Remy Sharp"
                                     src="/Ellise 179(1).png"
                                   />
-                                  <span> {getTime(row?.createTime)}</span>
+                                  <span> {getTime(row?.task?.createTime)}</span>
                                 </Stack>
                               </TableCell>
                             </TableRow>
@@ -2975,7 +2494,7 @@ function ApplicationDate() {
                               { label: "All", value: -1 },
                             ]}
                             colSpan={3}
-                            count={rows.length}
+                            count={noteList.length}
                             rowsPerPage={rowsPerPage}
                             page={pages}
                             SelectProps={{
@@ -3061,7 +2580,7 @@ function ApplicationDate() {
                             pages * rowsPerPage,
                             pages * rowsPerPage + rowsPerPage
                           )
-                          : rows
+                          : historyList
                         ).map((row, key) => (
                           <TableRow key={key}>
                             <TableCell component="th" scope="row">
@@ -3118,7 +2637,7 @@ function ApplicationDate() {
                               { label: "All", value: -1 },
                             ]}
                             colSpan={3}
-                            count={rows.length}
+                            count={historyList.length}
                             rowsPerPage={rowsPerPage}
                             page={pages}
                             SelectProps={{

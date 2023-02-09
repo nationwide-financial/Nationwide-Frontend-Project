@@ -3,21 +3,53 @@ import { Autocomplete, Button, CircularProgress, DialogTitle, FormControl, Stack
 import { type } from "os";
 import { useEffect, useState } from "react";
 import { _addTask } from "../../services/loanTaskServices";
+import Select from "@mui/material/Select";
+import MenuItem from "@mui/material/MenuItem";
+import {   Avatar, Box } from "@mui/material";
+import Chip from "@mui/material/Chip";
+import AvatarGroup from "@mui/material/AvatarGroup";
 
 const defaultTask = {
     description: '',
-    assignedTo: '',
+    assignedTo: [],
     dueDate: '',
     prevert: false,
     editable: false
 }
 
 const ApplicationTaskPopup = ({ open, onClose, applicationId, team, applicationData, onClickCreate, error }) => {
-    const [taskData, setTaskData] = useState(defaultTask);
     
+    console.log("team",team)
+    const [taskData, setTaskData] = useState(defaultTask);
+    const [personName, setPersonName] = useState([]);
+    console.log(personName)
     useEffect(() => {
 
     });
+
+    const ITEM_HEIGHT = 48;
+    const ITEM_PADDING_TOP = 8;
+    const MenuProps = {
+      PaperProps: {
+        style: {
+          maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+          width: 250,
+        },
+      },
+    };
+    const setInitialStateOfTeam = (ids) => {
+      setPersonName([...ids]);
+    };
+    const handleChangeEditTeamMember = async (event) => {
+      const {
+        target: { value },
+      } = event;
+      let users = typeof value === "string" ? value.split(",") : value;
+      setPersonName(users);
+      setTaskData({ ...taskData, assignedTo: users })
+    };
+
+    console.log("taskData",taskData)
 
     const handleUpdate = (type, value) => {
         switch (type) {
@@ -74,18 +106,51 @@ const ApplicationTaskPopup = ({ open, onClose, applicationId, team, applicationD
                         <label style={{ marginBottom: 6 }}>Description</label>
                         <TextField onChange={(e) => handleUpdate('descripition', e.target.value)} size="small" value={taskData.description} />
                     </FormControl>
-                    <FormControl>
-                        <label style={{ marginBottom: 6 }}>Assign to</label>
-                        <Autocomplete
-                            value={taskData.assignedTo}
-                            renderInput={(params) => (
-                                <TextField {...params} size='small' label="User" />
+                    <div style={{ marginTop: "20px" ,width:500}}>
+                        <FormControl sx={{ m: 1, width: 580 }}>
+                        {/* <InputLabel id="demo-multiple-chip-label">Chip</InputLabel> */}
+                        <Select
+                            // labelId="demo-multiple-chip-label"
+                            id="demo-multiple-chip"
+                            multiple
+                            value={personName}
+                            onChange={handleChangeEditTeamMember}
+                            // input={<OutlinedInput id="select-multiple-chip" label="Chip" />}
+                            renderValue={(selected) => (
+                            <Box
+                                sx={{
+                                display: "flex",
+                                flexWrap: "wrap",
+                                gap: 0.5,
+                                }}
+                            >
+                                {selected.map((value) => (
+                                <Chip
+                                    key={value}
+                                    label={value}
+                                    avatar={
+                                    <Avatar
+                                        alt="Natacha"
+                                        src="../images/img1.png"
+                                    />
+                                    }
+                                />
+                                ))}
+                            </Box>
                             )}
-                            onChange={(e, val) => handleUpdate('assignedTo', val)}
-                            options={team.map(option => option)}
+                            MenuProps={MenuProps}
                         >
-                        </Autocomplete>
-                    </FormControl>
+                            {team.map((member, key) => (
+                            <MenuItem
+                                key={key}
+                                value={member}
+                            >
+                                {member}
+                            </MenuItem>
+                            ))}
+                        </Select>
+                        </FormControl>
+                    </div>
                     <FormControl>
                         <label style={{ marginBottom: 6 }}>Due Date</label>
                         <TextField value={taskData.dueDate} onChange={(e) => handleUpdate('dueDate', e.target.value)} size="small" />

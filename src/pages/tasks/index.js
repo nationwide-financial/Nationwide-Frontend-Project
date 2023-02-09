@@ -51,11 +51,15 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogActions from "@mui/material/DialogActions";
 import CardContent from "@mui/material/CardContent";
+import Select from "@mui/material/Select";
+import MenuItem from "@mui/material/MenuItem";
+import Chip from "@mui/material/Chip";
 
 import { Autocomplete, FormControl, Switch } from "@mui/material";
 import { _addTask } from "../../services/loanTaskServices";
 import { _getApplications } from "../../services/applicationService";
 import { _addHistory } from "../../services/applicationHistory";
+import { _getUser } from '../../services/authServices' 
 
 // cutom-btn--
 
@@ -281,6 +285,31 @@ const Tasks = () => {
     setOpenModify(false);
   };
 
+  const ITEM_HEIGHT = 48;
+  const ITEM_PADDING_TOP = 8;
+  const MenuProps = {
+    PaperProps: {
+      style: {
+        maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+        width: 250,
+      },
+    },
+  };
+   
+  const [personName, setPersonName] = useState([]);
+  const setInitialStateOfTeam = (ids) => {
+    setPersonName([...ids]);
+  };
+  const handleChangeEditTeamMember = async (event) => {
+    const {
+      target: { value },
+    } = event;
+    let users = typeof value === "string" ? value.split(",") : value;
+    setPersonName(users);
+  };
+
+
+
   const isNull = (val) => {
     return !val || val.length === 0 ? true : false;
   };
@@ -305,19 +334,19 @@ const Tasks = () => {
       console.log("response", response);
 
       if (response?.status === 200) {
-        const newTask = response?.data?.loanTask;
-        if (newTask) {
-          let tempTasks = [...taskData, newTask];
-          let tableDt = await tempTasks.sort((a, b) =>
-            a.createTime < b.createTime
-              ? 1
-              : b.createTime < a.createTime
-              ? -1
-              : 0
-          );
-          setTaskData([...tableDt]);
-        }
-
+        // const newTask = response?.data?.loanTask;
+        // if (newTask) {
+        //   let tempTasks = [...taskData, newTask];
+        //   let tableDt = await tempTasks.sort((a, b) =>
+        //     a.createTime < b.createTime
+        //       ? 1
+        //       : b.createTime < a.createTime
+        //       ? -1
+        //       : 0
+        //   );
+        //   setTaskData([...tableDt]);
+        // }
+        fetchTasks();
         let history = {
           action: "Task Created",
           description: `The Task created`,
@@ -381,19 +410,50 @@ const Tasks = () => {
   useEffect(() => {
     getApplications();
     fetchTasks();
-    getUsers();
   }, []);
+
+
+    const getLoginUser = async () => {
+    try{
+      const res = await _getUser()
+      return res?.data
+    }catch(err){
+      console.log(err)
+    }
+  }
 
   const fetchTasks = async () => {
     setLoading(true);
+    let loginUser = await getLoginUser();
+    let users = await getUsers();
     const response = await _fetchAllTasks();
     let tableDt = await response?.data?.loanTasks?.Items.sort((a, b) =>
       a.createTime < b.createTime ? 1 : b.createTime < a.createTime ? -1 : 0
     );
+    let taskDataArray = [];
+      await tableDt?.map( async (task)=>{
+        console.log(task,"task613")
+        let object ={}
+        let temp=[]
+        object.task = task;
+        await task?.assignTo?.map((member)=>{
+          if (loginUser?.PK == `USER#${member}`){
+            temp.push(loginUser)
+            temp.push(...users.filter((user)=>{ return user?.PK == `USER#${member}`}))
+          }else{
+            temp.push(...users.filter((user)=>{ return user?.PK == `USER#${member}`}))
+          }
+          
+        })
+        object.teamArr = temp;
+        console.log(object,"object620")
+        taskDataArray.push(object)
+      })
     console.log("fetchTasks", response);
+
     setLoading(false);
     if (response?.status === 200) {
-      setTaskData([...tableDt]);
+      setTaskData([...taskDataArray]);
     } else {
       setError({ type: "error", message: "Error fetching data" });
     }
@@ -401,7 +461,7 @@ const Tasks = () => {
 
   const deleteTask = async (task) => {
     setLoading(true);
-    const response = await _deleteTaskById(task?.PK, task?.id);
+    const response = await _deleteTaskById(task?.task?.PK, task?.task?.id);
     fetchTasks();
     console.log(response);
 
@@ -421,6 +481,7 @@ const Tasks = () => {
     try {
       const res = await _getAllPlatformUserByAdmin();
       setUsers([...res?.data?.users]);
+      return res?.data?.users;
     } catch (err) {
       console.log(err);
     }
@@ -624,9 +685,7 @@ const Tasks = () => {
                               if (searchKey == "") {
                                 return data;
                               } else {
-                                return data?.description
-                                  .toLowerCase()
-                                  .includes(searchKey.toLocaleLowerCase());
+                                return data?.task?.description.toLowerCase().includes(searchKey.toLocaleLowerCase());
                               }
                             })
                             .slice(
@@ -657,24 +716,24 @@ const Tasks = () => {
                                         fontSize: 14,
                                         fontWeight: 500,
                                         color:
-                                          task?.status.toLowerCase() ==
+                                          task?.task?.status.toLowerCase() ==
                                           "not done"
                                             ? "#FF0000"
-                                            : task?.status.toLowerCase() ==
+                                            : task?.task?.status.toLowerCase() ==
                                               "done"
                                             ? "#00FF00"
                                             : "#0000FF",
                                         backgroundColor:
-                                          task?.status.toLowerCase() ==
+                                          task?.task?.status.toLowerCase() ==
                                           "not done"
                                             ? `${newShade("#FF0000", 180)}`
-                                            : task?.status.toLowerCase() ==
+                                            : task?.task?.status.toLowerCase() ==
                                               "done"
                                             ? `${newShade("#00FF00", 180)}`
                                             : `${newShade("#0000FF", 180)}`,
                                       }}
                                     >
-                                      {task?.status || ""}
+                                      {task?.task?.status || ""}
                                     </span>
                                   </TableCell>
                                   <TableCell
@@ -687,13 +746,22 @@ const Tasks = () => {
                                 <Avatar alt='avatar3' src='./images/avatar3.png' />
                                 <Avatar alt='avatar4' src='./images/avatar4.png' />
                                 </AvatarGroup> */}
-                                    <Typography
-                                      sx={{ color: "#858585" }}
-                                      style={{ fontSize: 14, fontWeight: 500 }}
-                                      pr={1}
-                                    >
-                                      {task?.assignTo}
-                                    </Typography>
+                                    {task?.task?.assignTo?.length > 1 ? (
+                                      <AvatarGroup
+                                        total={task?.task?.assignTo?.length}
+                                      >
+                                        {task?.teamArr?.map((member) => {
+                                          return (
+                                            <Avatar
+                                              alt={member?.PK.split("#")[1]}
+                                              src={`${s3URL}/${member?.imageId}`}
+                                            />
+                                          );
+                                        })}
+                                      </AvatarGroup>
+                                    ) : (
+                                      task?.task?.assignTo || ""
+                                    )}
                                   </TableCell>
                                   <TableCell
                                     className="task_tbl_cell"
@@ -703,7 +771,7 @@ const Tasks = () => {
                                       sx={{ color: "#858585" }}
                                       style={{ fontSize: 14, fontWeight: 500 }}
                                     >
-                                      {task?.description}
+                                      {task?.task?.description}
                                     </Typography>
                                   </TableCell>
                                   <TableCell
@@ -715,7 +783,7 @@ const Tasks = () => {
                                       style={{ fontSize: 14, fontWeight: 500 }}
                                       pr={1}
                                     >
-                                      {task?.PK}
+                                      {task?.task?.PK}
                                     </Typography>
                                   </TableCell>
                                   <TableCell
@@ -729,8 +797,8 @@ const Tasks = () => {
                                       }}
                                       style={{ fontSize: 14, fontWeight: 500 }}
                                     >
-                                      {task.dueDate &&
-                                        moment(task.dueDate).format(
+                                      {task.task?.dueDate &&
+                                        moment(task.task?.dueDate).format(
                                           "YYYY-MM-DD"
                                         )}
                                     </Typography>
@@ -746,8 +814,8 @@ const Tasks = () => {
                                       }}
                                       style={{ fontSize: 14, fontWeight: 500 }}
                                     >
-                                      {task.updateTime &&
-                                        moment(task.updateTime).format(
+                                      {task.task?.updateTime &&
+                                        moment(task.task?.updateTime).format(
                                           "YYYY-MM-DD hh:MM A"
                                         )}
                                     </Typography>
@@ -809,7 +877,7 @@ const Tasks = () => {
                   variant="contained"
                   className="myButtonClzStyle"
                   onClick={() => {
-                    router.push(`/tasks/view/${selectTask?.id}`);
+                    router.push(`/tasks/view/${selectTask?.task?.id}`);
                   }}
                 >
                   {" "}
@@ -919,7 +987,7 @@ const Tasks = () => {
                 ></Autocomplete>
               </FormControl>
               <FormControl>
-                <label style={{ marginBottom: 6 }}>Assign to</label>
+                {/* <label style={{ marginBottom: 6 }}>Assign to</label>
                 <Autocomplete
                   value={teamMember}
                   renderInput={(params) => (
@@ -929,7 +997,52 @@ const Tasks = () => {
                     setTeamMember(val);
                   }}
                   options={teamMembers && teamMembers.map((member) => member)}
-                ></Autocomplete>
+                ></Autocomplete> */}
+                  <div >
+                        <FormControl sx={{ width:550}}>
+                         <label style={{ marginBottom: 6 }}>Assign to</label>
+                        <Select
+                            // labelId="demo-multiple-chip-label"
+                            id="demo-multiple-chip"
+                            multiple
+                            value={personName}
+                            onChange={handleChangeEditTeamMember}
+                            // input={<OutlinedInput id="select-multiple-chip" label="Chip" />}
+                            renderValue={(selected) => (
+                            <Box
+                                sx={{
+                                display: "flex",
+                                flexWrap: "wrap",
+                                gap: 0.5,
+                                }}
+                            >
+                                {selected.map((value) => (
+                                <Chip
+                                    key={value}
+                                    label={value}
+                                    avatar={
+                                    <Avatar
+                                        alt="Natacha"
+                                        src="../images/img1.png"
+                                    />
+                                    }
+                                />
+                                ))}
+                            </Box>
+                            )}
+                            MenuProps={MenuProps}
+                        >
+                            {teamMembers.map((member, key) => (
+                            <MenuItem
+                                key={key}
+                                value={member}
+                            >
+                                {member}
+                            </MenuItem>
+                            ))}
+                        </Select>
+                        </FormControl>
+                    </div>
               </FormControl>
               <FormControl>
                 <label style={{ marginBottom: 6 }}>Due Date</label>
@@ -974,7 +1087,7 @@ const Tasks = () => {
                   onClick={() => {
                     let taskData = {
                       description: taskDescription,
-                      assignedTo: teamMember,
+                      assignedTo: personName,
                       dueDate: taskDueDate,
                       prevert: taskPriventApplication,
                       editable: taskEditable,

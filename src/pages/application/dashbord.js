@@ -35,9 +35,10 @@ import { Snackbar } from "@material-ui/core";
 import DialogContentText from '@mui/material/DialogContentText';
 import TextField from '@mui/material/TextField';
 import { Autocomplete } from "@mui/material";
-import { _getAllPlatformUserByAdmin } from '../../services/authServices'
+import { _getAllPlatformUserByAdmin,_getUser } from '../../services/authServices'
 import { _listLabel } from '../../services/labelService'
 import { _gatReason } from '../../services/rejectionOptionService'
+import { _fetchAllContacts } from '../../services/contactServices'
 
 
 const Item = styled(Paper)(({ theme }) => ({
@@ -89,6 +90,7 @@ function LoanApplication() {
   const [rejectionReason, setRejectionReason] = useState("");
   const [selectedRejectionObj, setSelectedRejectionObj] = useState({})
   const [reasonsLoading, setReasonsLoading] = useState(false);
+  const [applicationData,setApplicationData] = useState([]);
 
   const [appId, setAppId] = useState('');
   const [days, setDays] = useState(0);
@@ -103,9 +105,6 @@ function LoanApplication() {
     setCheckedReasonAuto(event.target.checked);
   };
 
-  useEffect(() => {
-    getUsers();
-  }, [])
 
   useEffect(() => {
     getWorkflowStatus();
@@ -150,11 +149,62 @@ function LoanApplication() {
 
   const getApplications = async () => {
     try {
-      const res = await _getAllPlatformUserByAdmin()
+      const responseLabel = await _listLabel();
+      const res = await _getAllPlatformUserByAdmin();
+      const resLoginUser = await _getUser()
+      console.log("resLoginUser",resLoginUser?.data)
+      console.log("responsePlatformUser",res)
+      const resContact = await _fetchAllContacts();
+      console.log("responseAllContacts",resContact)
+      setPlatfromUsers(res?.data?.users)
       const response = await _getApplications();
       if (response?.status === 200) {
         setApplications(response.data.data.Items.length > 0 && response.data.data.Items);
-        getTeamMembers(response.data.data.Items);
+        let tempApplications = response.data.data.Items;
+        let tempUsers =[...res?.data?.users,resLoginUser?.data] ;
+        let userIds = [];
+        let teamMembers = [];
+  
+        await tempApplications.map((tempApplications) => {
+          if (tempApplications?.members) {
+            userIds.push(...tempApplications?.members)
+          }
+        })
+        let removedduplicatesUsers = [...new Set(userIds)];
+        await removedduplicatesUsers.map(async (id) => {
+          let tempU = await tempUsers.filter((user) => user?.PK == 'USER#' + id)
+          teamMembers.push(...tempU)
+        })
+        setTeamMembersArr([...teamMembers])
+
+        let tableDataArry =[];
+        await tempApplications.map((application) => {
+          let object ={}
+          let team=[];
+          let labels = [];
+          let contact = {};
+          object.application = application
+          if (application?.members){
+            application?.members.map((user)=>{
+              team.push(...teamMembers.filter((member)=>{ return member?.PK == 'USER#'+user}));
+            })
+            object.teamArr = team;
+          }
+          
+          if (application?.appLabel){
+            application?.appLabel.map((applabel)=>{
+              labels.push(...responseLabel.data.data.Items.filter((label)=>{ return label?.PK == applabel}));
+            })
+            object.labelArr = labels;
+          }
+  
+          if (application?.contactId){
+              object.contact= resContact?.data?.Items.filter((con)=>{ return con?.PK == application?.contactId[0]})[0]; 
+          }
+          tableDataArry.push(object)
+        })
+        setApplicationData([...tableDataArry])
+        console.log("tableDataArry",tableDataArry)
       }
     } catch (err) {
       console.log("Error ", err);
@@ -270,7 +320,7 @@ function LoanApplication() {
       }
     }
   }
-
+ 
   const renderWorkFlows = () => {
     const statusList = [];
     const sorted = workflowStatus.length > 0 && workflowStatus.sort((a, b) => (a.index > b.index) ? 1 : ((b.index > a.index) ? -1 : 0))
@@ -311,43 +361,56 @@ function LoanApplication() {
   const renderApplications = (status, varaint) => {
     const applicationList = [];
     let total = 0;
-    applications && applications.map((application, index) => {
-      if (application.status_ === status) {
-        total = total + parseInt(application?.applicationBasicInfo?.loan_amount)
+    applicationData && applicationData.map((application, index) => {
+      if (application?.application?.status_ === status) {
+        total = total + parseInt(application?.application?.applicationBasicInfo?.loan_amount)
         applicationList.push(
-          <Draggable draggableId={application.PK} index={index} type="application">
+          <Draggable  draggableId={application?.application?.PK} index={index} type="application">
             {(provided, snapshot) => (
-              <div ref={provided.innerRef}
+              <div ref={provided.innerRef }
                 {...provided.draggableProps}
                 {...provided.dragHandleProps}
                 style={getItemStyle(
                   snapshot.isDragging,
                   provided.draggableProps.style
-                )}>
+                )}
+                onDoubleClick={()=>{
+                  router.push(`/application/applications-data?applicationId=${application?.application?.PK}`);
+                }}
+                >
                 <Paper
                   sx={{ backgroundColor: '#f8f8f8', minHeight: 100, padding: 2 }}
                 >
                   <Stack direction='column' spacing={1}>
                     <Stack direction='row' spacing={0.5}>
-                      <Chip color="success" sx={{ height: 4 }} />
-                      <Chip color="warning" sx={{ height: 4 }} />
-                      <Chip color="error" sx={{ height: 4 }} />
+                    <div style={{ display: "flex", border: "none" }}>
+                      {application?.labelArr && application?.labelArr?.map((label,key)=>{
+                        return ( <div key={key}
+                          style={{
+                            backgroundColor: label?.color,
+                            height: 5,
+                            width: 30,
+                            marginRight:5
+                          }}
+                        >
+                        </div>)
+                      })}
+                    </div>
                     </Stack>
-                    <Typography variant="h6" sx={{ fontWeight: 600, fontSize: 18 }}>{application.referralSource}</Typography>
+                    <Typography variant="h6" sx={{ fontWeight: 600, fontSize: 18 }}>{application?.contact?.basicInformation?.first_name} {application?.contact?.basicInformation?.last_name}</Typography>
                     <Stack direction='row' spacing={1} justifyContent='space-between' sx={{ color: '#a1a1a1' }}>
-                      <Typography variant="p">#{application.productId.split('_')[1]}</Typography>
+                      <Typography variant="p">#{application?.application?.productId.split('_')[1]}</Typography>
                       <Typography variant="p">|</Typography>
-                      <Typography variant="p">{moment(application.createTime).format('YYYY-MM-DD')}</Typography>
+                      <Typography variant="p">{moment(application?.application?.createTime).format('YYYY-MM-DD')}</Typography>
                     </Stack>
                     <Stack direction='row' spacing={1} justifyContent='space-between'>
-                      <Typography variant="h6" sx={{ fontWeight: 600 }}>${application?.applicationBasicInfo?.loan_amount}</Typography>
-                      <AvatarGroup max={2}>
-                        {/* {users && users.map((user)=>{
-                          return( <Avatar alt={user.PK.split("#")[1]} src={`${s3URL}/${user?.imageId}`}/>)
-                        })} */}
-                        <Avatar src={'/images/avatar' + (index + 1) + '.png'} />
-                        <Avatar src='' />
-                        <Avatar src='' />
+                      <Typography variant="h6" sx={{ fontWeight: 600 }}>${application?.application?.applicationBasicInfo?.loan_amount}</Typography>
+                      <AvatarGroup total={application?.teamArr.length}>
+                      {application?.teamArr && application?.teamArr.map((user, key)=>{
+                        return(
+                          <Avatar style={{height:25,width:25}} key={key} alt={user?.PK.split("#")[1]} src={`${s3URL}/${user?.imageId}`} />
+                        )
+                      })}
                       </AvatarGroup>
                     </Stack>
                   </Stack>

@@ -52,6 +52,7 @@ import { _getAllPlatformUserByAdmin } from '../../services/authServices'
 import { _getApplications } from '../../services/applicationService';
 import { _listLabel } from '../../services/labelService'
 import { _fetchAllContacts } from '../../services/contactServices'
+import { _gatLoanType } from "../../services/loanTypeService.js";
 
 
 
@@ -128,25 +129,47 @@ function ApplicationTableView() {
   // const [value, setValue] = useState("t");
   const [tableData,setTableData]=useState([])
   const [teamMembersArr, setTeamMembersArr] = useState([]);
-  const [open, setOpen] = React.useState(false);
   const router = useRouter();
   const [searchKey, setSearchKey] = useState("");
 console.log(searchKey)
   // const changeStatOfElement = () =>{
 
   // }
+  const [coContact, setCoContact] = useState(false)
+  const [loanTypeData, setLoanTypeData] = useState([]);
+
+  const getLoanType = async () => {
+    try {
+      const res = await _gatLoanType();
+      setLoanTypeData(res?.data?.data?.Items)
+    } catch (err) {
+      console.log(err)
+    }
+  };
+  
+    const handleContinue = () => {
+    if (coContact) {
+      router.push(`/application/application-form?product=${product}&coEnable=${1}`);
+    } else {
+      router.push(`/application/application-form?product=${product}&coEnable=${0}`);
+    }
+  };
+  
+  const [open, setOpen] = React.useState(false);
+
   const handleClickOpen = () => {
     setOpen(true);
   };
-
   const handleClose = () => {
+    setProduct('')
     setOpen(false);
   };
-  const handleContinue = () => {
-    // setOpen(false);
+  
+  const handelSelectProduct = (id) => {
+    setProduct(id)
+  }
 
-    router.push("/application/new-application");
-  };
+  const [product, setProduct] = useState('');
 
   const IOSSwitch = styled((props) => (
     <Switch
@@ -283,6 +306,7 @@ const mergeDocuments = async (tempApplications) =>{
   }
 
  useEffect(() => {
+  getLoanType()
   getTableData();
  }, []);
 
@@ -321,7 +345,7 @@ const mergeDocuments = async (tempApplications) =>{
                 New Application
               </Button>
 
-              <Dialog open={open} onClose={handleClose} fullWidth m={4}>
+              {/* <Dialog open={open} onClose={handleClose} fullWidth m={4}>
                 <Box sx={{ width: 1000, maxWidth: "100%" }}>
                   <BootstrapDialogTitle
                     id="customized-dialog-title"
@@ -345,7 +369,7 @@ const mergeDocuments = async (tempApplications) =>{
                     </DialogActions>
                   </div>
                 </Box>
-              </Dialog>
+              </Dialog> */}
             </Box>
           </Grid>
         </Grid>
@@ -397,9 +421,6 @@ const mergeDocuments = async (tempApplications) =>{
                         padding: 2,
                         marginRight: 2,
                       }}
-                      onClick={()=>{
-                        router.push('/application/dashbord')
-                      }}
                       aria-label="save"
                       style={{ transform: "rotate(360deg)" }}
                     >
@@ -436,6 +457,9 @@ const mergeDocuments = async (tempApplications) =>{
                         marginRight: 2,
                       }}
                       aria-label="save"
+                      onClick={()=>{
+                        router.push('/application/dashbord')
+                      }}
                     >
                       <DashboardOutlinedIcon sx={{ color: "gray" }} />
                     </IconButton>
@@ -469,6 +493,144 @@ const mergeDocuments = async (tempApplications) =>{
           </Grid>
         </Grid>
       </Box>
+      <div>
+      <Dialog open={open} onClose={handleClose} fullWidth m={4}>
+        <Box sx={{ maxWidth: "100%" }} p={2}>
+          <BootstrapDialogTitle
+            id="customized-dialog-title"
+            onClose={handleClose}
+          >
+            <Typography
+              variant="h6"
+              style={{ fontWeight: 700, fontSize: 30 }}
+            >
+              New Application
+            </Typography>
+          </BootstrapDialogTitle>
+
+          <DialogContent>
+            <FormControl
+              style={{ display: "flex", justifyContent: "center" }}
+            >
+              <label>
+                {" "}
+                <Typography
+                  variant="h6"
+                  style={{
+                    fontSize: 17,
+                    fontWeight: 700,
+                    fontStyle: "normal",
+                    marginBottom: 10,
+                  }}
+                >
+                  Selected Product
+                </Typography>
+              </label>
+
+              {loanTypeData.map((row, key) => (
+                <div key={key}>
+                  <Box
+                    sx={{ maxWidth: "100%" }}
+                    className="hover_effect"
+                  >
+                    <Stack spacing={2} direction="row">
+                      <Button
+                        fullWidth
+                        variant="outlined"
+                        borderColor="#393939"
+                        style={{
+                          backgroundColor:
+                            row.PK == product ? "#1478F1" : "",
+                          color:
+                            row.PK == product ? "#FFFFFF" : "#393939",
+                        }}
+                        onMouseOver={() => {
+                          backgroundColor: "#1478F1";
+                          color: "#FFFFFF";
+                        }}
+                        onClick={() => {
+                          handelSelectProduct(row.PK);
+                        }}
+                      >
+                        <Grid
+                          container
+                          display={"flex"}
+                          fontWeight={700}
+                        >
+                          <Grid
+                            xs={6}
+                            align="left"
+                            // color={"#393939"}
+                            textTransform="capitalize"
+                          >
+                            <Typography
+                              //  className="page_sub_content_header"
+                              style={{
+                                fontSize: 20,
+                                fontWeight: 700,
+                                textTransform: "capitalize",
+                              }}
+                              p={1}
+                            >
+                              {row.loanName}
+                            </Typography>
+                          </Grid>{" "}
+                          <Grid xs={6} align="right" color={"#393939"}>
+                            {row.img != null && (
+                              <img
+                                src={`${s3URL}/${row.img}`}
+                                height="40"
+                                width="40"
+                              />
+                            )}
+                          </Grid>
+                        </Grid>
+                      </Button>
+                    </Stack>
+                  </Box>
+                  <br />
+                </div>
+              ))}
+              <label>
+                {" "}
+                <Typography variant="h6" className="check_box_label">
+                  Application Form Options
+                </Typography>
+              </label>
+              <Box sx={{ maxWidth: "100%" }}>
+                <FormGroup>
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        onChange={(e) => {
+                          setCoContact(e.target.checked);
+                        }}
+                      />
+                    }
+                    className="check_box_label_subtext"
+                    label="Include Co-Borrower Page"
+                  />
+                </FormGroup>
+              </Box>
+            </FormControl>
+          </DialogContent>
+          <div style={{ marginBottom: 100, marginLeft: 16 }}>
+            <DialogActions
+              style={{ display: "flex", justifyContent: "left" }}
+              mt={2}
+            >
+              <Button
+                variant="contained"
+                onClick={handleContinue}
+                textTransform="capitalize"
+              >
+                Continue
+              </Button>
+            </DialogActions>
+          </div>
+        </Box>
+      </Dialog>
+      </div>
     </div>
   );
 }

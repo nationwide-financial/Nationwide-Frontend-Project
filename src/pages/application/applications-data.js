@@ -485,8 +485,8 @@ function ApplicationDate() {
   }
 
   const newShade = (hexColor, magnitude) => {
-    hexColor = hexColor.replace(`#`, ``);
-    if (hexColor.length === 6) {
+    hexColor = hexColor?.replace(`#`, ``);
+    if (hexColor?.length === 6) {
       const decimalColor = parseInt(hexColor, 16);
       let r = (decimalColor >> 16) + magnitude;
       r > 255 && (r = 255);
@@ -663,6 +663,7 @@ function ApplicationDate() {
       handleSuccessMessage();
       setMessage("Application Status Updated successfuly");
       console.log("_changeApplicationStatus", res);
+      getApplicationData();
     } catch (err) {
       console.log(err);
     }
@@ -829,18 +830,18 @@ function ApplicationDate() {
 
               <Stack direction="row" spacing={1}>
                 {existLabels &&
-                  existLabels.map((row, key) => {
+                  existLabels?.map((row, key) => {
                     return (
                       <Chip
                         key={key}
-                        label={row.label}
+                        label={row?.label}
                         onClick={() => { }}
                         onDelete={() => {
-                          handelDeleteLabel(row.PK);
+                          handelDeleteLabel(row?.PK);
                         }}
                         style={{
-                          color: `${row.color}`,
-                          backgroundColor: `${newShade(row.color, 180)}`,
+                          color: `${row?.color}`,
+                          backgroundColor: `${newShade(row?.color, 180)}`,
                           fontWeight: 700,
                           fontSize: 12,
                         }}
@@ -925,10 +926,14 @@ function ApplicationDate() {
                   }}
                 >
                   {workFlowStatus.map((row, key) => {
+                    console.log("929",row?.name === applicationData?.status_)
+                    // console.log("applicationData?.status_",applicationData?.status_)
+                    // console.log("row?.name",row?.name)
                     return (
                       <MenuItem
                         hover
                         key={key}
+                        style={{ backgroundColor: row?.name == applicationData?.status_ && 'lightblue'}}
                         onClick={() => {
                           handelUpdateApplicationState(applicationId, row.name);
                           handlebtnClose();
@@ -969,7 +974,8 @@ function ApplicationDate() {
                   <Stack direction="row" spacing={1} pl={2}>
                     <Typography variant="h5" className=" page_sub_header">
                       <span style={{ paddingRight: 5 }}>Final Review</span>
-                      <span style={{ color: "#1478F1" }}>4/5</span>
+                      <span style={{ color: "#1478F1" }}>{ workFlowStatus?.map((status)=>{return status?.name == applicationData?.status_ }).indexOf(true)+1}/{workFlowStatus && workFlowStatus?.length}</span>
+                    
                     </Typography>
                     <Link className="page_sub_outlineless_text_btn">
                       <Stack direction="row" spacing={1} mt={1}>
@@ -1243,7 +1249,7 @@ function ApplicationDate() {
                 >
                   <Tab label="Application Data" {...a11yProps(0)} />
                   <Tab label="Tasks " {...a11yProps(1)} />
-                  <Tab label="Emails" {...a11yProps(2)} />
+                  {/* <Tab label="Emails" {...a11yProps(2)} /> */}
                   <Tab label="Notes" {...a11yProps(2)} />
                   <Tab label="Application History" {...a11yProps(2)} />
                 </Tabs>
@@ -1757,7 +1763,7 @@ function ApplicationDate() {
               </TabPanel>
               <TabPanel value={value} index={1}>
                 {/* 1st-header-section */}
-                <ApplicationTaskPopup open={openTask} error={taskError} onClose={handleCloseTask} onClickCreate={(taskData) => handleTaskCreate(taskData)} applicationData={applicationData} team={teamMembers} applicationId={applicationData.PK} />
+                <ApplicationTaskPopup open={openTask} error={taskError} onClose={handleCloseTask} onClickCreate={(taskData) => handleTaskCreate(taskData)} applicationData={applicationData} team={teamMembers} applicationId={applicationData?.PK} />
                 <Grid container p={0} mb={2}>
                   <Grid item xs={12} md={6}>
                     <Typography style={{ fontSize: 21, fontWeight: 700 }}>
@@ -1940,12 +1946,12 @@ function ApplicationDate() {
                   </TableContainer>
                 </Grid>
               </TabPanel>
-              <TabPanel value={value} index={2}>
-                {/* 1st-header-section */}
+              {/* <TabPanel value={value} index={2}>
+                
                 {showContent ? (
                   <Box>
                     <Grid container>
-                      {/* email  table */}
+                     
                         <Grid container p={0} mb={2}>
                           <Grid item xs={12} md={6}>
                             <Typography
@@ -1963,7 +1969,7 @@ function ApplicationDate() {
                               Send Email
                             </Button>
                           </Grid>
-                        {/* sub-section */}
+                        
                         <Grid
                           container
                           style={{
@@ -1972,7 +1978,7 @@ function ApplicationDate() {
                           }}
                         >
                           <Stack direction="row">
-                            {/* header-search-section */}
+                            
 
                             <Grid container spacing={1} alignItems="flex-end">
                               <Grid item>
@@ -1985,11 +1991,11 @@ function ApplicationDate() {
                               />
                             </Grid>
                           </Stack>
-                          {/* active-user-display-section */}
+                          
                         </Grid>
                       </Grid>
                       <Grid container>
-                        {/* col-1 */}
+                       
                         <Grid item xs={12}>
                           <TableContainer
                             style={{ backgroundColor: "transparent" }}
@@ -2033,7 +2039,7 @@ function ApplicationDate() {
                           </TableContainer>
                         </Grid>
 
-                        {/* </Grid> */}
+          
                       </Grid>
                     </Grid>
                   </Box>
@@ -2063,7 +2069,7 @@ function ApplicationDate() {
                             Send Email
                           </Button>
 
-                          {/* dialog -start--- */}
+                          
 
                           <Dialog
                             open={open}
@@ -2095,7 +2101,7 @@ function ApplicationDate() {
                                     justifyContent: "center",
                                   }}
                                 >
-                                  {/* Description related field */}
+                                  
                                   <FormControl
                                     style={{
                                       display: "flex",
@@ -2131,7 +2137,7 @@ function ApplicationDate() {
                                     </Box>
                                   </FormControl>
 
-                                  {/* Assign To-related-field */}
+                                  
                                   <FormControl
                                     style={{
                                       display: "flex",
@@ -2166,7 +2172,7 @@ function ApplicationDate() {
                                       />
                                     </Box>
                                   </FormControl>
-                                  {/* Due Date related field */}
+                                 
                                   <FormControl
                                     style={{
                                       display: "flex",
@@ -2263,7 +2269,7 @@ function ApplicationDate() {
                               </div>
                             </Box>
                           </Dialog>
-                          {/* dialog- end----- */}
+                          
                         </Box>
                       </Grid>
                     </Grid>
@@ -2284,7 +2290,7 @@ function ApplicationDate() {
                     </Grid>{" "}
                   </Box>
                 )}
-              </TabPanel>
+              </TabPanel> */}
               {/* Note-related-tab */}
               <TabPanel value={value} index={3}>
                 {/* 1st-header-section */}

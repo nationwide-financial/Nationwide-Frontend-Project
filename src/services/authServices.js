@@ -14,6 +14,8 @@ export const _updateUserField = (id, field, body) => BackendClient.put(`${baseUR
 export const _resetPassword = (id, body) => BackendClient.put(`${baseURL}/user/auth/reset-password`, body);
 export const _updateNoficationPreference = (body) => BackendClient.put(`${baseURL}/notificationPreference`, body);
 export const _editUserDetails = (id, body) => BackendClient.put(`${baseURL}/user/${id}/editUserDetails`, body);
+export const _getAllUserData = () => BackendClient.get(`${baseURL}/users/getAllUserData`);
+
 
 export const _upoadProfilePic = async(profileImg) => {
     let formData = new FormData();

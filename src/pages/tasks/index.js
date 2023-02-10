@@ -59,7 +59,7 @@ import { Autocomplete, FormControl, Switch } from "@mui/material";
 import { _addTask } from "../../services/loanTaskServices";
 import { _getApplications } from "../../services/applicationService";
 import { _addHistory } from "../../services/applicationHistory";
-import { _getUser } from '../../services/authServices' 
+import { _getUser,_getAllUserData } from '../../services/authServices' 
 
 // cutom-btn--
 
@@ -261,6 +261,8 @@ const Tasks = () => {
     setOpenTask(true);
   };
   const handleCloseTask = () => {
+    setApplicationId("")
+    setPersonName([])
     setAssignUsers("");
     setTaskDescription("");
     setTaskDueDate("");
@@ -297,9 +299,9 @@ const Tasks = () => {
   };
    
   const [personName, setPersonName] = useState([]);
-  const setInitialStateOfTeam = (ids) => {
-    setPersonName([...ids]);
-  };
+  // const setInitialStateOfTeam = (ids) => {
+  //   setPersonName([...ids]);
+  // };
   const handleChangeEditTeamMember = async (event) => {
     const {
       target: { value },
@@ -329,7 +331,7 @@ const Tasks = () => {
         applicationId: applicationId,
         status: "Not Done",
       };
-
+      console.log("handleTaskCreate",body)
       const response = await _addTask(body);
       console.log("response", response);
 
@@ -412,20 +414,9 @@ const Tasks = () => {
     fetchTasks();
   }, []);
 
-
-    const getLoginUser = async () => {
-    try{
-      const res = await _getUser()
-      return res?.data
-    }catch(err){
-      console.log(err)
-    }
-  }
-
   const fetchTasks = async () => {
     setLoading(true);
-    let loginUser = await getLoginUser();
-    let users = await getUsers();
+    const resAllUsers = await _getAllUserData()
     const response = await _fetchAllTasks();
     let tableDt = await response?.data?.loanTasks?.Items.sort((a, b) =>
       a.createTime < b.createTime ? 1 : b.createTime < a.createTime ? -1 : 0
@@ -436,15 +427,9 @@ const Tasks = () => {
         let object ={}
         let temp=[]
         object.task = task;
-        await task?.assignTo?.map((member)=>{
-          if (loginUser?.PK == `USER#${member}`){
-            temp.push(loginUser)
-            temp.push(...users.filter((user)=>{ return user?.PK == `USER#${member}`}))
-          }else{
-            temp.push(...users.filter((user)=>{ return user?.PK == `USER#${member}`}))
-          }
-          
-        })
+        task?.assignTo?.map((member)=>{
+          temp.push(...resAllUsers?.data?.users?.Items?.filter((user)=>{ return user?.PK == `USER#${member}`}))
+        }) 
         object.teamArr = temp;
         console.log(object,"object620")
         taskDataArray.push(object)
@@ -474,16 +459,6 @@ const Tasks = () => {
       handleCloseModify();
       handleCloseDeleteConfirm();
       setError({ type: "error", message: "Error fetching data" });
-    }
-  };
-
-  const getUsers = async () => {
-    try {
-      const res = await _getAllPlatformUserByAdmin();
-      setUsers([...res?.data?.users]);
-      return res?.data?.users;
-    } catch (err) {
-      console.log(err);
     }
   };
 
@@ -980,6 +955,7 @@ const Tasks = () => {
                         []
                     );
                     setTeamMember("");
+                    setPersonName([])
                   }}
                   options={applications?.map((application) => {
                     let s = `ID - ${application?.PK}|Status - ${application?.status_}`;

@@ -32,7 +32,8 @@ import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
 import { red } from "@mui/material/colors";
 import { teal } from "@mui/material/colors";
-
+import { _getAllUserData } from '../../services/authServices'
+import { s3URL } from '../../utils/config'
 // cutom-btn--
 
 const BootstrapButton = styled(Button)({
@@ -228,7 +229,7 @@ function ApplicationLabel() {
   // fetch table data
   async function getTableData() {
     const response = await _listLabel();
-    console.log(response);
+    console.log("_listLabel",response);
     setRows(
       response.data.data.Items.map((row) => {
         let uT = getTime(row.updateTime);
@@ -240,12 +241,25 @@ function ApplicationLabel() {
           createTime: cT,
           lightColor: lightColor,
           label: row.label,
+          creator:row?.creator,
+          updateBy:row?.updateBy
         };
       })
     );
   }
+const [users,setUsers]=useState([]);
+  const fetchAllUsers = async () =>{
+    try{
+      const resAllUsers = await _getAllUserData()
+      setUsers([...resAllUsers?.data?.users?.Items])
+      console.log("resAllUsers",resAllUsers)
+    }catch(err){
+      console.log(err)
+    }
+  }
 
   useEffect(() => {
+    fetchAllUsers();
     getTableData();
   }, []);
 
@@ -668,13 +682,13 @@ function ApplicationLabel() {
                       </TableCell>
                       <TableCell align="right">
                         <Stack direction="row" spacing={2}>
-                          <Avatar alt="Remy Sharp" src="/images/avatar1.png" />
+                          <Avatar alt={row?.creator?.split("#")[1]}  src={`${s3URL}/${users?.filter((user)=>{ return user?.PK == row?.creator})[0]?.imageId}`} />
                           <span>{row.createTime}</span>
                         </Stack>
                       </TableCell>
                       <TableCell align="right">
                         <Stack direction="row" spacing={2}>
-                          <Avatar alt="Remy Sharp" src="/images/avatar1.png" />
+                        <Avatar alt={row?.updateBy?.split("#")[1]} src={`${s3URL}/${users?.filter((user)=>{ return user?.PK == row?.updateBy})[0]?.imageId}`} />
                           <span>{row.updateTime}</span>
                         </Stack>
                       </TableCell>

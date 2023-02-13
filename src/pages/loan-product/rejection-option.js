@@ -4,6 +4,7 @@ import {
   Box,
   Button,
   FormControlLabel,
+  FormControl,
   Divider,
   Grid,
   IconButton,
@@ -33,12 +34,89 @@ import {
   _addRejection,
   _gatReason,
   _updateRejection,
+  _deleteReason,
 } from "../../services/rejectionOptionService";
 import { FastForward, Flag } from "@mui/icons-material";
 import { Snackbar } from "@material-ui/core";
 import { Alert } from "@mui/material";
 
+import PropTypes from "prop-types";
+import { styled } from "@mui/material/styles";
+// import Dialog from '@mui/material/Dialog';
+// import DialogTitle from '@mui/material/DialogTitle';
+// import DialogContent from '@mui/material/DialogContent';
+// import DialogActions from '@mui/material/DialogActions';
+// import IconButton from "@mui/material/IconButton";
+import CloseIcon from "@mui/icons-material/Close";
+import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
+import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
+import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
+import OutlinedInput from "@mui/material/OutlinedInput";
+
+// dialog-box--
+const BootstrapDialog = styled(Dialog)(({ theme }) => ({
+  "& .MuiDialogContent-root": {
+    padding: theme.spacing(2),
+  },
+  "& .MuiDialogActions-root": {
+    padding: theme.spacing(1),
+  },
+}));
+
+function BootstrapDialogTitle(props) {
+  const { children, onClose, ...other } = props;
+
+  return (
+    <DialogTitle sx={{ m: 0, p: 2 }} {...other}>
+      {children}
+      {onClose ? (
+        <IconButton
+          aria-label="close"
+          onClick={onClose}
+          sx={{
+            position: "absolute",
+            right: 8,
+            top: 8,
+            color: (theme) => theme.palette.grey[500],
+          }}
+        >
+          <CloseIcon />
+        </IconButton>
+      ) : null}
+    </DialogTitle>
+  );
+}
+
+BootstrapDialogTitle.propTypes = {
+  children: PropTypes.node,
+  onClose: PropTypes.func.isRequired,
+};
+
+// dialog-box--
+
 function RejectionOption() {
+  // dialog-box--
+  const [open, setOpen] = React.useState(false);
+  const [EditAutomatedOpen, setEditAutomatedOpen] = React.useState(false);
+
+  const handleClickOpen = () => {
+    setOpen(true);
+  };
+  const handleClickEditAutomatedOpen = () => {
+    setEditAutomatedOpen(true);
+  };
+  const handleClose = () => {
+    setOpen(false);
+    setToggelAddRejection(false)
+    setAddReasion("")
+  };
+
+  const handleAutomatedClose = () => {
+    setEditAutomatedOpen(false);
+  };
+
+  // dialog-box--
+
   const [openRejectionPopup, setOpenRejectionPopup] = useState(false);
   const handleClickOpenRejectionPopup = () => {
     setOpenRejectionPopup(true);
@@ -73,6 +151,11 @@ function RejectionOption() {
   const [reason, setReason] = useState("");
   const [checkedReasonAuto, setCheckedReasonAuto] = useState(false);
   const [userInputs, setUserInputs] = useState({});
+  const [isEditInputs, setIsEditInputs] = useState({});
+  const [addReasion, setAddReasion] = useState("");
+  const [toggelAddRejection, setToggelAddRejection] = useState(false);
+  const [loadingDeleteReasion, setLoadingDeleteReasion] = useState(false);
+
 
   const [declineRejectionsUpdateSwitch, setdeclineRejectionsUpdateSwitch] =
     useState(false);
@@ -94,6 +177,7 @@ function RejectionOption() {
       });
       //console.log("input************",inputs)
       setUserInputs({ ...inputs });
+      setIsEditInputs({ ...inputs });
     } catch (err) {
       console.log(err);
     }
@@ -103,7 +187,7 @@ function RejectionOption() {
     setUserInputs((state) => ({ ...state, [target.name]: target.value }));
   }, []);
   const updateRejection = async (id, days, auto, reason) => {
-    //console.log("id,days,auto,reason",id,"  ",days,"  ",auto,"  ",reason)
+
     try {
       let body = {
         auto_: auto,
@@ -114,7 +198,7 @@ function RejectionOption() {
       setLoading(id);
       const res = await _updateRejection(id, body);
       setLoading("");
-      //console.log("_updateRejections",res)
+      console.log("_updateRejections", res);
       if (res?.status == 200) {
         handleCloseRejectionPopup();
         setMessage({
@@ -129,40 +213,62 @@ function RejectionOption() {
       }
       setDays(0);
       setReason("");
+      getRejections();
       // console.log("updateRejection",res)
     } catch (err) {
       console.log(err);
     }
   };
 
+  const deleteRejection = async (reasionId) => {
+    console.log("reasionId215", reasionId);
+    try {
+      if (reasionId) {
+        setLoadingDeleteReasion(true)
+        const response = await _deleteReason(reasionId);
+        if(response?.status == 200 ){
+          getRejections();
+          setMessage({
+            severity: "success",
+            message: "Rejection Reasion Deleted!",
+          });
+        }else{
+          setMessage({
+            severity: "error",
+            message: "Rejection Reasion Delete failed",
+          })
+          getRejections();
+        }
+      }
+      setLoadingDeleteReasion(false)
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
   const addRejection = async () => {
+    console.log("first")
     try {
       let body = {
         label: "Decline Reason",
-        description: rejectionReason,
-        auto_: rejectionCheckedReasonAuto,
-        days: rejectionDays,
+        description: addReasion,
+        auto_: false,
+        days: 0,
       };
       // console.log(body)
-      if (
-        !rejectionReason ||
-        rejectionReason == "" ||
-        rejectionReason == null
-      ) {
+      if (!addReasion || addReasion == "" || addReasion == null ) {
         setFormError("Reasion can not be empty!");
-      } else if (rejectionDays == 0 && rejectionCheckedReasonAuto) {
-        setFormError("Days can not be zero!");
-      } else if (Math.sign(rejectionDays) == -1 && rejectionCheckedReasonAuto) {
-        setFormError("Days can not be negative!");
       } else {
         setFormError("");
+        console.log("setFormError",formError)
         setAddRejectionLoading(true);
         const res = await _addRejection(body);
-        //console.log(res)
+        console.log("_addRejection",res)
         if (res?.status == 200) {
           setAddRejectionLoading(false);
           handleClickCloseRejectionPopup();
           getRejections();
+          setToggelAddRejection(false)
           setMessage({
             severity: "success",
             message: "Rejection Reasion Added",
@@ -173,6 +279,7 @@ function RejectionOption() {
             severity: "error",
             message: "Rejection Reasion Adding is failed",
           });
+          setToggelAddRejection(false)
           getRejections();
         }
       }
@@ -181,7 +288,6 @@ function RejectionOption() {
     }
   };
   useEffect(() => {
-    // getData();
     getRejections();
   }, [trigger]);
 
@@ -211,7 +317,7 @@ function RejectionOption() {
           <h1 className="page_header">Rejection Options</h1>
         </Grid>
         <Grid item xs={12} md={6} mb={2}>
-          <div
+          {/* <div
             style={{
               display: "flex",
               justifyContent: "right",
@@ -228,7 +334,7 @@ function RejectionOption() {
             >
               Add Rejection
             </Button>
-          </div>
+          </div> */}
         </Grid>
       </Grid>
       <Grid container mb={5} mt={3}>
@@ -237,46 +343,258 @@ function RejectionOption() {
             <Typography variant="h5" className=" page_sub_header">
               <span>Decline Reasons</span>
             </Typography>
-            {declineRejectionsUpdateSwitch ? (
-              <Button
-                variant="contained"
-                onClick={() => {
-                  setdeclineRejectionsUpdateSwitch(
-                    (declineRejectionsUpdateSwitch) =>
-                      !declineRejectionsUpdateSwitch
-                  );
-                  setDays(0);
-                  setReason("");
-                }}
+            <Link
+              href="#"
+              // onClick={() => {
+              //   setdeclineRejectionsUpdateSwitch(
+              //     (declineRejectionsUpdateSwitch) =>
+              //       !declineRejectionsUpdateSwitch
+              //   );
+              //   setDays(0);
+              //   setReason("");
+              // }}
+              className="page_sub_outlineless_text_btn"
+            >
+              <Stack
+                direction="row"
+                spacing={1}
+                mt={1}
+                style={{ fontSize: 18, fontWeight: 500 }}
               >
-                Cancel
-              </Button>
-            ) : (
-              <Link
-                href="#"
-                onClick={() => {
-                  setdeclineRejectionsUpdateSwitch(
-                    (declineRejectionsUpdateSwitch) =>
-                      !declineRejectionsUpdateSwitch
-                  );
-                  setDays(0);
-                  setReason("");
-                }}
-                className="page_sub_outlineless_text_btn"
-              >
-                <Stack
-                  direction="row"
-                  spacing={1}
-                  mt={1}
-                  style={{ fontSize: 18, fontWeight: 500 }}
-                >
-                  <NoteAltOutlinedIcon mt={1} />
-                  <Typography> Edit Decline Reasons </Typography>
-                </Stack>
-              </Link>
-            )}
+                <NoteAltOutlinedIcon mt={1} />
+                <Typography onClick={handleClickOpen}>
+                  {" "}
+                  Edit Decline Reasons{" "}
+                </Typography>
+              </Stack>
+            </Link>
           </Stack>
         </Grid>
+
+        {/* dialog-box-- */}
+        <Grid container>
+          <Grid item xs={12}>
+            <BootstrapDialog
+              className="rj-dialog"
+              onClose={handleClose}
+              aria-labelledby="customized-dialog-title"
+              open={open}
+              style={{ minWidth: 550, maxHeight: "auto" }}
+            >
+              <BootstrapDialogTitle
+                id="customized-dialog-title"
+                onClose={handleClose}
+                style={{ fontSize: 30, fontWeight: 600 }}
+              >
+                Edit Decline Reasons
+              </BootstrapDialogTitle>
+              <DialogContent>
+                {reasions &&
+                  reasions?.map((reasion, key) => {
+                    if (reasion && reasion?.auto_ == false) {
+                      return (
+                        <Grid key={key}>
+                          <label>
+                            <Typography
+                              align="left"
+                              variant="h6"
+                              style={{
+                                fontSize: 17,
+                                fontWeight: 700,
+                              }}
+                            >
+                              Decline Reason
+                            </Typography>
+                          </label>
+
+                          <FormControl
+                            sx={{ width: "100%" }}
+                            variant="outlined"
+                          >
+                            <OutlinedInput
+                              style={{ marginTop: 10, marginBottom: 30 }}
+                              fullWidth
+                              placeholder="Text"
+                              name={`REASOIN_${reasion.PK}`}
+                              size="small"
+                              margin="dense"
+                              type="text"
+                              id="outlined-basic"
+                              className="nwInput"
+                              value={
+                                (userInputs &&
+                                  userInputs[`REASOIN_${reasion.PK}`]) ||
+                                ""
+                              }
+                              onChange={onChangeHandler}
+                              endAdornment={
+                                <InputAdornment position="end">
+                                  {console.log(
+                                    "userInputs[`REASOIN_${reasion.PK}`]",
+                                    userInputs[`REASOIN_${reasion.PK}`],
+                                    isEditInputs[`REASOIN_${reasion.PK}`]
+                                  )}
+
+                                  {userInputs[`REASOIN_${reasion.PK}`] !=
+                                    isEditInputs[`REASOIN_${reasion.PK}`] && (
+                                    <Button
+                                      style={{ height: 30 }}
+                                      variant="contained"
+                                      href="#contained-buttons"
+                                      onClick={async () => {
+                                        await updateRejection(
+                                          reasion.PK,
+                                          0,
+                                          false,
+                                          userInputs &&
+                                            userInputs[`REASOIN_${reasion.PK}`]
+                                        );
+                                        await setdeclineRejectionsUpdateSwitch(
+                                          false
+                                        );
+                                        //setTrigger((trigger) => !trigger);
+                                      }}
+                                    >
+                                      {reasion.PK == loading
+                                        ? "Saving"
+                                        : "Save"}
+                                      {reasion.PK == loading && (
+                                        <CircularProgress
+                                          style={{
+                                            height: 20,
+                                            width: 20,
+                                            marginLeft: 10,
+                                            color: "white",
+                                          }}
+                                        />
+                                      )}
+                                    </Button>
+                                  )}
+                                  <IconButton
+                                    onClick={async () => {
+                                      await deleteRejection(reasion.PK);
+                                      // await setdeclineRejectionsUpdateSwitch(false);
+                                      // setTrigger((trigger) => !trigger);
+                                    }}
+                                  >
+                                    <DeleteOutlinedIcon
+                                      style={{
+                                        borderRadius: 5,
+                                      }}
+                                    />
+                                  </IconButton>
+                                </InputAdornment>
+                              }
+                            />
+                          </FormControl>
+                        </Grid>
+                      );
+                    }
+                  })}
+              </DialogContent>
+
+              <DialogContent>
+                {toggelAddRejection && (
+                  <FormControl sx={{ width: "100%" }} variant="outlined">
+                    <OutlinedInput
+                      style={{ marginTop: 10, marginBottom: 30 }}
+                      fullWidth
+                      placeholder="Reasion"
+                      name="reasion"
+                      size="small"
+                      margin="dense"
+                      type="text"
+                      id="outlined-basic"
+                      className="nwInput"
+                      value={addReasion}
+                      onChange={(e) => {
+                        setAddReasion(e.target.value);
+                      }}
+                      endAdornment={
+                        <InputAdornment position="end">
+                          <Button
+                            style={{ height: 30 }}
+                            variant="contained"
+                            href="#contained-buttons"
+                            onClick={() => {
+                              addRejection();
+                            }}
+                          >
+                            Add
+                            {/* {reasion.PK == loading && (
+                            <CircularProgress
+                              style={{
+                                height: 20,
+                                width: 20,
+                                marginLeft: 10,
+                                color: "white",
+                              }}
+                            />
+                          )} */}
+                          </Button>
+                          <Button
+                            style={{ height: 30, marginLeft: 5 }}
+                            variant="contained"
+                            href="#contained-buttons"
+                            onClick={() => {
+                              setToggelAddRejection(
+                                (toggelAddRejection) => !toggelAddRejection
+                              );
+                              setAddReasion("");
+                            }}
+                          >
+                            Close
+                          </Button>
+                        </InputAdornment>
+                      }
+                    />
+                  </FormControl>
+                )}
+                <Stack direction="row" spacing={1}>
+                  <a
+                    href=""
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setToggelAddRejection(
+                        (toggelAddRejection) => !toggelAddRejection
+                      );
+                    }}
+                  >
+                    <AddCircleOutlineOutlinedIcon
+                      style={{ color: "#1478F1" }}
+                    />
+                  </a>
+                  <Typography
+                    style={{
+                      color: "#858585",
+                      fontSize: 16,
+                      fontWeight: 500,
+                    }}
+                  >
+                    Add decline reason
+                  </Typography>
+                </Stack>
+              </DialogContent>
+              <DialogActions
+                style={{ display: "flex", justifyContent: "left" }}
+              >
+                <Button
+                  variant="contained"
+                  autoFocus
+                  onClick={handleClose}
+                  style={{
+                    textTransform: "capitalize",
+                    fontWeight: 700,
+                    fontSize: 16,
+                  }}
+                >
+                  Save
+                </Button>
+              </DialogActions>
+            </BootstrapDialog>
+          </Grid>
+        </Grid>
+        {/* dialog-box-- */}
 
         <Grid item xs={12} mt={4}>
           <TableContainer style={{ backgroundColor: "transparent" }}>
@@ -308,67 +626,16 @@ function RejectionOption() {
                           >
                             {"Decline Reason"}
                           </TableCell>
-                          {declineRejectionsUpdateSwitch ? (
-                            <div>
-                              <TextField
-                                name={`REASOIN_${reasion.PK}`}
-                                type="text"
-                                onChange={onChangeHandler}
-                                value={
-                                  (userInputs &&
-                                    userInputs[`REASOIN_${reasion.PK}`]) ||
-                                  ""
-                                }
-                                fullWidth
-                                size="small"
-                                margin="normal"
-                                id="outlined-basic"
-                                placeholder="reasion"
-                                variant="outlined"
-                                multiline
-                                rows={3}
-                                style={{ width: 500 }}
-                              />
-                              <br />
-                              <Button
-                                variant="contained"
-                                onClick={async () => {
-                                  await updateRejection(
-                                    reasion.PK,
-                                    0,
-                                    false,
-                                    userInputs &&
-                                      userInputs[`REASOIN_${reasion.PK}`]
-                                  );
-                                  await setdeclineRejectionsUpdateSwitch(false);
-                                  setTrigger((trigger) => !trigger);
-                                }}
-                              >
-                                Save
-                                {reasion.PK == loading && (
-                                  <CircularProgress
-                                    style={{
-                                      height: 20,
-                                      width: 20,
-                                      marginLeft: 10,
-                                      color: "white",
-                                    }}
-                                  />
-                                )}
-                              </Button>
-                            </div>
-                          ) : (
-                            <TableCell
-                              align="left"
-                              style={{
-                                fontSize: 16,
-                                fontWeight: 600,
-                                color: "#858585",
-                              }}
-                            >
-                              {reasion?.description}
-                            </TableCell>
-                          )}
+                          <TableCell
+                            align="left"
+                            style={{
+                              fontSize: 16,
+                              fontWeight: 600,
+                              color: "#858585",
+                            }}
+                          >
+                            {reasion?.description}
+                          </TableCell>
                         </TableRow>
                       );
                     }
@@ -392,46 +659,158 @@ function RejectionOption() {
             <Typography variant="h5" className=" page_sub_header">
               <span>Automated Rejections</span>
             </Typography>
-            {automatedRejectionsUpdateSwitch ? (
-              <Button
-                variant="contained"
-                onClick={() => {
-                  setAutomatedRejectionsUpdateSwitch(
-                    (automatedRejectionsUpdateSwitch) =>
-                      !automatedRejectionsUpdateSwitch
-                  );
-                  setDays(0);
-                  setReason("");
-                }}
+
+            <Link
+              href="#"
+              // onClick={() => {
+              //   setAutomatedRejectionsUpdateSwitch(
+              //     (automatedRejectionsUpdateSwitch) =>
+              //       !automatedRejectionsUpdateSwitch
+              //   );
+              //   setDays(0);
+              //   setReason("");
+              // }}
+              className="page_sub_outlineless_text_btn"
+            >
+              <Stack
+                direction="row"
+                spacing={1}
+                mt={1}
+                style={{ fontSize: 18, fontWeight: 500 }}
               >
-                Cancel
-              </Button>
-            ) : (
-              <Link
-                href="#"
-                onClick={() => {
-                  setAutomatedRejectionsUpdateSwitch(
-                    (automatedRejectionsUpdateSwitch) =>
-                      !automatedRejectionsUpdateSwitch
-                  );
-                  setDays(0);
-                  setReason("");
-                }}
-                className="page_sub_outlineless_text_btn"
-              >
-                <Stack
-                  direction="row"
-                  spacing={1}
-                  mt={1}
-                  style={{ fontSize: 18, fontWeight: 500 }}
-                >
-                  <NoteAltOutlinedIcon mt={1} />
-                  <Typography> Edit Automated Rejections </Typography>
-                </Stack>
-              </Link>
-            )}
+                <NoteAltOutlinedIcon mt={1} />
+                <Typography onClick={handleClickEditAutomatedOpen}>
+                  {" "}
+                  Edit Automated Rejections{" "}
+                </Typography>
+              </Stack>
+            </Link>
           </Stack>
         </Grid>
+
+        {/* dialog-box-- */}
+        <Grid container>
+          <Grid item xs={12}>
+            <BootstrapDialog
+              className="rj-dialog"
+              onClose={handleClose}
+              aria-labelledby="customized-dialog-title"
+              open={EditAutomatedOpen}
+              style={{ minWidth: 550, maxHeight: "auto" }}
+            >
+              <BootstrapDialogTitle
+                id="customized-dialog-title"
+                onClose={handleAutomatedClose}
+                style={{ fontSize: 30, fontWeight: 600 }}
+              >
+                Edit Automated Rejections
+              </BootstrapDialogTitle>
+              <DialogContent>
+                <Grid>
+                  <label>
+                    <Typography
+                      align="left"
+                      variant="h6"
+                      style={{
+                        fontSize: 17,
+                        fontWeight: 700,
+                      }}
+                    >
+                      Reject in process applications after
+                    </Typography>
+                  </label>
+
+                  <FormControl sx={{ width: "100%" }} variant="outlined">
+                    <OutlinedInput
+                      style={{ marginTop: 10, marginBottom: 30 }}
+                      fullWidth
+                      placeholder="000000"
+                      autoFocus
+                      size="small"
+                      margin="dense"
+                      type="number"
+                      id="outlined-basic"
+                      className="nwInput"
+                      onChange={onChangeHandler}
+                      // endAdornment={
+                      //   <InputAdornment position="end">
+                      //     <IconButton>
+                      //       <DeleteOutlinedIcon
+                      //         style={{
+                      //           borderRadius: 5,
+                      //         }}
+                      //       />
+                      //     </IconButton>
+                      //   </InputAdornment>
+                      // }
+                    />
+                  </FormControl>
+                </Grid>
+                {/* 2 */}
+                <Grid>
+                  <label>
+                    <Typography
+                      align="left"
+                      variant="h6"
+                      style={{
+                        fontSize: 17,
+                        fontWeight: 700,
+                      }}
+                    >
+                      Decline Reason
+                    </Typography>
+                  </label>
+
+                  <FormControl sx={{ width: "100%" }} variant="outlined">
+                    <OutlinedInput
+                      style={{ marginTop: 10, marginBottom: 30 }}
+                      fullWidth
+                      placeholder="Customet did not respond"
+                      autoFocus
+                      size="small"
+                      margin="dense"
+                      type="text"
+                      id="outlined-basic"
+                      className="nwInput"
+                      onChange={onChangeHandler}
+                      // endAdornment={
+                      //   <InputAdornment position="end">
+                      //     <IconButton>
+                      //       <DeleteOutlinedIcon
+                      //         style={{
+                      //           backgroundColor: "#D9D9D9",
+                      //           color: "#fff",
+                      //           borderRadius: 5,
+                      //         }}
+                      //       />
+                      //     </IconButton>
+                      //   </InputAdornment>
+                      // }
+                    />
+                  </FormControl>
+                </Grid>
+              </DialogContent>
+
+              <DialogActions
+                style={{ display: "flex", justifyContent: "left" }}
+              >
+                <Button
+                  variant="contained"
+                  autoFocus
+                  onClick={handleClose}
+                  style={{
+                    textTransform: "capitalize",
+                    fontWeight: 700,
+                    fontSize: 16,
+                  }}
+                >
+                  Save
+                </Button>
+              </DialogActions>
+            </BootstrapDialog>
+          </Grid>
+        </Grid>
+        {/* dialog-box-- */}
 
         <Grid item xs={12} mt={4}>
           <TableContainer style={{ backgroundColor: "transparent" }}>
@@ -471,38 +850,18 @@ function RejectionOption() {
                             >
                               {"Reject in Process Applications After"}
                             </TableCell>
-                            {automatedRejectionsUpdateSwitch ? (
-                              <div>
-                                <TextField
-                                  name={`DAYS_${reasion.PK}`}
-                                  type="number"
-                                  onChange={onChangeHandler}
-                                  value={
-                                    (userInputs &&
-                                      userInputs[`DAYS_${reasion.PK}`]) ||
-                                    ""
-                                  }
-                                  fullWidth
-                                  size="small"
-                                  margin="normal"
-                                  id="outlined-basic"
-                                  placeholder="days"
-                                  variant="outlined"
-                                  style={{ width: 500 }}
-                                />
-                              </div>
-                            ) : (
-                              <TableCell
-                                align="left"
-                                style={{
-                                  fontSize: 16,
-                                  fontWeight: 600,
-                                  color: "#858585",
-                                }}
-                              >
-                                {`${reasion?.days} days`}
-                              </TableCell>
-                            )}
+
+                            <TableCell
+                              align="left"
+                              style={{
+                                fontSize: 16,
+                                fontWeight: 600,
+                                color: "#858585",
+                              }}
+                            >
+                              {`${reasion?.days} days`}
+                            </TableCell>
+
                             <Grid
                               item
                               xs={10}
@@ -531,72 +890,16 @@ function RejectionOption() {
                             >
                               {"Decline Reason"}
                             </TableCell>
-
-                            {automatedRejectionsUpdateSwitch ? (
-                              <div>
-                                <TextField
-                                  name={`REASOIN_${reasion.PK}`}
-                                  type="text"
-                                  onChange={onChangeHandler}
-                                  value={
-                                    (userInputs &&
-                                      userInputs[`REASOIN_${reasion.PK}`]) ||
-                                    ""
-                                  }
-                                  fullWidth
-                                  size="small"
-                                  margin="normal"
-                                  id="outlined-basic"
-                                  placeholder="reasion"
-                                  variant="outlined"
-                                  multiline
-                                  rows={3}
-                                  style={{ width: 500 }}
-                                />
-                                <br />
-                                <Button
-                                  variant="contained"
-                                  onClick={async () => {
-                                    setLoading(reasion.PK);
-                                    await updateRejection(
-                                      reasion.PK,
-                                      userInputs &&
-                                        userInputs[`DAYS_${reasion.PK}`],
-                                      true,
-                                      userInputs &&
-                                        userInputs[`REASOIN_${reasion.PK}`]
-                                    );
-                                    await setAutomatedRejectionsUpdateSwitch(
-                                      false
-                                    );
-                                    setTrigger((trigger) => !trigger);
-                                  }}
-                                >
-                                  Save
-                                  {reasion.PK == loading && (
-                                    <CircularProgress
-                                      style={{
-                                        height: 20,
-                                        width: 20,
-                                        marginLeft: 10,
-                                        color: "white",
-                                      }}
-                                    />
-                                  )}
-                                </Button>
-                              </div>
-                            ) : (
-                              <TableCell
-                                align="left"
-                                style={{
-                                  fontSize: 16,
-                                  fontWeight: 600,
-                                  color: "#858585",
-                                }}
-                              >
-                                {reasion?.description}
-                              </TableCell>
-                            )}
+                            <TableCell
+                              align="left"
+                              style={{
+                                fontSize: 16,
+                                fontWeight: 600,
+                                color: "#858585",
+                              }}
+                            >
+                              {reasion?.description}
+                            </TableCell>
                           </TableRow>
                         </div>
                       );
@@ -609,7 +912,7 @@ function RejectionOption() {
             </Grid>
           </TableContainer>
         </Grid>
-        <div>
+        {/* <div>
           <Grid container>
             <Grid item xs={12}>
               <Dialog
@@ -619,21 +922,6 @@ function RejectionOption() {
                 <DialogTitle>Add Rejection</DialogTitle>
                 <DialogContent>
                   <DialogContentText>please enter the reason</DialogContentText>
-                  {/* <TextField
-                    name="label"
-                    type="text"
-                    onChange={(e) => {
-                      setRejectionLabel(e.target.value);
-                    }}
-                    value={rejectionLabel}
-                    fullWidth
-                    size="small"
-                    margin="normal"
-                    id="outlined-basic"
-                    placeholder="Label"
-                    variant="outlined"
-                     style={{width:500}}
-                  /> */}
                   <TextField
                     name="reason"
                     type="text"
@@ -701,7 +989,7 @@ function RejectionOption() {
               </Dialog>
             </Grid>
           </Grid>
-        </div>
+        </div> */}
       </Grid>
     </Box>
   );

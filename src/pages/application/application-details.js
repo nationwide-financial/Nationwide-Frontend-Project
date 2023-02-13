@@ -215,7 +215,7 @@ function ApplicationDetails() {
         contactId: [...contactIds],
         loanAmount: amount,
         referralSource: referralSource,
-        status_: "new",
+        status_: "New Applications",
         coContact: [...cocontactIds],
         members: [],
         applicationBasicInfo: { ...application },

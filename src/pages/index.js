@@ -48,7 +48,7 @@ import { getCookies, setCookies, removeCookies, getCookie } from 'cookies-next';
 function NestedGrid({ task }) {
   const router = useRouter();
 
-  console.log(task);
+ // console.log(task);
   function getTime(ts) {
     let date = new Date(ts);
     return date.toDateString();
@@ -236,6 +236,7 @@ const HomePage = () => {
   }
 
   const getLeadData = async (applicationByuserArr, contactArr) => {
+    console.log("applicationByuserArr",applicationByuserArr)
     let contacts = [];
     await applicationByuserArr.map((application) => {
       let contactTemp = contactArr.filter(
@@ -313,6 +314,7 @@ const HomePage = () => {
       workFlow.push(data?.name);
     });
     let c = 0;
+    workFlow = [...workFlow,"won","closed","abandoned"]
     //console.log(workFlow)
     for (let i = 0; i < workFlow.length; i++) {
       for (let j = 0; j < applicationArr.length; j++) {
@@ -346,22 +348,22 @@ const HomePage = () => {
 
   async function fetchAllData() {
     const contactArr = await getContact();
-    console.log("_fetchAllContacts", contactArr);
+    //console.log("_fetchAllContacts", contactArr);
 
     const applicationArr = await getApplication();
-    console.log("_getApplications", applicationArr);
+   // console.log("_getApplications", applicationArr);
 
     const applicationByuserArr = await getApplicationByuser();
-    console.log("applicationByuserArr", applicationByuserArr);
+    //console.log("applicationByuserArr", applicationByuserArr);
 
     const workFlowStatusArr = await getWorkFlowStatus();
-    console.log("_fetchWorkflowStatuses", workFlowStatusArr);
+   // console.log("_fetchWorkflowStatuses", workFlowStatusArr);
 
     const workTaskArr = await getTasks();
     let myTask = await workTaskArr.sort((a, b) =>
       a.createTime < b.createTime ? 1 : b.createTime < a.createTime ? -1 : 0
     );
-    console.log("_fetchAllTasks", myTask);
+   // console.log("_fetchAllTasks", myTask);
     setTaskData([...myTask]);
 
     taskCalculations(workTaskArr);

@@ -632,7 +632,7 @@ function LoanApplication() {
                         </Typography>
                       </label>
 
-                      {loanTypeData.map((row, key) => (
+                      {loanTypeData?.map((row, key) => (
                         <div key={key}>
                           <Box
                             sx={{ maxWidth: "100%" }}

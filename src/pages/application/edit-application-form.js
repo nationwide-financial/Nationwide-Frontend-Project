@@ -39,6 +39,7 @@ import { useState } from "react";
 import Snackbar from '@mui/material/Snackbar';
 import Alert from '@mui/material/Alert';
 import {_gatVariabels} from '../../services/variabelService.js';
+import { s3URL } from '../../utils/config'
 
 // import AvatarGroup from '@mui/material/AvatarGroup';
 import {
@@ -49,7 +50,7 @@ import {
   _getApplicationById,
   _manageTeamMembers,
 } from "../../services/applicationService.js";
-import { _getAllPlatformUserByAdmin } from "../../services/authServices.js";
+import { _getAllPlatformUserByAdmin, _getUser } from "../../services/authServices.js";
 
 function TablePaginationActions(props) {
   const theme = useTheme();
@@ -285,9 +286,11 @@ function EditApplicationForm() {
 
   const getTeamMembers = async () => {
     try {
-      const res = await _getAllPlatformUserByAdmin(1, 100);
+      const loginUser = await _getUser();
+      const res = await _getAllPlatformUserByAdmin();
       if (res?.status == 200) {
-        return res.data?.users;
+        let data = [...res.data?.users,loginUser?.data]
+        return data;
       }
     } catch (err) {
       console.log(err);
@@ -499,33 +502,13 @@ function EditApplicationForm() {
             <Stack direction="row" spacing={1}>
               <h1 className="page_header">Application Form</h1>
               <Stack direction="row" spacing={1} pb={2} bottom={15}>
-                <AvatarGroup max={4}>
-                  <Avatar alt="Remy Sharp" src="/static/images/avatar/1.jpg" />
-                  <Avatar
-                    alt="Travis Howard"
-                    src="/static/images/avatar/2.jpg"
-                  />
-                  <Avatar alt="Cindy Baker" src="/static/images/avatar/3.jpg" />
-                  <Avatar
-                    alt="Agnes Walker"
-                    src="/static/images/avatar/4.jpg"
-                  />
-                  <Avatar
-                    alt="Trevor Henderson"
-                    src="/static/images/avatar/5.jpg"
-                  />
-                  <Avatar
-                    alt="Trevor Henderson"
-                    src="/static/images/avatar/5.jpg"
-                  />
-                  <Avatar
-                    alt="Trevor Henderson"
-                    src="/static/images/avatar/5.jpg"
-                  />
-                  <Avatar
-                    alt="Trevor Henderson"
-                    src="/static/images/avatar/5.jpg"
-                  />
+                <AvatarGroup max={4} total={personName?.length}>
+                  {personName?.map((emailId,key)=>{
+                    let user = teamMembersData.filter((user)=>{return user?.PK == `USER#${emailId}`})[0]
+                    return(
+                      <Avatar key={key} alt={user?.PK.split("#")[1]} src={`${s3URL}/${user?.imageId}`} />
+                    )
+                  })}
                 </AvatarGroup>
 
                 <Link
@@ -609,18 +592,23 @@ function EditApplicationForm() {
                                           gap: 0.5,
                                         }}
                                       >
-                                        {selected.map((value) => (
-                                          <Chip
-                                            key={value}
-                                            label={value}
-                                            avatar={
-                                              <Avatar
-                                                alt="Natacha"
-                                                src="../images/img1.png"
-                                              />
-                                            }
-                                          />
-                                        ))}
+                                        {selected.map((value,key) => {
+                                          console.log("value613",value)
+                                          let user = teamMembersData.filter((user)=>{
+                                            return user?.PK == `USER#${value}`
+                                          })[0]
+                                          console.log(`userName${key}`,user)
+                                          return (
+                                            <Chip
+                                            style={{borderRadius:0,height:40}}
+                                              key={value}
+                                              label={`${user?.info?.firstName && user?.info?.lastName ? user?.info?.firstName+" "+user?.info?.lastName : user?.PK.split("#")[1]} `}
+                                              avatar={
+                                                <Avatar key={key} alt={user?.PK.split("#")[1]} src={`${s3URL}/${user?.imageId}`} />
+                                              }
+                                            />
+                                          )
+                                        })}
                                       </Box>
                                     )}
                                     MenuProps={MenuProps}
@@ -629,8 +617,10 @@ function EditApplicationForm() {
                                       <MenuItem
                                         key={key}
                                         value={object?.PK.split("#")[1] || ""}
+                                       // value={`${object?.PK.split("#")[1] || ""+ object?.info?.firstName && object?.info?.lastName ? "|"+object?.info?.firstName+" "+object?.info?.lastName : "" }`}
                                       >
-                                        {object?.PK.split("#")[1] || ""}
+                                        
+                                        {object?.PK.split("#")[1] || ""} { (object?.info?.firstName || object?.info?.lastName) && "|"} {object?.info?.firstName && object?.info?.lastName} {object?.info?.firstName && object?.info?.lastName}
                                       </MenuItem>
                                     ))}
                                   </Select>

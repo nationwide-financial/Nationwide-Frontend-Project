@@ -750,7 +750,9 @@ function ApplicationDate() {
   const getUsers = async () =>{
     try{
       const res = await _getAllPlatformUserByAdmin();
-      setUsers([...res?.data?.users])
+      const loginUser = await _getUser();
+      console.log("loginUser754",loginUser)
+      setUsers([...res?.data?.users,loginUser?.data])
       console.log("getUsers*****",res?.data?.users)
       return res?.data?.users;
     }catch(err){
@@ -891,7 +893,7 @@ function ApplicationDate() {
                 <Stack direction="row" spacing={1}>
                   <Avatar
                     alt="Remy Sharp"
-                    src="/static/images/avatar/1.jpg"
+                    src={`${s3URL}/${users?.filter((user)=>{ return user?.PK == applicationData?.updateBy})[0]?.imageId}`}
                     sx={{ width: 24, height: 24 }}
                   />{" "}
                   <span style={{ fontSize: 16, fontWeight: 500, marginTop: 2 }}>
@@ -1027,8 +1029,16 @@ function ApplicationDate() {
                             <TableCell component="th" scope="row">
                               {"Team Members"}
                             </TableCell>
+                            {console.log("1032",applicationData)}
                             <TableCell align="left" p={1}>
-                              {""}
+                            <AvatarGroup max={4} total={applicationData?.members?.length}>
+                              {applicationData?.members && applicationData?.members?.map((emailId,key)=>{
+                              let user = users.filter((user)=>{return user?.PK == `USER#${emailId}`})[0]
+                              return(
+                                <Avatar key={key} alt={user?.PK.split("#")[1]} src={`${s3URL}/${user?.imageId}`} />
+                              )
+                              })}
+                            </AvatarGroup>
                             </TableCell>
                           </TableRow>
 

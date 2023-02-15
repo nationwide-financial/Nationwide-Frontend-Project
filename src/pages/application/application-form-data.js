@@ -1,5 +1,5 @@
-import  React,{useEffect,useState} from "react";
-import { Avatar, Box, Button, Grid, Typography } from "@mui/material";
+import React, { useEffect, useState, useCallback } from "react";
+import { Box, Button, Grid, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import Paper from "@mui/material/Paper";
 import Table from "@mui/material/Table";
@@ -11,11 +11,13 @@ import NoteAltOutlinedIcon from "@mui/icons-material/NoteAltOutlined";
 import Link from "@mui/material/Link";
 import Stack from "@mui/material/Stack";
 import { useRouter } from "next/router";
-
+import { TextField } from "@mui/material";
 import { _gatSingleLoanType } from '../../services/loanTypeService.js'
-import { _fetchAllContacts  } from '../../services/contactServices.js'
-import {_gatVariabels} from '../../services/variabelService.js';
-import { Contrast } from "@mui/icons-material";
+import { _fetchContactById, _updateContactById } from '../../services/contactServices.js'
+import { _gatVariabels } from '../../services/variabelService.js';
+import { MobileDatePicker } from '@mui/x-date-pickers';
+import Snackbar from '@mui/material/Snackbar';
+import Alert from '@mui/material/Alert';
 
 const Item = styled(Paper)(({ theme }) => ({
   backgroundColor: theme.palette.mode === "dark" ? "#1A2027" : "#fff",
@@ -25,133 +27,184 @@ const Item = styled(Paper)(({ theme }) => ({
   color: theme.palette.text.secondary,
 }));
 
-// TopLeft
-
-function topleftcreateData(leftData, rightData) {
-  return { leftData, rightData };
-}
-
-const topleftrows = [
-  topleftcreateData("First Name", "Phillip"),
-  topleftcreateData("Email", "Johnsmith@gmail.com"),
-  topleftcreateData("ID Number", "555-55-5555"),
-  topleftcreateData("Street Address", "123 Apple Lane"),
-];
-
-// TopRight
-
-function toprightcreateData(leftData, rightData) {
-  return { leftData, rightData };
-}
-
-const toprightrows = [
-  toprightcreateData("Last Name", "Cooper"),
-  toprightcreateData("Phone", "(239) 555-0108"),
-  toprightcreateData("Date of Birth", "04/23/1980"),
-  toprightcreateData("Postal Code", "10004"),
-];
-
-// bottom rowws
-
-// DownLeft
-
-function downleftcreateData(leftData, rightData) {
-  return { leftData, rightData };
-}
-
-const downleftrows = [
-  downleftcreateData("Company Name", "ABC Technology"),
-  downleftcreateData("Job Title ", "Software Engineer"),
-];
-
-// DownRight
-
-function downrightcreateData(leftData, rightData) {
-  return { leftData, rightData };
-}
-
-const downrightrows = [downrightcreateData("Year at Job", "8")];
-
-const handleChange = (newValue) => {
-  setValue(newValue);
-};
-
 function ApplicationFormData() {
-  const [age, setAge] = React.useState("");
   const router = useRouter();
-
-  const handleChange = (event) => {
-    setAge(event.target.value);
+  const [openSuccessMessage, setOpenSuccessMessage] = useState(false);
+  const [message,setMessage] =useState('');
+  const handleSuccessMessage = () => {
+    setOpenSuccessMessage(true);
   };
 
-  let closeImg = {
-    cursor: "pointer",
-    float: "right",
-    marginTop: "5px",
-    width: "20px",
-  };
-  const [open, setOpen] = React.useState(false);
-  const handleClickOpen = () => {
-    setOpen(true);
+  const handleCloseSuccessMessage = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setMessage('')
+    setOpenSuccessMessage(false);
   };
 
-  const handleClose = () => {
-    setOpen(false);
-  };
-  
   const [loanType, setLoanType] = useState("");
   const [contactStr, setContactStr] = useState("");
 
   const [contactId, setcontactId] = useState('');
   const [cocontactId, setcocontactId] = useState([]);
-  const [contactData, setContactData] = useState([]);
+  
 
-  const handleContinue = (product,contact) => {
+ // application edit 
+ const [submitErr, setSubmitErr] = useState("");
+  const [switchEditMode, setSwitchEditMode] = useState(false);
+  const [contactData, setContactData] = useState({});
+
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
+  const [dob, setDob] = useState("");
+  const [idNumber, setIdNumber] = useState("");
+  const [city, setCity] = useState("");
+  const [streetAddress, setStreetAddress] = useState("");
+  const [postalCode, setPostalCode] = useState("");
+  const [province, setProvince] = useState("");
+  const [country, setCountry] = useState("");
+  const [companyName, setCompanyName] = useState("");
+  const [jobTitle, setJobTitle] = useState("");
+  const [additionalInfomations, setAdditionalInfomations] = useState({})
+
+  function getDate (dateString ){
+    const date = new Date(dateString);
+    return `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
+  } 
+  console.log("77",getDate('2023-02-26T18:30:00.000Z'))
+  const onChangeHandler = useCallback(
+    ({ target }) => {
+      setAdditionalInfomations((state) => ({ ...state, [target.name]: target.value }));
+    }, []
+  );
+  const handelSubmitContact = async (id) => {
+    try {
+      if (!firstName || firstName == "" || firstName == null) {
+        setSubmitErr("first name can not be empty !");
+      } else if (!lastName || lastName == "" || lastName == null) {
+        setSubmitErr("last name can not be empty !");
+      } else if (!email || email == "" || email == null) {
+        setSubmitErr("email can not be empty !");
+      } else if (!dob || dob == "" || dob == null) {
+        setSubmitErr("date of birth can not be empty !");
+      } else if (!idNumber || idNumber == "" || idNumber == null) {
+        setSubmitErr("ID number can not be empty !");
+      } else if (!city || city == "" || city == null) {
+        setSubmitErr("city can not be empty !");
+      } else if ( !streetAddress || streetAddress == "" || streetAddress == null) {
+        setSubmitErr("street address can not be empty !");
+      } else if (!postalCode || postalCode == "" || postalCode == null) {
+        setSubmitErr("postal code can not be empty !");
+      } else if (!province || province == "" || province == null) {
+        setSubmitErr("province code can not be empty !");
+      } else if (!country || country == "" || country == null) {
+        setSubmitErr("country code can not be empty !");
+      } else if (!phoneNumber || phoneNumber == "" || phoneNumber == null) {
+        setSubmitErr("phone number code can not be empty !");
+      } else if (!companyName || companyName == "" || companyName == null) {
+        setSubmitErr("Company Name code can not be empty !");
+      } else if (!jobTitle || jobTitle == "" || jobTitle == null) {
+        setSubmitErr("job Title code can not be empty !");
+      } else {
+        setSubmitErr("");
+        console.log("inside");
+        let body = {
+          basicInformation: {
+            firstName: firstName,
+            lastName: lastName,
+            email: email,
+            phone: phoneNumber,
+            idNumber: idNumber,
+            dob: dob,
+            streetAddress: streetAddress,
+            city: city,
+            state: province,
+            postalCode: postalCode,
+            country: country,
+          },
+          jobInformation: {
+            companyName: companyName,
+            jobTitle: jobTitle,
+          },
+          additionalInformation:{...additionalInfomations}
+        };
+        const res = await _updateContactById(id, body);
+        console.log("_updateContactById", res);
+        if (res?.status == 200) {
+          handleSuccessMessage()
+          setMessage("Updated")
+          setSwitchEditMode((switchEditMode) => !switchEditMode);
+          getContactData(contactId);
+        }
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  };
+  const handleContinue = (product, contact) => {
     let string = cocontactId.join('S')
-    cocontactId.length > 0 ? router.push(`/application/application-details?product=${product}&contact=${contact}&cocontact=${string}`) :router.push(`/application/application-details?product=${product}&contact=${contact}`)
-    
+    cocontactId.length > 0 ? router.push(`/application/application-details?product=${product}&contact=${contact}&cocontact=${string}`) : router.push(`/application/application-details?product=${product}&contact=${contact}`)
+
   };
 
-const getContactData = async(ids) =>{
-  try{
-    let contactDt=[]
-      const res = await _fetchAllContacts();
-      console.log("contactId",contactId)
-      contactDt.push(ids?.map((id)=>( res.data.Items.filter(data => data.PK == id)[0] )))
-      console.log("_fetchAllContacts",contactDt[0]);
-      setContactData([...contactDt[0]])
-  }catch(err){
-    console.log(err)
-  }
-}
-const [variableData, setVariableData] = useState([]);
-console.log("variableData.length/2",Math.round(variableData.length/2))
-  let midNo = Math.round(variableData.length/2)
-  let leftCount = variableData.length - midNo;
-  let rightCount = 0;
-  
-  const getVariables = async () =>{
-    try{
+  const getContactData = async (id) => {
+    try {
+      if (id) {
+        const res = await _fetchContactById(id);
+        console.log("320_fetchContactById",res)
+        if (res?.data?.Item && res.status == 200) {
+          setContactData(res?.data?.Item);
+
+          setPhoneNumber(res?.data?.Item?.basicInformation?.phone);
+          setFirstName(res?.data?.Item?.basicInformation?.firstName);
+          setLastName(res?.data?.Item?.basicInformation?.lastName);
+          setEmail(res?.data?.Item?.basicInformation?.email);
+          setDob(res?.data?.Item?.basicInformation?.dob);
+          setIdNumber(res?.data?.Item?.basicInformation?.idNumber);
+          setCity(res?.data?.Item?.basicInformation?.city);
+          setStreetAddress(res?.data?.Item?.basicInformation?.streetAddress);
+          setPostalCode(res?.data?.Item?.basicInformation?.postalCode);
+          setProvince(res?.data?.Item?.basicInformation?.state);
+          setCountry(res?.data?.Item?.basicInformation?.country);
+          setCompanyName(res?.data?.Item?.jobInformation?.companyName);
+          setJobTitle(res?.data?.Item?.jobInformation?.jobTitle);
+          setAdditionalInfomations(res?.data?.Item?.additionalInformation)
+        }
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const [variableData, setVariableData] = useState([]);
+  const getVariables = async () => {
+    try {
       const res = await _gatVariabels();
-      let data = await res?.data?.data?.Items.filter((variable)=>variable?.variableType == "contact")
-      data = await data.sort((a,b) => (a.createTime > b.createTime) ? 1 : ((b.createTime > a.createTime) ? -1 : 0));
+      let data = await res?.data?.data?.Items.filter((variable) => variable?.variableType == "contact")
+      data = await data.sort((a, b) => (a.createTime > b.createTime) ? 1 : ((b.createTime > a.createTime) ? -1 : 0));
       console.log(res)
       setVariableData([...data])
-    }catch(err){
+    } catch (err) {
       console.log(err)
     }
   }
+
   useEffect(() => {
-    async function getData(){
+    async function getData() {
       if (!router.isReady) return;
       getVariables();
       const query = router.query;
-      let contactString= query?.contact;
-      let coContactString= query?.cocontact;
+      let contactString = query?.contact;
+      let coContactString = query?.cocontact;
       setContactStr(contactString)
       let ids = await contactString ? contactString.split("S") : [];
-      let cocontactIds = await coContactString ? coContactString.split("S"): [];
+      console.log("173",ids[0])
+      let cocontactIds = await coContactString ? coContactString.split("S") : [];
       setcontactId(ids)
+      getContactData(ids[0])
       setcocontactId(cocontactIds)
       getContactData(ids)
       setLoanType(query.product)
@@ -161,6 +214,11 @@ console.log("variableData.length/2",Math.round(variableData.length/2))
 
   return (
     <div>
+       <Snackbar open={openSuccessMessage} autoHideDuration={6000} onClose={handleCloseSuccessMessage}>
+        <Alert onClose={handleCloseSuccessMessage} severity="success" sx={{ width:"100%" }} style={{backgroundColor:'lightgreen'}}>
+          {message}
+        </Alert>
+     </Snackbar>
       <Box>
         <Grid container>
           <Grid item xs={12}>
@@ -179,369 +237,549 @@ console.log("variableData.length/2",Math.round(variableData.length/2))
                   Personal Loan
                 </Typography>
 
-                <Grid container lineHeight={5}>
-                  <Grid xs={12}>
-                    <Typography
-                      align="left"
-                      fontWeight={700}
-                      fontSize={25}
-                      lineHeight={2}
+                <Grid item xs={12} md={6} mt={2}>
+              <Typography variant="h5" mt={3} mb={2}>
+                <span style={{ fontSize: 25, fontWeight: 700 }}>
+                  Contact Profile
+                </span>{" "}
+              </Typography>
+
+              <Stack direction="row" spacing={1}>
+                <Typography variant="h5">
+                  <span style={{ fontSize: 20, fontWeight: 700 }}>
+                    {contactData?.basicInformation?.firstName || ""}{" "}
+                    {contactData?.basicInformation?.lastName || ""}
+                  </span>{" "}
+                </Typography>
+
+                {!switchEditMode ? (
+                  <Link
+                    className="page_sub_outlineless_text_btn"
+                    style={{ textDecoration: "none", cursor: "pointer" }}
+                    onClick={() => {
+                      setSwitchEditMode((switchEditMode) => !switchEditMode);
+                    }}
+                  >
+                    <Stack
+                      direction="row"
+                      spacing={1}
+                      mt={1}
+                      style={{ fontSize: 18, fontWeight: 500 }}
                     >
-                      Contact Profile
-                    </Typography>
+                      <NoteAltOutlinedIcon mt={1} />
+                      <Typography> Edit Profile </Typography>
+                    </Stack>
+                  </Link>
+                ) : (
+                  <div style={{ marginBottom: 100, display: "flex", justifyContent: "left", margin: 20 }} >
+                    <Button variant="contained" onClick={() => { handelSubmitContact(contactData.PK)}} >
+                      Save
+                    </Button>
+                  </div>
+                )}
+              </Stack>
+            </Grid>
+            <Box sx={{ minWidth: 275 }}>
+                <Grid mt={4}>
+                <Typography
+                  align="left"
+                  style={{ fontSize: 20, fontWeight: 700 }}
+                >
+                  Basic Information
+                </Typography>
+                </Grid>
+                <Grid container spacing={2}>
+                  <Grid item xs={6}>
+                    <TableContainer style={{ backgroundColor: "transparent" }}>
+                      <Table aria-label="simple table">
+                        <TableBody>
+                          <TableRow
+                            sx={{
+                              "&:last-child td, &:last-child th": { border: 0 },
+                            }}
+                          >
+                            <TableCell
+                              component="th"
+                              scope="row"
+                              style={{
+                                fontSize: 20,
+                                fontWeight: 400,
+                                color: "#393939",
+                              }}
+                            >
+                              {"First Name"}
+                            </TableCell>
+                            <TableCell
+                              align="left"
+                              style={{
+                                fontSize: 20,
+                                fontWeight: 600,
+                                color: "#393939",
+                              }}
+                            >
+                              {switchEditMode ? <TextField
+                                  fullWidth
+                                  size="small"
+                                  margin="normal"
+                                  id="outlined-basic"
+                                  variant="outlined"
+                                  placeholder="Text"
+                                  value={firstName}
+                                  onChange={(e) => {
+                                    setFirstName(e.target.value);
+                                  }}
+                                  style={{ margin: 0 }}
+                                />:contactData?.basicInformation?.firstName || "" }
+                            </TableCell>
+                          </TableRow>    
+                          <TableRow
+                            sx={{
+                              "&:last-child td, &:last-child th": { border: 0 },
+                            }}
+                          >
+                            <TableCell
+                              component="th"
+                              scope="row"
+                              style={{
+                                fontSize: 20,
+                                fontWeight: 400,
+                                color: "#393939",
+                              }}
+                            >
+                              {"Email"}
+                            </TableCell>
+                            <TableCell
+                              align="left"
+                              style={{
+                                fontSize: 20,
+                                fontWeight: 600,
+                                color: "#393939",
+                              }}
+                            >
+                              {switchEditMode ?<TextField
+                                  fullWidth
+                                  size="small"
+                                  margin="normal"
+                                  id="outlined-basic"
+                                  variant="outlined"
+                                  placeholder="Text"
+                                  value={email}
+                                  onChange={(e) => {
+                                    setEmail(e.target.value);
+                                  }}
+                                  style={{ margin: 0 }}
+                                />:contactData?.basicInformation?.email || ""}
+                              
+                            </TableCell>
+                          </TableRow>
+
+                          <TableRow
+                            sx={{
+                              "&:last-child td, &:last-child th": { border: 0 },
+                            }}
+                          >
+                            <TableCell
+                              component="th"
+                              scope="row"
+                              style={{
+                                fontSize: 20,
+                                fontWeight: 400,
+                                color: "#393939",
+                              }}
+                            >
+                              {"ID Number"}
+                            </TableCell>
+                            <TableCell
+                              align="left"
+                              style={{
+                                fontSize: 20,
+                                fontWeight: 600,
+                                color: "#393939",
+                              }}
+                            >
+                              {switchEditMode ?<TextField
+                                  fullWidth
+                                  size="small"
+                                  margin="normal"
+                                  id="outlined-basic"
+                                  variant="outlined"
+                                  placeholder="Text"
+                                  value={idNumber}
+                                  onChange={(e) => {
+                                    setIdNumber(e.target.value);
+                                  }}
+                                  style={{ margin: 0 }}
+                                /> : contactData?.basicInformation?.idNumber || ""}
+                            </TableCell>
+                          </TableRow>
+                          <TableRow
+                            sx={{
+                              "&:last-child td, &:last-child th": { border: 0 },
+                            }}
+                          >
+                            <TableCell
+                              component="th"
+                              scope="row"
+                              style={{
+                                fontSize: 20,
+                                fontWeight: 400,
+                                color: "#393939",
+                              }}
+                            >
+                              {"Street Address"}
+                            </TableCell>
+                            <TableCell
+                              align="left"
+                              style={{
+                                fontSize: 20,
+                                fontWeight: 600,
+                                color: "#393939",
+                              }}
+                            >
+                              {switchEditMode ?<TextField
+                                  fullWidth
+                                  size="small"
+                                  margin="normal"
+                                  id="outlined-basic"
+                                  variant="outlined"
+                                  placeholder="Text"
+                                  value={streetAddress}
+                                  onChange={(e) => {
+                                    setStreetAddress(e.target.value);
+                                  }}
+                                  style={{ margin: 0 }}
+                                />: contactData?.basicInformation?.streetAddress || ""}
+                            </TableCell>
+                          </TableRow>
+                        </TableBody>
+                      </Table>
+                    </TableContainer>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <TableContainer style={{ backgroundColor: "transparent" }}>
+                      <Table aria-label="simple table">
+                        <TableBody>
+                         <TableRow
+                            sx={{
+                              "&:last-child td, &:last-child th": { border: 0 },
+                            }}
+                          >
+                            <TableCell
+                              component="th"
+                              scope="row"
+                              style={{
+                                fontSize: 20,
+                                fontWeight: 400,
+                                color: "#393939",
+                              }}
+                            >
+                              {"Last Name"}
+                            </TableCell>
+                            <TableCell
+                              align="left"
+                              style={{
+                                fontSize: 20,
+                                fontWeight: 600,
+                                color: "#393939",
+                              }}
+                            >
+                              {switchEditMode ?  <TextField
+                                  fullWidth
+                                  size="small"
+                                  margin="normal"
+                                  id="outlined-basic"
+                                  variant="outlined"
+                                  placeholder="Text"
+                                  value={lastName}
+                                  onChange={(e) => {
+                                    setLastName(e.target.value);
+                                  }}
+                                  style={{ margin: 0 }}
+                                /> : contactData?.basicInformation?.lastName || ""}
+                            </TableCell>
+                          </TableRow>
+                          <TableRow
+                            sx={{
+                              "&:last-child td, &:last-child th": { border: 0 },
+                            }}
+                          >
+                            <TableCell
+                              component="th"
+                              scope="row"
+                              style={{
+                                fontSize: 20,
+                                fontWeight: 400,
+                                color: "#393939",
+                              }}
+                            >
+                              {"Phone"}
+                            </TableCell>
+                            <TableCell
+                              align="left"
+                              style={{
+                                fontSize: 20,
+                                fontWeight: 600,
+                                color: "#393939",
+                              }}
+                            >
+                              {switchEditMode ? <TextField
+                                  fullWidth
+                                  size="small"
+                                  margin="normal"
+                                  id="outlined-basic"
+                                  variant="outlined"
+                                  placeholder="Text"
+                                  value={phoneNumber}
+                                  onChange={(e) => {
+                                    setPhoneNumber(e.target.value);
+                                  }}
+                                  style={{ margin: 0 }}
+                                /> : contactData?.basicInformation?.phone || "" }
+                            </TableCell>
+                          </TableRow>
+                          <TableRow
+                            sx={{
+                              "&:last-child td, &:last-child th": { border: 0 },
+                            }}
+                          >
+                            <TableCell
+                              component="th"
+                              scope="row"
+                              style={{
+                                fontSize: 20,
+                                fontWeight: 400,
+                                color: "#393939",
+                              }}
+                            >
+                              {"Date Of Birth"}
+                            </TableCell>
+                            <TableCell
+                              align="left"
+                              style={{
+                                fontSize: 20,
+                                fontWeight: 600,
+                                color: "#393939",
+                              }}
+                            >
+                              {switchEditMode ? <MobileDatePicker
+                                inputFormat="MM/DD/YYYY"
+                                value={dob}
+                                onChange={(event) => {console.log(event) 
+                                  setDob(event)}}
+                                renderInput={(params) => <TextField size="small" fullWidth margin="normal" {...params} error={false} />}
+                              />:getDate(contactData?.basicInformation?.dob)  || "" }
+                            </TableCell>
+                          </TableRow>
+
+                          <TableRow
+                            sx={{
+                              "&:last-child td, &:last-child th": { border: 0 },
+                            }}
+                          >
+                            <TableCell
+                              component="th"
+                              scope="row"
+                              style={{
+                                fontSize: 20,
+                                fontWeight: 400,
+                                color: "#393939",
+                              }}
+                            >
+                              {"Postal Code"}
+                            </TableCell>
+                            <TableCell
+                              align="left"
+                              style={{
+                                fontSize: 20,
+                                fontWeight: 600,
+                                color: "#393939",
+                              }}
+                            >
+                              {switchEditMode ? <TextField
+                                  fullWidth
+                                  size="small"
+                                  margin="normal"
+                                  id="outlined-basic"
+                                  variant="outlined"
+                                  placeholder="Text"
+                                  value={postalCode}
+                                  onChange={(e) => {
+                                    setPostalCode(e.target.value);
+                                  }}
+                                  style={{ margin: 0 }}
+                                /> : contactData?.basicInformation?.postalCode || "" }
+                            </TableCell>
+                          </TableRow>
+                        </TableBody>
+                      </Table>
+                    </TableContainer>
                   </Grid>
                 </Grid>
-
-                {contactData &&
-                  contactData.map((row, key) => (
-                    <Box sx={{ minWidth: 275 }} key={key}>
-                      <Grid xs={12}>
-                        <Stack direction="row" spacing={1}>
-                          <Typography
-                            variant="h5"
-                            className=" page_sub_content_header"
+                <Grid mt={4}>
+                <Typography
+                  align="left"
+                  style={{ fontSize: 20, fontWeight: 700 }}
+                >
+                  Financial Information
+                </Typography>
+                </Grid>
+                <Grid container spacing={2}>
+                  <Grid item xs={6}>
+                    <TableContainer style={{ backgroundColor: "transparent" }}>
+                      <Table aria-label="simple table">
+                        <TableBody>
+                          <TableRow
+                            sx={{
+                              "&:last-child td, &:last-child th": { border: 0 },
+                            }}
                           >
-                            <span>
-                              {" "}
-                              {row?.basicInformation?.firstName || ""}{" "}
-                              {row?.basicInformation?.lastName || ""}
-                            </span>
-                          </Typography>
-                          <Link
-                            href="#"
-                            className="page_sub_outlineless_text_btn"
+                            <TableCell
+                              component="th"
+                              scope="row"
+                              style={{
+                                fontSize: 20,
+                                fontWeight: 400,
+                                color: "#393939",
+                              }}
+                            >
+                              {"Company Name"}
+                            </TableCell>
+                            <TableCell
+                              align="left"
+                              style={{
+                                fontSize: 20,
+                                fontWeight: 600,
+                                color: "#393939",
+                              }}
+                            >
+                              {switchEditMode ? <TextField
+                                  fullWidth
+                                  size="small"
+                                  margin="normal"
+                                  id="outlined-basic"
+                                  variant="outlined"
+                                  placeholder="Text"
+                                  value={companyName}
+                                  onChange={(e) => {
+                                    setCompanyName(e.target.value);
+                                  }}
+                                  style={{ margin: 0 }}
+                                /> : contactData?.jobInformation?.companyName || "" }
+                            </TableCell>
+                          </TableRow>
+                          <TableRow
+                            sx={{
+                              "&:last-child td, &:last-child th": { border: 0 },
+                            }}
                           >
-                            <Stack direction="row" spacing={1} mt={0}>
-                              <NoteAltOutlinedIcon mt={4} />
-                              <Typography>Edit Profile</Typography>
-                            </Stack>
-                          </Link>
-                        </Stack>
-                      </Grid>
-                      <Grid mt={4}>
-                        <Typography
-                          align="left"
-                          
-                          style={{ fontSize:20, fontWeight:700 }}
-                        >
-                          Basic Information
-                        </Typography>
-                      </Grid>
-                      <Grid container spacing={2}>
-                        <Grid item xs={6}>
-                          <TableContainer
-                            style={{ backgroundColor: "transparent" }}
-                          >
-                            <Table aria-label="simple table">
-                              <TableBody>
-                                {variableData && variableData.map((variable,key)=>{
-                                 
-                                  if(leftCount>=key){
-                                    return( <TableRow key={key}
-                                      sx={{
-                                        "&:last-child td, &:last-child th": {
-                                          border: 0,
-                                        },
-                                      }}
-                                    >
-                                      <TableCell
-                                        component="th"
-                                        scope="row"
-                                        style={{ fontSize:20, fontWeight: 400}}
-                                      >
-                                        {variable?.displayName}
-                                      </TableCell>
-                                      <TableCell
-                                        align="left"
-                                      
-                                        style={{ fontSize:20, fontWeight: 600}}
-                                      >
-                                        {row?.basicInformation?.[variable?.systemName] || ""}
-                                      </TableCell>
-                                    </TableRow>)
-                                  }
-                                })}
-                               
-
-                                {/* <TableRow
-                                  sx={{
-                                    "&:last-child td, &:last-child th": {
-                                      border: 0,
-                                    },
+                            <TableCell
+                              component="th"
+                              scope="row"
+                              style={{
+                                fontSize: 20,
+                                fontWeight: 400,
+                                color: "#393939",
+                              }}
+                            >
+                              {"Job Title"}
+                            </TableCell>
+                            <TableCell
+                              align="left"
+                              style={{
+                                fontSize: 20,
+                                fontWeight: 600,
+                                color: "#393939",
+                              }}
+                            >
+                              {switchEditMode ? <TextField
+                                  fullWidth
+                                  size="small"
+                                  margin="normal"
+                                  id="outlined-basic"
+                                  variant="outlined"
+                                  placeholder="Text"
+                                  value={jobTitle}
+                                  onChange={(e) => {
+                                    setJobTitle(e.target.value);
                                   }}
-                                >
-                                  <TableCell
-                                    component="th"
-                                    scope="row"
-                                    style={{ fontSize:20, fontWeight: 400}}
-                                    
-                                  >
-                                    {"Email"}
-                                  </TableCell>
-                                  <TableCell
-                                    align="left"
-                                  
-                                    style={{ fontSize:20, fontWeight: 600}}
-                                  >
-                                    {row?.basicInformation?.email || ""}
-                                  </TableCell>
-                                </TableRow>
+                                  style={{ margin: 0 }}
+                                /> : contactData?.jobInformation?.jobTitle || "" }
+                            </TableCell>
+                          </TableRow>
+                        </TableBody>
+                      </Table>
+                    </TableContainer>
+                  </Grid>
 
+                  <Grid item xs={6}>
+                    <TableContainer style={{ backgroundColor: "transparent" }}>
+                      <Table aria-label="simple table">
+                        <TableBody>
 
-                                <TableRow
-                                  sx={{
-                                    "&:last-child td, &:last-child th": {
-                                      border: 0,
-                                    },
-                                  }}
-                                >
-                                  <TableCell
-                                    component="th"
-                                    scope="row"
-                                    style={{ fontSize:20, fontWeight: 400}}
-                                   
-                                  >
-                                    {"ID Number"}
-                                  </TableCell>
-                                  <TableCell
-                                    align="left"
-                                  
-                                    style={{ fontSize:20, fontWeight: 600}}
-                                  >
-                                    {row?.basicInformation?.idNumber || ""}
-                                  </TableCell>
-                                </TableRow>
+                        </TableBody>
+                      </Table>
+                    </TableContainer>
+                  </Grid>
+                  <Grid mt={6}></Grid>
+                </Grid>
 
-
-                                <TableRow
-                                  sx={{
-                                    "&:last-child td, &:last-child th": {
-                                      border: 0,
-                                    },
-                                  }}
-                                >
-                                  <TableCell
-                                    component="th"
-                                    scope="row"
-                                    style={{ fontSize:20, fontWeight: 400}}
-                                   
-                                  >
-                                    {"Street Address"}
-                                  </TableCell>
-                                  <TableCell
-                                    align="left"
-                                   
-                                    style={{ fontSize:20, fontWeight: 600}}
-                                  >
-                                    {row?.basicInformation?.streetAddress || ""}
-                                  </TableCell>
-                                </TableRow> */}
-                              </TableBody>
-                            </Table>
-                          </TableContainer>
-                        </Grid>
-                        <Grid item xs={6}>
-                          <TableContainer
-                            style={{ backgroundColor: "transparent" }}
-                          >
-                            <Table aria-label="simple table">
-                              <TableBody>
-                               
-                              {variableData && variableData.map((variable,key)=>{
-                                 
-                                  if(leftCount<key){
-                                    return( <TableRow key={key}
-                                      sx={{
-                                        "&:last-child td, &:last-child th": {
-                                          border: 0,
-                                        },
-                                      }}
-                                    >
-                                      <TableCell
-                                        component="th"
-                                        scope="row"
-                                        style={{ fontSize:20, fontWeight: 400}}
-                                      >
-                                        {variable?.displayName}
-                                      </TableCell>
-                                      <TableCell
-                                        align="left"
-                                      
-                                        style={{ fontSize:20, fontWeight: 600}}
-                                      >
-                                        {row?.basicInformation?.[variable?.systemName] || ""}
-                                      </TableCell>
-                                    </TableRow>)
-                                  }
-                                })}
-                            
-
-
-
-                                  {/* <TableRow
-                                  
-                                  sx={{
-                                    "&:last-child td, &:last-child th": {
-                                      border: 0,
-                                    },
-                                  }}
-                                  >
-                                  <TableCell
-                                    component="th"
-                                    scope="row"
-                                    style={{ fontSize:20, fontWeight: 400}}
-                                  >
-                                    {"Phone"}
-                                  </TableCell>
-                                  <TableCell
-                                    align="left"
-                                   style={{ fontSize:20, fontWeight: 600}}
-                                  >
-                                    {row?.basicInformation?.phone || ""}
-                                  </TableCell>
-                                </TableRow>
-
-                                <TableRow
-                                  
-                                  sx={{
-                                    "&:last-child td, &:last-child th": {
-                                      border: 0,
-                                    },
-                                  }}
-                                >
-                                  <TableCell
-                                    component="th"
-                                    scope="row"
-                                    style={{ fontSize:20, fontWeight: 400}}
-                                  >
-                                    {"Date of Birth"}
-                                  </TableCell>
-                                  <TableCell
-                                    align="left"
-                                    style={{ fontSize:20, fontWeight: 600}}
-                                  >
-                                    {row?.basicInformation?.dob || ""}
-                                  </TableCell>
-                                </TableRow>
-
-                                <TableRow
-                                  
-                                  sx={{
-                                    "&:last-child td, &:last-child th": {
-                                      border: 0,
-                                    },
-                                  }}
-                                >
-                                  <TableCell
-                                    component="th"
-                                    scope="row"
-                                    style={{ fontSize:20, fontWeight: 400}}
-                                  >
-                                    {"Postal Code"}
-                                  </TableCell>
-                                  <TableCell
-                                    align="left"
-                                    style={{ fontSize:20, fontWeight: 600}}                                  >
-                                    {row?.basicInformation?.postalCode || ""}
-                                  </TableCell> 
-                                </TableRow> */}
-
-
-
-                              </TableBody>
-                            </Table>
-                          </TableContainer>
-                        </Grid>
-                      </Grid>
-                      {/* down */}
-                      {/* <Grid mt={4}>
-                        <Typography
-                          align="left"
-                          className="page_sub_content_header"
-                        >
-                          Financial Information
-                        </Typography>
-                      </Grid> */}
-                      {/* <Grid container spacing={2}>
-                        <Grid item xs={6}>
-                          <TableContainer
-                            style={{ backgroundColor: "transparent" }}
-                          >
-                            <Table aria-label="simple table">
-                              <TableBody>
+                <Grid mt={4}>
+                <Typography
+                  align="left"
+                  style={{ fontSize: 20, fontWeight: 700 }}
+                >
+                 Additional Information
+                </Typography>
+                </Grid>
+                <Grid container spacing={2}>
+                  <Grid item xs={6}>
+                    <TableContainer style={{ backgroundColor: "transparent" }}>
+                      <Table aria-label="simple table">
+                        <TableBody>
+                          {variableData && variableData.map((variable,key)=>{
+                            return( 
+                            <TableRow key={key}
+                              sx={{
+                              "&:last-child td, &:last-child th": {
+                                border: 0,
+                              },
+                              }}
+                            >
+                              <TableCell
+                              component="th"
+                              scope="row"
+                              style={{ fontSize:20, fontWeight: 400}}
+                              >
+                              {variable?.displayName}
+                              </TableCell>
+                              <TableCell
+                              align="left"
                               
-                                  <TableRow
-                                    sx={{
-                                      "&:last-child td, &:last-child th": {
-                                        border: 0,
-                                      },
-                                    }}
-                                  >
-                                    <TableCell
-                                      component="th"
-                                      scope="row"
-                                      style={{ fontSize:20, fontWeight: 400}}
-                                                                         >
-                                      {"Company Name"}
-                                    </TableCell>
-                                    <TableCell
-                                      align="left"
-                                      style={{ fontSize:20, fontWeight: 600}}                                    >
-                                       {row?.jobInformation?.companyName || ""}
-                                    </TableCell>
-                                  </TableRow>
-
-
-                                  <TableRow
-                                    sx={{
-                                      "&:last-child td, &:last-child th": {
-                                        border: 0,
-                                      },
-                                    }}
-                                  >
-                                    <TableCell
-                                      component="th"
-                                      scope="row"
-                                      style={{ fontSize:20, fontWeight: 400}}
-                                    >
-                                      {"Job Title"}
-                                    </TableCell>
-                                    <TableCell
-                                      align="left"
-                                      style={{ fontSize:20, fontWeight: 600}}
-                                    >
-                                     {row?.jobInformation?.jobTitle || ""}
-                                    </TableCell>
-                                  </TableRow>
-                              </TableBody>
-                            </Table>
-                          </TableContainer>
-                        </Grid>
-
-                        <Grid item xs={6}>
-                          <TableContainer
-                            style={{ backgroundColor: "transparent" }}
-                          >
-                            <Table aria-label="simple table">
-                              <TableBody>
-                               
-                                  <TableRow
-                                    sx={{
-                                      "&:last-child td, &:last-child th": {
-                                        border: 0,
-                                      },
-                                    }}
-                                  >
-                                   
-                                  </TableRow>
-                               
-                              </TableBody>
-                            </Table>
-                          </TableContainer>
-                        </Grid>
-                      </Grid> */}
-                    </Box>
-                  ))}
+                              style={{ fontSize:20, fontWeight: 600}}
+                              >
+                                {switchEditMode ? <TextField
+                                  fullWidth
+                                  size="small"
+                                  margin="normal"
+                                  id="outlined-basic"
+                                  variant="outlined"
+                                  placeholder="Text"
+                                  name={variable?.systemName}
+                                  value={additionalInfomations?.[variable?.systemName]}
+                                  onChange={onChangeHandler}
+                                  style={{ margin: 0 }}
+                                /> : contactData?.additionalInformation?.[variable?.systemName] || ""}
+                              </TableCell>
+                            </TableRow>
+                            )
+                          })}	
+                        </TableBody>
+                      </Table>
+                    </TableContainer>
+                  </Grid>
+                  <Grid mt={6}></Grid>
+                </Grid>
+              </Box>
 
                 <Grid mt={6}>
                   <div
@@ -552,7 +790,7 @@ console.log("variableData.length/2",Math.round(variableData.length/2))
                       margin: 20,
                     }}
                   >
-                    <Button variant="outlined" onClick={()=> handleContinue (loanType ,contactStr)}>
+                    <Button variant="outlined" onClick={() => handleContinue(loanType, contactStr)}>
                       Continue
                     </Button>
                   </div>
@@ -561,8 +799,8 @@ console.log("variableData.length/2",Math.round(variableData.length/2))
             </Item>
           </Grid>
         </Grid>
-      </Box>
-    </div>
+      </Box >
+    </div >
   );
 }
 

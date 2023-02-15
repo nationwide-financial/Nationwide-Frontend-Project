@@ -213,10 +213,10 @@ function LoanApplication() {
   }
   const addRejection = async (id, data) => {
     try {
-      let { PK, auto, description, days } = data;
+      let { auto, description, days } = data;
       let body = {
         applicationRejection: {
-          auto: auto == "auto" ? true : false,
+          auto: auto,
           days: days,
           reason: description
         }
@@ -397,7 +397,7 @@ function LoanApplication() {
                       })}
                     </div>
                     </Stack>
-                    <Typography variant="h6" sx={{ fontWeight: 600, fontSize: 18 }}>{application?.contact?.basicInformation?.first_name} {application?.contact?.basicInformation?.last_name}</Typography>
+                    <Typography variant="h6" sx={{ fontWeight: 600, fontSize: 18 }}>{application?.contact?.basicInformation?.firstName} {application?.contact?.basicInformation?.lastName}</Typography>
                     <Stack direction='row' spacing={1} justifyContent='space-between' sx={{ color: '#a1a1a1' }}>
                       <Typography variant="p">#{application?.application?.productId.split('_')[1]}</Typography>
                       <Typography variant="p">|</Typography>
@@ -405,12 +405,12 @@ function LoanApplication() {
                     </Stack>
                     <Stack direction='row' spacing={1} justifyContent='space-between'>
                       <Typography variant="h6" sx={{ fontWeight: 600 }}>${application?.application?.applicationBasicInfo?.loan_amount}</Typography>
-                      <AvatarGroup total={application?.teamArr.length}>
-                      {application?.teamArr && application?.teamArr.map((user, key)=>{
-                        return(
-                          <Avatar style={{height:25,width:25}} key={key} alt={user?.PK.split("#")[1]} src={`${s3URL}/${user?.imageId}`} />
-                        )
-                      })}
+                      <AvatarGroup total={application?.teamArr.length} >
+                        {application?.teamArr && application?.teamArr.map((user, key)=>{
+                          return(
+                            <Avatar style={{height:25,width:25}} key={key} alt={user?.PK.split("#")[1]} src={`${s3URL}/${user?.imageId}`} />
+                          )
+                        })}
                       </AvatarGroup>
                     </Stack>
                   </Stack>
@@ -457,9 +457,10 @@ function LoanApplication() {
 
   const handleContinue = () => {
     if (coContact) {
-      router.push(`/application/application-form?product=${product}&coEnable=${1}`);
+      router.push(`/contact/add/${product}/coEnabled`);
+      // router.push(`/application/application-form?product=${product}&coEnable=${1}`);
     } else {
-      router.push(`/application/application-form?product=${product}&coEnable=${0}`);
+      router.push(`/contact/add/${product}/coDisabled`);
     }
   };
 
@@ -1045,68 +1046,18 @@ function LoanApplication() {
                       )}
                       onChange={(e, val) => {
                         setSelectedRejectionObj({
-                          PK: val?.split(" | ")[0],
-                          auto: val?.split(" | ")[1],
-                          description: val?.split(" | ")[2],
-                          days: val?.split(" | ")[3],
+                          auto: true,
+                          description: val,
+                          days: 0,
                         });
-                        setRejectionReason(val?.split(" | ")[2]);
+                        setRejectionReason(val);
                       }}
                       options={reasons?.map((reasion) => {
-                        let s = `${reasion?.PK} | ${
-                          reasion?.auto_ ? "auto" : "manual"
-                        } | ${reasion?.description} | ${reasion?.days}`;
-                        return s;
+                        return reasion?.description;
                       })}
                     ></Autocomplete>
                   </FormControl>
                 </div>
-                {/* {Object.keys(selectedRejectionObj).length > 1  && <div style={{marginTop:20}}>
-            <p>ID - {selectedRejectionObj?.PK}</p><br/>
-            <p>Rejection type - {selectedRejectionObj?.auto}</p><br/>
-            <p>Reason - {selectedRejectionObj?.description}</p><br/>
-            <p>Days - {selectedRejectionObj?.days}</p>
-          </div>}  */}
-                {/* <TextField
-            name="reason"
-            type="text"
-            onChange={(e)=>{
-              setReason(e.target.value)
-            }}
-            //value={""}
-            fullWidth
-            size="small"
-            margin="normal"
-            id="outlined-basic"
-            placeholder="Reason"
-            variant="outlined"
-            style={{width:500}}
-            multiline
-            rows={4}
-            /> */}
-                {/* <FormControlLabel
-            style={{marginLeft:0}}
-            value="start"
-            control={<Switch color="primary" />}
-            label="Auto"
-            labelPlacement="start"
-            onChange={handleChangeReasonAuto}
-          /> */}
-                {/* {checkedReasonAuto && <TextField
-            name="days"
-            type="number"
-            onChange={(e)=>{
-              setDays(e.target.value)
-            }}
-           // value={}
-            fullWidth
-            size="small"
-            margin="normal"
-            id="outlined-basic"
-            placeholder="Days"
-            variant="outlined"
-            // style={{width:500}}
-          /> } */}
               </DialogContent>
               <DialogActions>
                 <Button

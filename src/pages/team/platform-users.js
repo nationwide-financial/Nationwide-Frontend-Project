@@ -47,7 +47,7 @@ import Modal from "@mui/material/Modal";
 import MenuItem from "@mui/material/MenuItem";
 import Snackbar from '@mui/material/Snackbar';
 import Alert from '@mui/material/Alert';
-
+import { s3URL } from '../../utils/config'
 
 const style = {
   position: "absolute",
@@ -670,27 +670,28 @@ const PlatformUsers = () => {
                     }}
                     tabIndex={-1}
                   >
-                    <TableCell component="th" scope="row">
-                      {row.fname}
+                    <TableCell component="th" scope="row">   
+                        <Avatar alt={row?.PK?.split("#")[1]}  src={`${s3URL}/${row?.imageId}`} />
+                        {row?.fname}
                     </TableCell>
-                    <TableCell>{row.lname}</TableCell>
-                    <TableCell>{row.email}</TableCell>
-                    <TableCell>{row.permission}</TableCell>
-                    <TableCell>{row.phone_auth}</TableCell>
+                    <TableCell>{row?.lname}</TableCell>
+                    <TableCell>{row?.email}</TableCell>
+                    <TableCell>{row?.permission}</TableCell>
+                    <TableCell>{row?.phone_auth}</TableCell>
                     <TableCell>
-                      {row.status == "DEACTIVE" ? (
+                      {row?.status == "DEACTIVE" ? (
                         <span style={{ backgroundColor: "red" , borderRadius:'5px' }}>
-                          <span style={{margin:'3px'}}>{row.status}</span>
+                          <span style={{margin:'3px'}}>{row?.status}</span>
                           
                         </span>
-                      ) : row.status == "ACTIVE" ? (
+                      ) : row?.status == "ACTIVE" ? (
                         <span style={{ backgroundColor: "green", borderRadius:'5px'  }}>
-                         <span style={{margin:'3px'}}>{row.status}</span>
+                         <span style={{margin:'3px'}}>{row?.status}</span>
                         </span>
                       ) : (
-                        row.status == "PENDING" && (
+                        row?.status == "PENDING" && (
                           <span style={{ backgroundColor: "orange" , borderRadius:'5px' }}>
-                            <span style={{margin:'3px'}}>{row.status}</span>
+                            <span style={{margin:'3px'}}>{row?.status}</span>
                           </span>
                         )
                       )}

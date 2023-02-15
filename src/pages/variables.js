@@ -346,7 +346,7 @@ function Variable() {
         systemName: systemNameUpdate,
         dataType: dataTypeUpdate,
         description: descriptionUpdate,
-        variableType: variableType,
+        variableType: variableTypeUpdate,
         permission_: true,
       };
       if (
@@ -733,6 +733,7 @@ function Variable() {
                     <Box sx={{ maxWidth: "100%" }}>
                       <TextField
                         name="systemName"
+                        disabled
                         type="text"
                         onChange={(e) => {
                           setSystemNameUpdate(e.target.value);
@@ -768,6 +769,7 @@ function Variable() {
                           labelId="demo-simple-select-label"
                           id="demo-simple-select"
                           name="dataType"
+                          disabled
                           value={dataTypeUpdate}
                           onChange={(e) => {
                             setDataTypeUpdate(e.target.value);
@@ -813,6 +815,7 @@ function Variable() {
                           labelId="demo-simple-select-label"
                           id="demo-simple-select"
                           name="variableType"
+                          disabled
                           value={variableTypeUpdate}
                           onChange={(e) => {
                             setVariableTypeUpdate(e.target.value);

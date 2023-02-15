@@ -1,4 +1,4 @@
-import React ,{useState,useEffect}from "react";
+import React, { useState, useEffect } from "react";
 import {
   Avatar,
   Box,
@@ -48,7 +48,7 @@ const label = { inputProps: { "aria-label": "Checkbox demo" } };
 import { useRouter } from "next/router";
 import LoanAppDialogFormController from "../../components/applicationTableDialogboxFormController/loanApplicationDialogFormController";
 import { s3URL } from '../../utils/config'
-import { _getAllPlatformUserByAdmin } from '../../services/authServices'
+import { _getAllPlatformUserByAdmin, _getUser } from '../../services/authServices'
 import { _getApplications } from '../../services/applicationService';
 import { _listLabel } from '../../services/labelService'
 import { _fetchAllContacts } from '../../services/contactServices'
@@ -127,11 +127,11 @@ const card = (
 
 function ApplicationTableView() {
   // const [value, setValue] = useState("t");
-  const [tableData,setTableData]=useState([])
+  const [tableData, setTableData] = useState([])
   const [teamMembersArr, setTeamMembersArr] = useState([]);
   const router = useRouter();
   const [searchKey, setSearchKey] = useState("");
-console.log(searchKey)
+  console.log(searchKey)
   // const changeStatOfElement = () =>{
 
   // }
@@ -146,15 +146,16 @@ console.log(searchKey)
       console.log(err)
     }
   };
-  
-    const handleContinue = () => {
+
+  const handleContinue = () => {
     if (coContact) {
-      router.push(`/application/application-form?product=${product}&coEnable=${1}`);
+      router.push(`/contact/add/${product}/coEnabled`);
+      // router.push(`/application/application-form?product=${product}&coEnable=${1}`);
     } else {
-      router.push(`/application/application-form?product=${product}&coEnable=${0}`);
+      router.push(`/contact/add/${product}/coDisabled`);
     }
   };
-  
+
   const [open, setOpen] = React.useState(false);
 
   const handleClickOpen = () => {
@@ -164,7 +165,7 @@ console.log(searchKey)
     setProduct('')
     setOpen(false);
   };
-  
+
   const handelSelectProduct = (id) => {
     setProduct(id)
   }
@@ -227,88 +228,90 @@ console.log(searchKey)
     },
   }));
   async function getLabels() {
-    try{
+    try {
       const response = await _listLabel();
       // console.log("_listLabel",response);
-      return  response.data.data.Items
-      
-    }catch(err){
-      console.log(err)
-    } 
-  }
+      return response.data.data.Items
 
-  async function getTableData(){
-    try{
-      const res = await _getApplications();
-     // console.log("resresresresresres",res)
-    //  console.log(res?.data?.data?.Items)
-      let tableDt = await res?.data?.data?.Items.sort((a,b) => (a.createTime < b.createTime) ? 1 : ((b.createTime < a.createTime) ? -1 : 0));
-     
-      console.log("_getApplications",tableDt)
-      mergeDocuments(tableDt)
-    }catch(err){
+    } catch (err) {
       console.log(err)
     }
   }
 
-const mergeDocuments = async (tempApplications) =>{
-    try{
-      const res = await _getAllPlatformUserByAdmin()
+  async function getTableData() {
+    try {
+      const res = await _getApplications();
+      // console.log("resresresresresres",res)
+      //  console.log(res?.data?.data?.Items)
+      let tableDt = await res?.data?.data?.Items.sort((a, b) => (a.createTime < b.createTime) ? 1 : ((b.createTime < a.createTime) ? -1 : 0));
+
+      console.log("_getApplications", tableDt)
+      mergeDocuments(tableDt)
+    } catch (err) {
+      console.log(err)
+    }
+  }
+
+  const mergeDocuments = async (tempApplications) => {
+    try {
+      const res = await _getAllPlatformUserByAdmin();
+      const loginUser = await _getUser();
+      console.log("loginUser",loginUser?.data)
       const resContact = await _fetchAllContacts();
-      let tempUsers = res?.data?.users;
+      let tempUsers = [...res?.data?.users,loginUser?.data];
       let userIds = [];
       let teamMembers = [];
-      await tempApplications.map( async (tempApplications)=>{
-        if(tempApplications?.members){
-         await userIds.push(...tempApplications?.members)
+      await tempApplications.map(async (tempApplications) => {
+        if (tempApplications?.members) {
+          await userIds.push(...tempApplications?.members)
         }
       })
       let removedduplicatesUsers = [...new Set(userIds)];
-      await removedduplicatesUsers.map( async (id)=>{
-        let tempU = await tempUsers.filter((user)=> user?.PK == 'USER#'+id)
+      await removedduplicatesUsers.map(async (id) => {
+        let tempU = await tempUsers.filter((user) => user?.PK == 'USER#' + id)
         teamMembers.push(...tempU)
       })
       setTeamMembersArr([...teamMembers])
 
       let labelsArr = await getLabels();
-      console.log("labels",labelsArr)
+      console.log("labels", labelsArr)
 
-      let tableDataArry =[];
+      let tableDataArry = [];
       await tempApplications.map((application) => {
-        let object ={}
-        let team=[];
+        let object = {}
+        let team = [];
         let labels = [];
         let contact = {};
         object.application = application
-        if (application?.members){
-          application?.members.map((user)=>{
-            team.push(...teamMembers.filter((member)=>{ return member?.PK == 'USER#'+user}));
+        if (application?.members) {
+          application?.members.map((user) => {
+            team.push(...teamMembers.filter((member) => { return member?.PK == 'USER#' + user }));
           })
           object.teamArr = team;
         }
-        
-        if (application?.appLabel){
-          application?.appLabel.map((applabel)=>{
-            labels.push(...labelsArr.filter((label)=>{ return label?.PK == applabel}));
+
+        if (application?.appLabel) {
+          application?.appLabel.map((applabel) => {
+            labels.push(...labelsArr.filter((label) => { return label?.PK == applabel }));
           })
           object.labelArr = labels;
         }
 
-        if (application?.contactId){
-            object.contact= resContact?.data?.Items.filter((con)=>{ return con?.PK == application?.contactId[0]})[0]; 
+        if (application?.contactId) {
+          object.contact = resContact?.data?.Items.filter((con) => { return con?.PK == application?.contactId[0] })[0];
         }
         tableDataArry.push(object)
       })
       setTableData([...tableDataArry])
-    }catch(err){
+    } catch (err) {
       console.log(err)
     }
   }
 
- useEffect(() => {
-  getLoanType()
-  getTableData();
- }, []);
+  useEffect(() => {
+    getLoanType()
+    getTableData();
+  }, []);
 
 
   return (
@@ -380,8 +383,8 @@ const mergeDocuments = async (tempApplications) =>{
             <Grid container spacing={1} alignItems="flex-end">
               <Grid item xs={12}>
                 <div className={styles.search}>
-                  <SearchOutlinedIcon className={styles.icon} fontSize='medium'/>
-                  <TextField onChange={(e)=>{setSearchKey(e.target.value)}}  className={styles.input} id="input-with-icon-textfield" label="Search" variant="standard"  />
+                  <SearchOutlinedIcon className={styles.icon} fontSize='medium' />
+                  <TextField onChange={(e) => { setSearchKey(e.target.value) }} className={styles.input} id="input-with-icon-textfield" label="Search" variant="standard" />
                 </div>
               </Grid>
             </Grid>
@@ -389,8 +392,8 @@ const mergeDocuments = async (tempApplications) =>{
           {/* active-user-display-section */}
           <Grid item xs={12} md={1}>
             <AvatarGroup total={teamMembersArr.length}>
-            {teamMembersArr && teamMembersArr.map((user, key)=>{
-                return(
+              {teamMembersArr && teamMembersArr.map((user, key) => {
+                return (
                   <Avatar key={key} alt={user?.PK.split("#")[1]} src={`${s3URL}/${user?.imageId}`} />
                 )
               })}
@@ -457,7 +460,7 @@ const mergeDocuments = async (tempApplications) =>{
                         marginRight: 2,
                       }}
                       aria-label="save"
-                      onClick={()=>{
+                      onClick={() => {
                         router.push('/application/dashbord')
                       }}
                     >
@@ -489,147 +492,147 @@ const mergeDocuments = async (tempApplications) =>{
         {/*body-content  */}
         <Grid container spacing={2} mt={2}>
           <Grid item xs={12}>
-            <LoanApplicatioTable applications={tableData} searchKey={searchKey}/>
+            <LoanApplicatioTable applications={tableData} searchKey={searchKey} />
           </Grid>
         </Grid>
       </Box>
       <div>
-      <Dialog open={open} onClose={handleClose} fullWidth m={4}>
-        <Box sx={{ maxWidth: "100%" }} p={2}>
-          <BootstrapDialogTitle
-            id="customized-dialog-title"
-            onClose={handleClose}
-          >
-            <Typography
-              variant="h6"
-              style={{ fontWeight: 700, fontSize: 30 }}
+        <Dialog open={open} onClose={handleClose} fullWidth m={4}>
+          <Box sx={{ maxWidth: "100%" }} p={2}>
+            <BootstrapDialogTitle
+              id="customized-dialog-title"
+              onClose={handleClose}
             >
-              New Application
-            </Typography>
-          </BootstrapDialogTitle>
+              <Typography
+                variant="h6"
+                style={{ fontWeight: 700, fontSize: 30 }}
+              >
+                New Application
+              </Typography>
+            </BootstrapDialogTitle>
 
-          <DialogContent>
-            <FormControl
-              style={{ display: "flex", justifyContent: "center" }}
-            >
-              <label>
-                {" "}
-                <Typography
-                  variant="h6"
-                  style={{
-                    fontSize: 17,
-                    fontWeight: 700,
-                    fontStyle: "normal",
-                    marginBottom: 10,
-                  }}
-                >
-                  Selected Product
-                </Typography>
-              </label>
-
-              {loanTypeData.map((row, key) => (
-                <div key={key}>
-                  <Box
-                    sx={{ maxWidth: "100%" }}
-                    className="hover_effect"
+            <DialogContent>
+              <FormControl
+                style={{ display: "flex", justifyContent: "center" }}
+              >
+                <label>
+                  {" "}
+                  <Typography
+                    variant="h6"
+                    style={{
+                      fontSize: 17,
+                      fontWeight: 700,
+                      fontStyle: "normal",
+                      marginBottom: 10,
+                    }}
                   >
-                    <Stack spacing={2} direction="row">
-                      <Button
-                        fullWidth
-                        variant="outlined"
-                        borderColor="#393939"
-                        style={{
-                          backgroundColor:
-                            row.PK == product ? "#1478F1" : "",
-                          color:
-                            row.PK == product ? "#FFFFFF" : "#393939",
-                        }}
-                        onMouseOver={() => {
-                          backgroundColor: "#1478F1";
-                          color: "#FFFFFF";
-                        }}
-                        onClick={() => {
-                          handelSelectProduct(row.PK);
-                        }}
-                      >
-                        <Grid
-                          container
-                          display={"flex"}
-                          fontWeight={700}
+                    Selected Product
+                  </Typography>
+                </label>
+
+                {loanTypeData.map((row, key) => (
+                  <div key={key}>
+                    <Box
+                      sx={{ maxWidth: "100%" }}
+                      className="hover_effect"
+                    >
+                      <Stack spacing={2} direction="row">
+                        <Button
+                          fullWidth
+                          variant="outlined"
+                          borderColor="#393939"
+                          style={{
+                            backgroundColor:
+                              row.PK == product ? "#1478F1" : "",
+                            color:
+                              row.PK == product ? "#FFFFFF" : "#393939",
+                          }}
+                          onMouseOver={() => {
+                            backgroundColor: "#1478F1";
+                            color: "#FFFFFF";
+                          }}
+                          onClick={() => {
+                            handelSelectProduct(row.PK);
+                          }}
                         >
                           <Grid
-                            xs={6}
-                            align="left"
-                            // color={"#393939"}
-                            textTransform="capitalize"
+                            container
+                            display={"flex"}
+                            fontWeight={700}
                           >
-                            <Typography
-                              //  className="page_sub_content_header"
-                              style={{
-                                fontSize: 20,
-                                fontWeight: 700,
-                                textTransform: "capitalize",
-                              }}
-                              p={1}
+                            <Grid
+                              xs={6}
+                              align="left"
+                              // color={"#393939"}
+                              textTransform="capitalize"
                             >
-                              {row.loanName}
-                            </Typography>
-                          </Grid>{" "}
-                          <Grid xs={6} align="right" color={"#393939"}>
-                            {row.img != null && (
-                              <img
-                                src={`${s3URL}/${row.img}`}
-                                height="40"
-                                width="40"
-                              />
-                            )}
+                              <Typography
+                                //  className="page_sub_content_header"
+                                style={{
+                                  fontSize: 20,
+                                  fontWeight: 700,
+                                  textTransform: "capitalize",
+                                }}
+                                p={1}
+                              >
+                                {row.loanName}
+                              </Typography>
+                            </Grid>{" "}
+                            <Grid xs={6} align="right" color={"#393939"}>
+                              {row.img != null && (
+                                <img
+                                  src={`${s3URL}/${row.img}`}
+                                  height="40"
+                                  width="40"
+                                />
+                              )}
+                            </Grid>
                           </Grid>
-                        </Grid>
-                      </Button>
-                    </Stack>
-                  </Box>
-                  <br />
-                </div>
-              ))}
-              <label>
-                {" "}
-                <Typography variant="h6" className="check_box_label">
-                  Application Form Options
-                </Typography>
-              </label>
-              <Box sx={{ maxWidth: "100%" }}>
-                <FormGroup>
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        onChange={(e) => {
-                          setCoContact(e.target.checked);
-                        }}
-                      />
-                    }
-                    className="check_box_label_subtext"
-                    label="Include Co-Borrower Page"
-                  />
-                </FormGroup>
-              </Box>
-            </FormControl>
-          </DialogContent>
-          <div style={{ marginBottom: 100, marginLeft: 16 }}>
-            <DialogActions
-              style={{ display: "flex", justifyContent: "left" }}
-              mt={2}
-            >
-              <Button
-                variant="contained"
-                onClick={handleContinue}
-                textTransform="capitalize"
+                        </Button>
+                      </Stack>
+                    </Box>
+                    <br />
+                  </div>
+                ))}
+                <label>
+                  {" "}
+                  <Typography variant="h6" className="check_box_label">
+                    Application Form Options
+                  </Typography>
+                </label>
+                <Box sx={{ maxWidth: "100%" }}>
+                  <FormGroup>
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          onChange={(e) => {
+                            setCoContact(e.target.checked);
+                          }}
+                        />
+                      }
+                      className="check_box_label_subtext"
+                      label="Include Co-Borrower Page"
+                    />
+                  </FormGroup>
+                </Box>
+              </FormControl>
+            </DialogContent>
+            <div style={{ marginBottom: 100, marginLeft: 16 }}>
+              <DialogActions
+                style={{ display: "flex", justifyContent: "left" }}
+                mt={2}
               >
-                Continue
-              </Button>
-            </DialogActions>
-          </div>
-        </Box>
-      </Dialog>
+                <Button
+                  variant="contained"
+                  onClick={handleContinue}
+                  textTransform="capitalize"
+                >
+                  Continue
+                </Button>
+              </DialogActions>
+            </div>
+          </Box>
+        </Dialog>
       </div>
     </div>
   );

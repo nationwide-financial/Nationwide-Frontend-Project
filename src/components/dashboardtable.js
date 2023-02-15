@@ -100,7 +100,7 @@ export default function CollapsibleTable({rows=[]}) {
                   </IconButton>
                 </TableCell>
                 <TableCell component='th' scope='row' style={{fontSize:11, fontWeight:500 ,padding:0,margin:0}}>
-                  {row?.basicInformation?.first_name || ""} { " "}{row?.basicInformation?.last_name || ""}
+                  {row?.basicInformation?.firstName || ""} { " "}{row?.basicInformation?.lastName || ""}
                 </TableCell>
                 <TableCell align='right'  style={{fontSize:11, fontWeight:500 ,padding:0,margin:0}}>{row?.application?.applicationBasicInfo?.loan_amount || ""} </TableCell>
                 <TableCell align='right'  style={{fontSize:11, fontWeight:500 ,padding:0,margin:0}}>{row?.application?.status_ || ""}</TableCell>

@@ -291,6 +291,7 @@ TablePaginationActions.propTypes = {
 // ].sort((a, b) => (a.contact < b.contact ? -1 : 1));
 
 function TableNW({applications,searchKey=""}) {
+  console.log("applications294",applications)
   console.log(searchKey)
   const router = useRouter();
   const [page, setPage] = React.useState(0);
@@ -460,13 +461,13 @@ function TableNW({applications,searchKey=""}) {
                       ></div> */}
                     </div>
                     <Typography align="left" fontWeight={600}>
-                      {row?.contact?.basicInformation?.first_name || ""} {" "} {row?.contact?.basicInformation?.last_name || ""} 
+                      {row?.contact?.basicInformation?.firstName || ""} {" "} {row?.contact?.basicInformation?.lastName || ""} 
                     </Typography>
                   </React.Fragment>
                 </TableCell>
 
                 <TableCell align="center" className="remove_x_padding">
-                  {row?.application?.PK}
+                 {row?.application?.PK?.split("_")[1]}
                 </TableCell>
                 <TableCell
                   align="center"

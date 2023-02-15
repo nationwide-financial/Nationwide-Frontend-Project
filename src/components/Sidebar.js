@@ -181,6 +181,10 @@ const Sidebar = () => {
               name: "Workflow Statuses",
             },
             {
+              path: "/loan-product/teammember-assignment",
+              name: "Team Member Assignment",
+            },
+            {
               path: "/loan-product/application-label",
               name: "Application Label",
             },

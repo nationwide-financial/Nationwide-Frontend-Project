@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useContext } from "react";
 import {
   //Avatar,
   Box,
@@ -18,7 +18,7 @@ import Paper from "@mui/material/Paper";
 import FormControl from "@mui/material/FormControl";
 //import OutlinedInput from "@mui/material/OutlinedInput";
 import { useRouter } from "next/router";
-
+import { Context } from "../../context";
 import { _addApplication } from '../../services/applicationService.js'
 import { _addHistory } from '../../services/applicationHistory.js'
 import { _fetchSingleContacts } from '../../services/contactServices.js'
@@ -31,6 +31,7 @@ const Item = styled(Paper)(({ theme }) => ({
 }));
 
 import { _gatVariabels } from '../../services/variabelService.js';
+import {_getAutoAssignMember, _setActiveMember} from '../../services/common.js'
 
 
 //   const [value, setValue] = React.useState(dayjs('2014-08-18T21:11:54'));
@@ -89,6 +90,8 @@ import { _gatVariabels } from '../../services/variabelService.js';
 // };
 
 function ApplicationDetails() {
+
+  const { state, dispatch} = useContext(Context);
   const [age, setAge] = React.useState("");
   const router = useRouter();
 
@@ -112,6 +115,8 @@ function ApplicationDetails() {
   // };
   const [variable, setVariable] = useState([]);
   const [application, setApplication] = useState({});
+
+  const profile = state?.user || {}
 
   const getVariables = async () => {
     try {
@@ -207,6 +212,20 @@ function ApplicationDetails() {
       setError(inputErrors);
     }
     if(!inputErrors){
+      const auto_member = await _getAutoAssignMember();
+      const activeMember = auto_member?.data?.activeMember
+      let addmember = auto_member?.data?.members;
+
+       if (auto_member?.data?.type === 1) addmember = [state?.user?.info?.email];
+       if (auto_member?.data?.type === 2) {
+          const newActiveMember = activeMember !== null ? activeMember === addmember.length ? 0 : activeMember + 1 : 0
+          const body = {
+            activeMember: newActiveMember
+          }
+          _setActiveMember(body);
+          addmember = [addmember[newActiveMember]];
+       }
+
       const contactDetails = await _fetchSingleContacts(contactIds[0]);
       let constactFname = contactDetails?.data?.Item?.basicInformation?.firstName;
       let contactLname = contactDetails?.data?.Item?.basicInformation?.lastName;
@@ -217,7 +236,7 @@ function ApplicationDetails() {
         referralSource: referralSource,
         status_: "New Applications",
         coContact: [...cocontactIds],
-        members: [],
+        members: addmember || [],
         applicationBasicInfo: { ...application },
       };
       const res = await _addApplication(body);

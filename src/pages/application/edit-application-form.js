@@ -38,6 +38,7 @@ import MenuItem from "@mui/material/MenuItem";
 import { useState } from "react";
 import Snackbar from '@mui/material/Snackbar';
 import Alert from '@mui/material/Alert';
+import { MobileDatePicker } from '@mui/x-date-pickers';
 import {_gatVariabels} from '../../services/variabelService.js';
 import { s3URL } from '../../utils/config'
 
@@ -190,6 +191,27 @@ function EditApplicationForm() {
   const [variableData, setVariableData] = useState([]);
   let midNo = Math.round(variableData.length / 2)
   let leftCount = variableData.length - midNo;
+  const [switchEditMode, setSwitchEditMode] = useState(false);
+  const [applicationData, setApplicationData] = useState([]);
+  const [contactData, setContactData] = useState({});
+  const [cocontactData, setCocontactData] = useState([]);
+  const [teamMembersData, setTeamMembersData] = useState([]);
+
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
+  const [dob, setDob] = useState("");
+  const [idNumber, setIdNumber] = useState("");
+  const [city, setCity] = useState("");
+  const [streetAddress, setStreetAddress] = useState("");
+  const [postalCode, setPostalCode] = useState("");
+  const [province, setProvince] = useState("");
+  const [country, setCountry] = useState("");
+  const [companyName, setCompanyName] = useState("");
+  const [jobTitle, setJobTitle] = useState("");
+  const [yearAtJob, setYearAtJob] = useState("");
+  const [additionalInfomations, setAdditionalInfomations] = useState({})
 
   const [openSuccessMessage, setOpenSuccessMessage] = useState(false);
   const [message,setMessage] =useState('');
@@ -233,26 +255,7 @@ function EditApplicationForm() {
   };
 
 
-  const [switchEditMode, setSwitchEditMode] = useState(false);
-  const [applicationData, setApplicationData] = useState([]);
-  const [contactData, setContactData] = useState({});
-  const [cocontactData, setCocontactData] = useState([]);
-  const [teamMembersData, setTeamMembersData] = useState([]);
 
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [email, setEmail] = useState("");
-  const [dob, setDob] = useState("");
-  const [idNumber, setIdNumber] = useState("");
-  const [city, setCity] = useState("");
-  const [streetAddress, setStreetAddress] = useState("");
-  const [postalCode, setPostalCode] = useState("");
-  const [province, setProvince] = useState("");
-  const [country, setCountry] = useState("");
-  const [companyName, setCompanyName] = useState("");
-  const [jobTitle, setJobTitle] = useState("");
-  const [yearAtJob, setYearAtJob] = useState("");
 
   //console.log(applicationData?.members);
   const [personName, setPersonName] = useState([]);
@@ -300,12 +303,12 @@ function EditApplicationForm() {
   const getCocontactData = async (ids) => {
     try {
       if (ids) {
-        let cocontactDataArray = [];
+        let cocontactData = [];
         for (let i = 0; i < ids.length; i++) {
           const res = await _fetchContactById(ids[i]);
-          cocontactDataArray.push(res?.data?.Item);
+          cocontactData.push(res?.data?.Item);
         }
-        return cocontactDataArray;
+        return cocontactData;
       }
     } catch (err) {
       console.log(err);
@@ -316,6 +319,7 @@ function EditApplicationForm() {
     try {
       if (id) {
         const res = await _fetchContactById(id);
+        console.log("320_fetchContactById",res)
         if (res?.data?.Item && res.status == 200) {
           return res?.data?.Item;
         }
@@ -344,132 +348,132 @@ function EditApplicationForm() {
     setInitialStateOfTeam(applicationDataObject?.members);
     setApplicationData(applicationDataObject);
 
-    const contactDataArray = await getContactData(
-      applicationDataObject?.contactId[0]
-    );
-    setContactData(contactDataArray);
-
-    setContact(contactDataArray?.basicInformation)
-
-    const coContactDataArray = await getCocontactData(
-      applicationDataObject?.coContact
-    );
-    setCocontactData([...coContactDataArray]);
+    const contactData = await getContactData( applicationDataObject?.contactId[0]);
+    console.log("contactData351",contactData)
+    setContactData(contactData);
+    setAdditionalInfomations(contactData?.additionalInformation)
+    const coContactData = await getCocontactData( applicationDataObject?.cocontactData);
+    setCocontactData(coContactData);
 
     const teamMembersArray = await getTeamMembers();
-    setTeamMembersData([...teamMembersArray]);
+    setTeamMembersData(teamMembersArray);
 
-    // setPhoneNumber(contactDataArray?.basicInformation?.phone);
-    // setFirstName(contactDataArray?.basicInformation?.firstName);
-    // setLastName(contactDataArray?.basicInformation?.lastName);
-    // setEmail(contactDataArray?.basicInformation?.email);
-    // setDob(contactDataArray?.basicInformation?.dob);
-    // setIdNumber(contactDataArray?.basicInformation?.idNumber);
-    // setCity(contactDataArray?.basicInformation?.city);
-    // setStreetAddress(contactDataArray?.basicInformation?.streetAddress);
-    // setPostalCode(contactDataArray?.basicInformation?.postalCode);
-    // setProvince(contactDataArray?.basicInformation?.state);
-    // setCountry(contactDataArray?.basicInformation?.country);
-    // setCompanyName(contactDataArray?.jobInformation?.companyName);
-    // setJobTitle(contactDataArray?.jobInformation?.jobTitle);
-    // setYearAtJob("");
+    setPhoneNumber(contactData?.basicInformation?.phone);
+    setFirstName(contactData?.basicInformation?.firstName);
+    setLastName(contactData?.basicInformation?.lastName);
+    setEmail(contactData?.basicInformation?.email);
+    setDob(contactData?.basicInformation?.dob);
+    setIdNumber(contactData?.basicInformation?.idNumber);
+    setCity(contactData?.basicInformation?.city);
+    setStreetAddress(contactData?.basicInformation?.streetAddress);
+    setPostalCode(contactData?.basicInformation?.postalCode);
+    setProvince(contactData?.basicInformation?.state);
+    setCountry(contactData?.basicInformation?.country);
+    setCompanyName(contactData?.jobInformation?.companyName);
+    setJobTitle(contactData?.jobInformation?.jobTitle);
+    setYearAtJob("");
   }
 
+  function getDate (dateString ){
+    const date = new Date(dateString);
+    return `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
+  } 
   const [submitErr, setSubmitErr] = useState("");
+  
+  const onChangeHandler = useCallback(
+    ({ target }) => {
+      setAdditionalInfomations((state) => ({ ...state, [target.name]: target.value }));
+    }, []
+  );
 
-  // const handelSubmitContact = async (id) => {
-  //   try {
-  //     if (!firstName || firstName == "" || firstName == null) {
-  //       setSubmitErr("first name can not be empty !");
-  //     } else if (!lastName || lastName == "" || lastName == null) {
-  //       setSubmitErr("last name can not be empty !");
-  //     } else if (!email || email == "" || email == null) {
-  //       setSubmitErr("email can not be empty !");
-  //     } else if (!dob || dob == "" || dob == null) {
-  //       setSubmitErr("date of birth can not be empty !");
-  //     } else if (!idNumber || idNumber == "" || idNumber == null) {
-  //       setSubmitErr("ID number can not be empty !");
-  //     } else if (!city || city == "" || city == null) {
-  //       setSubmitErr("city can not be empty !");
-  //     } else if (
-  //       !streetAddress ||
-  //       streetAddress == "" ||
-  //       streetAddress == null
-  //     ) {
-  //       setSubmitErr("street address can not be empty !");
-  //     } else if (!postalCode || postalCode == "" || postalCode == null) {
-  //       setSubmitErr("postal code can not be empty !");
-  //     } else if (!province || province == "" || province == null) {
-  //       setSubmitErr("province code can not be empty !");
-  //     } else if (!country || country == "" || country == null) {
-  //       setSubmitErr("country code can not be empty !");
-  //     } else if (!phoneNumber || phoneNumber == "" || phoneNumber == null) {
-  //       setSubmitErr("phone number code can not be empty !");
-  //     } else if (!companyName || companyName == "" || companyName == null) {
-  //       setSubmitErr("Company Name code can not be empty !");
-  //     } else if (!jobTitle || jobTitle == "" || jobTitle == null) {
-  //       setSubmitErr("job Title code can not be empty !");
-  //     } else {
-  //       setSubmitErr("");
-  //       console.log("inside");
-  //       let body = {
-  //         basicInformation: {
-  //           firstName: firstName,
-  //           lastName: lastName,
-  //           email: email,
-  //           phone: phoneNumber,
-  //           idNumber: idNumber,
-  //           dob: dob,
-  //           streetAddress: streetAddress,
-  //           city: city,
-  //           state: province,
-  //           postalCode: postalCode,
-  //           country: country,
-  //         },
-  //         jobInformation: {
-  //           companyName: companyName,
-  //           jobTitle: jobTitle,
-  //         },
-  //       };
-  //       const res = await _updateContactById(id, body);
-  //       console.log("_updateContactById", res);
-  //       if (res?.status == 200) {
-  //         //alert("Updated");
-  //         handleSuccessMessage()
-  //         setMessage("Updated")
-  //         setSwitchEditMode((switchEditMode) => !switchEditMode);
-  //         getData();
-  //       }
-  //     }
-  //   } catch (err) {
-  //     console.log(err);
-  //   }
-  // };
+  console.log("additionalInfomations",additionalInfomations)
 
   const handelSubmitContact = async (id) => {
-    try { 
-      setSubmitErr(""); 
+    try {
+      if (!firstName || firstName == "" || firstName == null) {
+        setSubmitErr("first name can not be empty !");
+      } else if (!lastName || lastName == "" || lastName == null) {
+        setSubmitErr("last name can not be empty !");
+      } else if (!email || email == "" || email == null) {
+        setSubmitErr("email can not be empty !");
+      } else if (!dob || dob == "" || dob == null) {
+        setSubmitErr("date of birth can not be empty !");
+      } else if (!idNumber || idNumber == "" || idNumber == null) {
+        setSubmitErr("ID number can not be empty !");
+      } else if (!city || city == "" || city == null) {
+        setSubmitErr("city can not be empty !");
+      } else if ( !streetAddress || streetAddress == "" || streetAddress == null) {
+        setSubmitErr("street address can not be empty !");
+      } else if (!postalCode || postalCode == "" || postalCode == null) {
+        setSubmitErr("postal code can not be empty !");
+      } else if (!province || province == "" || province == null) {
+        setSubmitErr("province code can not be empty !");
+      } else if (!country || country == "" || country == null) {
+        setSubmitErr("country code can not be empty !");
+      } else if (!phoneNumber || phoneNumber == "" || phoneNumber == null) {
+        setSubmitErr("phone number code can not be empty !");
+      } else if (!companyName || companyName == "" || companyName == null) {
+        setSubmitErr("Company Name code can not be empty !");
+      } else if (!jobTitle || jobTitle == "" || jobTitle == null) {
+        setSubmitErr("job Title code can not be empty !");
+      } else {
+        setSubmitErr("");
+        console.log("inside");
         let body = {
-          basicInformation: contact
-        }
+          basicInformation: {
+            firstName: firstName,
+            lastName: lastName,
+            email: email,
+            phone: phoneNumber,
+            idNumber: idNumber,
+            dob: dob,
+            streetAddress: streetAddress,
+            city: city,
+            state: province,
+            postalCode: postalCode,
+            country: country,
+          },
+          jobInformation: {
+            companyName: companyName,
+            jobTitle: jobTitle,
+          },
+          additionalInformation:{...additionalInfomations}
+        };
         const res = await _updateContactById(id, body);
         console.log("_updateContactById", res);
         if (res?.status == 200) {
+          //alert("Updated");
           handleSuccessMessage()
           setMessage("Updated")
           setSwitchEditMode((switchEditMode) => !switchEditMode);
           getData();
         }
+      }
     } catch (err) {
       console.log(err);
     }
   };
 
-  const onChangeHandler = useCallback(
-    ({ target }) => {
-      setContact((state) => ({ ...state, [target.name]: target.value }));
-    }, []
-  );
+  // const handelSubmitContact = async (id) => {
+  //   try { 
+  //     setSubmitErr(""); 
+  //       let body = {
+  //         basicInformation: contact
+  //       }
+  //       const res = await _updateContactById(id, body);
+  //       console.log("_updateContactById", res);
+  //       if (res?.status == 200) {
+  //         handleSuccessMessage()
+  //         setMessage("Updated")
+  //         setSwitchEditMode((switchEditMode) => !switchEditMode);
+  //         getData();
+  //       }
+  //   } catch (err) {
+  //     console.log(err);
+  //   }
+  // };
+
+ 
 
   const getVariables = async () =>{
     try{
@@ -691,7 +695,7 @@ function EditApplicationForm() {
             >
               <Tab label="Contact Profile" {...a11yProps(0)} />
               <Tab label="Co-Contact Profile" {...a11yProps(1)} />
-              <Tab label="Application Details" {...a11yProps(1)} />
+              <Tab label="Application Details" {...a11yProps(2)} />
             </Tabs>
           </Box>
 
@@ -731,66 +735,68 @@ function EditApplicationForm() {
                     </Stack>
                   </Link>
                 ) : (
-                  <Link
-                    className="page_sub_outlineless_text_btn"
-                    style={{ textDecoration: "none", cursor: "pointer" }}
-                    onClick={() => {
-                      setSwitchEditMode((switchEditMode) => !switchEditMode);
-                    }}
-                  >
-                    <Stack
-                      direction="row"
-                      spacing={1}
-                      mt={1}
-                      style={{ fontSize: 18, fontWeight: 500 }}
-                    >
-                      <Typography> Back </Typography>
-                    </Stack>
-                  </Link>
+                  <div style={{ marginBottom: 100, display: "flex", justifyContent: "left", margin: 20 }} >
+                    <Button variant="contained" onClick={() => { handelSubmitContact(contactData.PK)}} >
+                      Save
+                    </Button>
+                  </div>
                 )}
               </Stack>
             </Grid>
-
-            {!switchEditMode ? (
               <Box sx={{ minWidth: 275 }}>
                 <Grid mt={4}>
-                  <Typography align="left" fontSize={20} fontWeigh={700}>
-                    Basic Information
-                  </Typography>
+                <Typography
+                  align="left"
+                  style={{ fontSize: 20, fontWeight: 700 }}
+                >
+                  Basic Information
+                </Typography>
                 </Grid>
                 <Grid container spacing={2}>
                   <Grid item xs={6}>
                     <TableContainer style={{ backgroundColor: "transparent" }}>
                       <Table aria-label="simple table">
                         <TableBody>
-                        {variableData && variableData.map((variable,key)=>{
-                                 
-                                 if(leftCount>=key){
-                                 return( <TableRow key={key}
-                                   sx={{
-                                   "&:last-child td, &:last-child th": {
-                                     border: 0,
-                                   },
-                                   }}
-                                 >
-                                   <TableCell
-                                   component="th"
-                                   scope="row"
-                                   style={{ fontSize:20, fontWeight: 400}}
-                                   >
-                                   {variable?.displayName}
-                                   </TableCell>
-                                   <TableCell
-                                   align="left"
-                                   
-                                   style={{ fontSize:20, fontWeight: 600}}
-                                   >
-                                   {contactData?.basicInformation?.[variable?.systemName] || ""}
-                                   </TableCell>
-                                 </TableRow>)
-                                 }
-                               })}
-                          {/* <TableRow
+                          <TableRow
+                            sx={{
+                              "&:last-child td, &:last-child th": { border: 0 },
+                            }}
+                          >
+                            <TableCell
+                              component="th"
+                              scope="row"
+                              style={{
+                                fontSize: 20,
+                                fontWeight: 400,
+                                color: "#393939",
+                              }}
+                            >
+                              {"First Name"}
+                            </TableCell>
+                            <TableCell
+                              align="left"
+                              style={{
+                                fontSize: 20,
+                                fontWeight: 600,
+                                color: "#393939",
+                              }}
+                            >
+                              {switchEditMode ? <TextField
+                                  fullWidth
+                                  size="small"
+                                  margin="normal"
+                                  id="outlined-basic"
+                                  variant="outlined"
+                                  placeholder="Text"
+                                  value={firstName}
+                                  onChange={(e) => {
+                                    setFirstName(e.target.value);
+                                  }}
+                                  style={{ margin: 0 }}
+                                />:contactData?.basicInformation?.firstName || "" }
+                            </TableCell>
+                          </TableRow>    
+                          <TableRow
                             sx={{
                               "&:last-child td, &:last-child th": { border: 0 },
                             }}
@@ -814,7 +820,20 @@ function EditApplicationForm() {
                                 color: "#393939",
                               }}
                             >
-                              {contactData?.basicInformation?.email || ""}
+                              {switchEditMode ?<TextField
+                                  fullWidth
+                                  size="small"
+                                  margin="normal"
+                                  id="outlined-basic"
+                                  variant="outlined"
+                                  placeholder="Text"
+                                  value={email}
+                                  onChange={(e) => {
+                                    setEmail(e.target.value);
+                                  }}
+                                  style={{ margin: 0 }}
+                                />:contactData?.basicInformation?.email || ""}
+                              
                             </TableCell>
                           </TableRow>
 
@@ -842,7 +861,19 @@ function EditApplicationForm() {
                                 color: "#393939",
                               }}
                             >
-                              {contactData?.basicInformation?.idNumber || ""}
+                              {switchEditMode ?<TextField
+                                  fullWidth
+                                  size="small"
+                                  margin="normal"
+                                  id="outlined-basic"
+                                  variant="outlined"
+                                  placeholder="Text"
+                                  value={idNumber}
+                                  onChange={(e) => {
+                                    setIdNumber(e.target.value);
+                                  }}
+                                  style={{ margin: 0 }}
+                                /> : contactData?.basicInformation?.idNumber || ""}
                             </TableCell>
                           </TableRow>
                           <TableRow
@@ -869,10 +900,21 @@ function EditApplicationForm() {
                                 color: "#393939",
                               }}
                             >
-                              {contactData?.basicInformation?.streetAddress ||
-                                ""}
+                              {switchEditMode ?<TextField
+                                  fullWidth
+                                  size="small"
+                                  margin="normal"
+                                  id="outlined-basic"
+                                  variant="outlined"
+                                  placeholder="Text"
+                                  value={streetAddress}
+                                  onChange={(e) => {
+                                    setStreetAddress(e.target.value);
+                                  }}
+                                  style={{ margin: 0 }}
+                                />: contactData?.basicInformation?.streetAddress || ""}
                             </TableCell>
-                          </TableRow> */}
+                          </TableRow>
                         </TableBody>
                       </Table>
                     </TableContainer>
@@ -881,34 +923,46 @@ function EditApplicationForm() {
                     <TableContainer style={{ backgroundColor: "transparent" }}>
                       <Table aria-label="simple table">
                         <TableBody>
-                        {variableData && variableData.map((variable,key)=>{
-                                 
-                                 if(leftCount<key){
-                                 return( <TableRow key={key}
-                                   sx={{
-                                   "&:last-child td, &:last-child th": {
-                                     border: 0,
-                                   },
-                                   }}
-                                 >
-                                   <TableCell
-                                   component="th"
-                                   scope="row"
-                                   style={{ fontSize:20, fontWeight: 400}}
-                                   >
-                                   {variable?.displayName}
-                                   </TableCell>
-                                   <TableCell
-                                   align="left"
-                                   
-                                   style={{ fontSize:20, fontWeight: 600}}
-                                   >
-                                   {contactData?.basicInformation?.[variable?.systemName] || ""}
-                                   </TableCell>
-                                 </TableRow>)
-                                 }
-                               })}	
-                          {/* <TableRow
+                         <TableRow
+                            sx={{
+                              "&:last-child td, &:last-child th": { border: 0 },
+                            }}
+                          >
+                            <TableCell
+                              component="th"
+                              scope="row"
+                              style={{
+                                fontSize: 20,
+                                fontWeight: 400,
+                                color: "#393939",
+                              }}
+                            >
+                              {"Last Name"}
+                            </TableCell>
+                            <TableCell
+                              align="left"
+                              style={{
+                                fontSize: 20,
+                                fontWeight: 600,
+                                color: "#393939",
+                              }}
+                            >
+                              {switchEditMode ?  <TextField
+                                  fullWidth
+                                  size="small"
+                                  margin="normal"
+                                  id="outlined-basic"
+                                  variant="outlined"
+                                  placeholder="Text"
+                                  value={lastName}
+                                  onChange={(e) => {
+                                    setLastName(e.target.value);
+                                  }}
+                                  style={{ margin: 0 }}
+                                /> : contactData?.basicInformation?.lastName || ""}
+                            </TableCell>
+                          </TableRow>
+                          <TableRow
                             sx={{
                               "&:last-child td, &:last-child th": { border: 0 },
                             }}
@@ -932,7 +986,19 @@ function EditApplicationForm() {
                                 color: "#393939",
                               }}
                             >
-                              {contactData?.basicInformation?.phone || ""}
+                              {switchEditMode ? <TextField
+                                  fullWidth
+                                  size="small"
+                                  margin="normal"
+                                  id="outlined-basic"
+                                  variant="outlined"
+                                  placeholder="Text"
+                                  value={phoneNumber}
+                                  onChange={(e) => {
+                                    setPhoneNumber(e.target.value);
+                                  }}
+                                  style={{ margin: 0 }}
+                                /> : contactData?.basicInformation?.phone || "" }
                             </TableCell>
                           </TableRow>
                           <TableRow
@@ -959,7 +1025,13 @@ function EditApplicationForm() {
                                 color: "#393939",
                               }}
                             >
-                              {contactData?.basicInformation?.dob || ""}
+                              {switchEditMode ? <MobileDatePicker
+                                inputFormat="MM/DD/YYYY"
+                                value={dob}
+                                onChange={(event) => {console.log(event) 
+                                  setDob(event)}}
+                                renderInput={(params) => <TextField size="small" fullWidth margin="normal" {...params} error={false} />}
+                              />: getDate(contactData?.basicInformation?.dob) || "" }
                             </TableCell>
                           </TableRow>
 
@@ -987,25 +1059,40 @@ function EditApplicationForm() {
                                 color: "#393939",
                               }}
                             >
-                              {contactData?.basicInformation?.postalCode || ""}
+                              {switchEditMode ? <TextField
+                                  fullWidth
+                                  size="small"
+                                  margin="normal"
+                                  id="outlined-basic"
+                                  variant="outlined"
+                                  placeholder="Text"
+                                  value={postalCode}
+                                  onChange={(e) => {
+                                    setPostalCode(e.target.value);
+                                  }}
+                                  style={{ margin: 0 }}
+                                /> : contactData?.basicInformation?.postalCode || "" }
                             </TableCell>
-                          </TableRow> */}
+                          </TableRow>
                         </TableBody>
                       </Table>
                     </TableContainer>
                   </Grid>
                 </Grid>
-                {/* <Grid mt={4}>
-                  <Typography align="left" fontSize={20} fontWeigh={700}>
-                    Financial Information
-                  </Typography>
-                </Grid> */}
+                <Grid mt={4}>
+                <Typography
+                  align="left"
+                  style={{ fontSize: 20, fontWeight: 700 }}
+                >
+                  Financial Information
+                </Typography>
+                </Grid>
                 <Grid container spacing={2}>
                   <Grid item xs={6}>
                     <TableContainer style={{ backgroundColor: "transparent" }}>
                       <Table aria-label="simple table">
                         <TableBody>
-                          {/* <TableRow
+                          <TableRow
                             sx={{
                               "&:last-child td, &:last-child th": { border: 0 },
                             }}
@@ -1029,10 +1116,22 @@ function EditApplicationForm() {
                                 color: "#393939",
                               }}
                             >
-                              {contactData?.jobInformation?.companyName || ""}
+                              {switchEditMode ? <TextField
+                                  fullWidth
+                                  size="small"
+                                  margin="normal"
+                                  id="outlined-basic"
+                                  variant="outlined"
+                                  placeholder="Text"
+                                  value={companyName}
+                                  onChange={(e) => {
+                                    setCompanyName(e.target.value);
+                                  }}
+                                  style={{ margin: 0 }}
+                                /> : contactData?.jobInformation?.companyName || "" }
                             </TableCell>
-                          </TableRow> */}
-                          {/* <TableRow
+                          </TableRow>
+                          <TableRow
                             sx={{
                               "&:last-child td, &:last-child th": { border: 0 },
                             }}
@@ -1056,585 +1155,8 @@ function EditApplicationForm() {
                                 color: "#393939",
                               }}
                             >
-                              {contactData?.jobInformation?.jobTitle || ""}
-                            </TableCell>
-                          </TableRow> */}
-                        </TableBody>
-                      </Table>
-                    </TableContainer>
-                  </Grid>
-
-                  <Grid item xs={6}>
-                    <TableContainer style={{ backgroundColor: "transparent" }}>
-                      <Table aria-label="simple table">
-                        <TableBody>
-                          <TableRow
-                            sx={{
-                              "&:last-child td, &:last-child th": { border: 0 },
-                            }}
-                          >
-                            {/* <TableCell
-                              component="th"
-                              scope="row"
-                              style={{
-                                fontSize: 20,
-                                fontWeight: 400,
-                                color: "#393939",
-                              }}
-                            >
-                              {"Year at Job"}
-                            </TableCell>
-                            <TableCell
-                              align="left"
-                              style={{
-                                fontSize: 20,
-                                fontWeight: 600,
-                                color: "#393939",
-                              }}
-                            >
-                              {""}
-                            </TableCell> */}
-                          </TableRow>
-                        </TableBody>
-                      </Table>
-                    </TableContainer>
-                  </Grid>
-                  <Grid mt={6}></Grid>
-                </Grid>
-              </Box>
-            ) : (
-              <div>
-                <Box sx={{ minWidth: 275 }}>
-                  <Grid mt={4}>
-                    <Typography align="left" fontSize={20} fontWeigh={700}>
-                      Basic Information
-                    </Typography>
-                  </Grid>
-                  <Grid container spacing={2}>
-                    <Grid item xs={6}>
-                      <TableContainer
-                        style={{ backgroundColor: "transparent" }}
-                      >
-                        <Table aria-label="simple table">
-                          <TableBody>
-                          {variableData && variableData.map((variable,key)=>{
-                                 
-                                 if(leftCount>=key){
-                                 return( <TableRow key={key}
-                                   sx={{
-                                   "&:last-child td, &:last-child th": {
-                                     border: 0,
-                                   },
-                                   }}
-                                 >
-                                   <TableCell
-                                   component="th"
-                                   scope="row"
-                                   style={{ fontSize:20, fontWeight: 400}}
-                                   >
-                                   {variable?.displayName}
-                                   </TableCell>
-                                   <TableCell
-                                    align="left"
-                                    style={{
-                                      fontSize: 20,
-                                      fontWeight: 600,
-                                      color: "#393939",
-                                    }}
-                                  >
-                                    <TextField
-                                      fullWidth
-                                      name={variable?.systemName}
-                                      size="small"
-                                      margin="normal"
-                                      id="outlined-basic"
-                                      variant="outlined"
-                                      placeholder="Text"
-                                      value={contact && contact[`${variable?.systemName}`] }
-                                      onChange={onChangeHandler}
-                                      style={{ margin: 0 }}
-                                    />
-                                    </TableCell>
-                                 </TableRow>)
-                                 }
-                               })}
-                            {/* <TableRow
-                              sx={{
-                                "&:last-child td, &:last-child th": {
-                                  border: 0,
-                                },
-                              }}
-                            >
-                              <TableCell
-                                component="th"
-                                scope="row"
-                                style={{
-                                  fontSize: 20,
-                                  fontWeight: 400,
-                                  color: "#393939",
-                                }}
-                              >
-                                {"First Name"}
-                              </TableCell>
-                              <TableCell
-                                align="left"
-                                style={{
-                                  fontSize: 20,
-                                  fontWeight: 600,
-                                  color: "#393939",
-                                }}
-                              >
-                                <TextField
+                              {switchEditMode ? <TextField
                                   fullWidth
-                                  autoFocus
-                                  size="small"
-                                  margin="normal"
-                                  id="outlined-basic"
-                                  variant="outlined"
-                                  placeholder="Text"
-                                  value={firstName}
-                                  onChange={(e) => {
-                                    setFirstName(e.target.value);
-                                  }}
-                                  style={{ margin: 0 }}
-                                />
-                              </TableCell>
-                            </TableRow> */}
-                            {/* <TableRow
-                              sx={{
-                                "&:last-child td, &:last-child th": {
-                                  border: 0,
-                                },
-                              }}
-                            >
-                              <TableCell
-                                component="th"
-                                scope="row"
-                                style={{
-                                  fontSize: 20,
-                                  fontWeight: 400,
-                                  color: "#393939",
-                                }}
-                              >
-                                {"Email"}
-                              </TableCell>
-                              <TableCell
-                                align="left"
-                                style={{
-                                  fontSize: 20,
-                                  fontWeight: 600,
-                                  color: "#393939",
-                                }}
-                              >
-                                <TextField
-                                  fullWidth
-                                  autoFocus
-                                  size="small"
-                                  margin="normal"
-                                  id="outlined-basic"
-                                  variant="outlined"
-                                  placeholder="Text"
-                                  value={email}
-                                  onChange={(e) => {
-                                    setEmail(e.target.value);
-                                  }}
-                                  style={{ margin: 0 }}
-                                />
-                              </TableCell>
-                            </TableRow>
-                            <TableRow
-                              sx={{
-                                "&:last-child td, &:last-child th": {
-                                  border: 0,
-                                },
-                              }}
-                            >
-                              <TableCell
-                                component="th"
-                                scope="row"
-                                style={{
-                                  fontSize: 20,
-                                  fontWeight: 400,
-                                  color: "#393939",
-                                }}
-                              >
-                                {"ID Number"}
-                              </TableCell>
-                              <TableCell
-                                align="left"
-                                style={{
-                                  fontSize: 20,
-                                  fontWeight: 600,
-                                  color: "#393939",
-                                }}
-                              >
-                                <TextField
-                                  fullWidth
-                                  autoFocus
-                                  size="small"
-                                  margin="normal"
-                                  id="outlined-basic"
-                                  variant="outlined"
-                                  placeholder="Text"
-                                  value={idNumber}
-                                  onChange={(e) => {
-                                    setIdNumber(e.target.value);
-                                  }}
-                                  style={{ margin: 0 }}
-                                />
-                              </TableCell>
-                            </TableRow>
-                            <TableRow
-                              sx={{
-                                "&:last-child td, &:last-child th": {
-                                  border: 0,
-                                },
-                              }}
-                            >
-                              <TableCell
-                                component="th"
-                                scope="row"
-                                style={{
-                                  fontSize: 20,
-                                  fontWeight: 400,
-                                  color: "#393939",
-                                }}
-                              >
-                                {"Street Address"}
-                              </TableCell>
-                              <TableCell
-                                align="left"
-                                style={{
-                                  fontSize: 20,
-                                  fontWeight: 600,
-                                  color: "#393939",
-                                }}
-                              >
-                                <TextField
-                                  fullWidth
-                                  autoFocus
-                                  size="small"
-                                  margin="normal"
-                                  id="outlined-basic"
-                                  variant="outlined"
-                                  placeholder="Text"
-                                  value={streetAddress}
-                                  onChange={(e) => {
-                                    setStreetAddress(e.target.value);
-                                  }}
-                                  style={{ margin: 0 }}
-                                />
-                              </TableCell>
-                            </TableRow> */}
-                          </TableBody>
-                        </Table>
-                      </TableContainer>
-                    </Grid>
-                    <Grid item xs={6}>
-                      <TableContainer
-                        style={{ backgroundColor: "transparent" }}
-                      >
-                        <Table aria-label="simple table">
-                          <TableBody>
-                          {variableData && variableData.map((variable,key)=>{
-                                 
-                                 if(leftCount<key){
-                                 return( <TableRow key={key}
-                                   sx={{
-                                   "&:last-child td, &:last-child th": {
-                                     border: 0,
-                                   },
-                                   }}
-                                 >
-                                   <TableCell
-                                   component="th"
-                                   scope="row"
-                                   style={{ fontSize:20, fontWeight: 400}}
-                                   >
-                                   {variable?.displayName}
-                                   </TableCell>
-                                   <TableCell
-                                    align="left"
-                                    style={{
-                                      fontSize: 20,
-                                      fontWeight: 600,
-                                      color: "#393939",
-                                    }}
-                                  >
-                                    <TextField
-                                      fullWidth
-                                      name={variable?.systemName} 
-                                      size="small"
-                                      margin="normal"
-                                      id="outlined-basic"
-                                      variant="outlined"
-                                      placeholder="Text"
-                                      value={contact && contact[`${variable?.systemName}`] }
-                                      onChange={onChangeHandler}
-                                      style={{ margin: 0 }}
-                                    />
-                                  </TableCell>
-                                 </TableRow>)
-                                 }
-                               })}	
-                            {/* <TableRow
-                              sx={{
-                                "&:last-child td, &:last-child th": {
-                                  border: 0,
-                                },
-                              }}
-                            >
-                              <TableCell
-                                component="th"
-                                scope="row"
-                                style={{
-                                  fontSize: 20,
-                                  fontWeight: 400,
-                                  color: "#393939",
-                                }}
-                              >
-                                {"Last Name"}
-                              </TableCell>
-                              <TableCell
-                                align="left"
-                                style={{
-                                  fontSize: 20,
-                                  fontWeight: 600,
-                                  color: "#393939",
-                                }}
-                              >
-                                <TextField
-                                  fullWidth
-                                  autoFocus
-                                  size="small"
-                                  margin="normal"
-                                  id="outlined-basic"
-                                  variant="outlined"
-                                  placeholder="Text"
-                                  value={lastName}
-                                  onChange={(e) => {
-                                    setLastName(e.target.value);
-                                  }}
-                                  style={{ margin: 0 }}
-                                />
-                              </TableCell>
-                            </TableRow> */}
-                            {/* <TableRow
-                              sx={{
-                                "&:last-child td, &:last-child th": {
-                                  border: 0,
-                                },
-                              }}
-                            >
-                              <TableCell
-                                component="th"
-                                scope="row"
-                                style={{
-                                  fontSize: 20,
-                                  fontWeight: 400,
-                                  color: "#393939",
-                                }}
-                              >
-                                {"Phone"}
-                              </TableCell>
-                              <TableCell
-                                align="left"
-                                style={{
-                                  fontSize: 20,
-                                  fontWeight: 600,
-                                  color: "#393939",
-                                }}
-                              >
-                                <TextField
-                                  fullWidth
-                                  autoFocus
-                                  size="small"
-                                  margin="normal"
-                                  id="outlined-basic"
-                                  variant="outlined"
-                                  placeholder="Text"
-                                  value={phoneNumber}
-                                  onChange={(e) => {
-                                    setPhoneNumber(e.target.value);
-                                  }}
-                                  style={{ margin: 0 }}
-                                />
-                              </TableCell>
-                            </TableRow>
-                            <TableRow
-                              sx={{
-                                "&:last-child td, &:last-child th": {
-                                  border: 0,
-                                },
-                              }}
-                            >
-                              <TableCell
-                                component="th"
-                                scope="row"
-                                style={{
-                                  fontSize: 20,
-                                  fontWeight: 400,
-                                  color: "#393939",
-                                }}
-                              >
-                                {"Date Of Birth"}
-                              </TableCell>
-                              <TableCell
-                                align="left"
-                                style={{
-                                  fontSize: 20,
-                                  fontWeight: 600,
-                                  color: "#393939",
-                                }}
-                              >
-                                <TextField
-                                  fullWidth
-                                  autoFocus
-                                  size="small"
-                                  margin="normal"
-                                  id="outlined-basic"
-                                  variant="outlined"
-                                  placeholder="Text"
-                                  value={dob}
-                                  onChange={(e) => {
-                                    setDob(e.target.value);
-                                  }}
-                                  style={{ margin: 0 }}
-                                />
-                              </TableCell>
-                            </TableRow>
-                            <TableRow
-                              sx={{
-                                "&:last-child td, &:last-child th": {
-                                  border: 0,
-                                },
-                              }}
-                            >
-                              <TableCell
-                                component="th"
-                                scope="row"
-                                style={{
-                                  fontSize: 20,
-                                  fontWeight: 400,
-                                  color: "#393939",
-                                }}
-                              >
-                                {"Postal Code"}
-                              </TableCell>
-                              <TableCell
-                                align="left"
-                                style={{
-                                  fontSize: 20,
-                                  fontWeight: 600,
-                                  color: "#393939",
-                                }}
-                              >
-                                <TextField
-                                  fullWidth
-                                  autoFocus
-                                  size="small"
-                                  margin="normal"
-                                  id="outlined-basic"
-                                  variant="outlined"
-                                  placeholder="Text"
-                                  value={postalCode}
-                                  onChange={(e) => {
-                                    setPostalCode(e.target.value);
-                                  }}
-                                  style={{ margin: 0 }}
-                                />
-                              </TableCell>
-                            </TableRow> */}
-                          </TableBody>
-                        </Table>
-                      </TableContainer>
-                    </Grid>
-                  </Grid>
-                  {/* down */}
-                  {/* <Grid mt={4}>
-                    <Typography align="left" fontSize={20} fontWeigh={700}>
-                      Financial Information
-                    </Typography>
-                  </Grid> */}
-                  <Grid container spacing={2}>
-                    <Grid item xs={6}>
-                      <TableContainer
-                        style={{ backgroundColor: "transparent" }}
-                      >
-                        <Table aria-label="simple table">
-                          <TableBody>
-                            {/* <TableRow
-                              sx={{
-                                "&:last-child td, &:last-child th": {
-                                  border: 0,
-                                },
-                              }}
-                            >
-                              <TableCell
-                                component="th"
-                                scope="row"
-                                style={{
-                                  fontSize: 20,
-                                  fontWeight: 400,
-                                  color: "#393939",
-                                }}
-                              >
-                                {"Company Name"}
-                              </TableCell>
-                              <TableCell
-                                align="left"
-                                style={{
-                                  fontSize: 20,
-                                  fontWeight: 600,
-                                  color: "#393939",
-                                }}
-                              >
-                                <TextField
-                                  fullWidth
-                                  autoFocus
-                                  size="small"
-                                  margin="normal"
-                                  id="outlined-basic"
-                                  variant="outlined"
-                                  placeholder="Text"
-                                  value={companyName}
-                                  onChange={(e) => {
-                                    setCompanyName(e.target.value);
-                                  }}
-                                  style={{ margin: 0 }}
-                                />
-                              </TableCell>
-                            </TableRow> */}
-
-                            {/* <TableRow
-                              sx={{
-                                "&:last-child td, &:last-child th": {
-                                  border: 0,
-                                },
-                              }}
-                            >
-                              <TableCell
-                                component="th"
-                                scope="row"
-                                style={{
-                                  fontSize: 20,
-                                  fontWeight: 400,
-                                  color: "#393939",
-                                }}
-                              >
-                                {"Job Title"}
-                              </TableCell>
-                              <TableCell
-                                align="left"
-                                style={{
-                                  fontSize: 20,
-                                  fontWeight: 600,
-                                  color: "#393939",
-                                }}
-                              >
-                                <TextField
-                                  fullWidth
-                                  autoFocus
                                   size="small"
                                   margin="normal"
                                   id="outlined-basic"
@@ -1645,90 +1167,84 @@ function EditApplicationForm() {
                                     setJobTitle(e.target.value);
                                   }}
                                   style={{ margin: 0 }}
-                                />
-                              </TableCell>
-                            </TableRow> */}
-                          </TableBody>
-                        </Table>
-                      </TableContainer>
-                    </Grid>
+                                /> : contactData?.jobInformation?.jobTitle || "" }
+                            </TableCell>
+                          </TableRow>
+                        </TableBody>
+                      </Table>
+                    </TableContainer>
+                  </Grid>
 
-                    <Grid item xs={6}>
-                      <TableContainer
-                        style={{ backgroundColor: "transparent" }}
-                      >
-                        <Table aria-label="simple table">
-                          <TableBody>
-                            <TableRow
+                  <Grid item xs={6}>
+                  <p style={{ color: "red" }}> {submitErr} </p>
+                    <TableContainer style={{ backgroundColor: "transparent" }}>
+                      <Table aria-label="simple table">
+                        <TableBody>
+
+                        </TableBody>
+                      </Table>
+                    </TableContainer>
+                  </Grid>
+                  <Grid mt={6}></Grid>
+                </Grid>
+
+                <Grid mt={4}>
+                <Typography
+                  align="left"
+                  style={{ fontSize: 20, fontWeight: 700 }}
+                >
+                 Additional Information
+                </Typography>
+                </Grid>
+                <Grid container spacing={2}>
+                  <Grid item xs={6}>
+                    <TableContainer style={{ backgroundColor: "transparent" }}>
+                      <Table aria-label="simple table">
+                        <TableBody>
+                          {variableData && variableData.map((variable,key)=>{
+                            return( 
+                            <TableRow key={key}
                               sx={{
-                                "&:last-child td, &:last-child th": {
-                                  border: 0,
-                                },
+                              "&:last-child td, &:last-child th": {
+                                border: 0,
+                              },
                               }}
                             >
-                              {/* <TableCell
-                                component="th"
-                                scope="row"
-                                style={{
-                                  fontSize: 20,
-                                  fontWeight: 400,
-                                  color: "#393939",
-                                }}
+                              <TableCell
+                              component="th"
+                              scope="row"
+                              style={{ fontSize:20, fontWeight: 400}}
                               >
-                                {"Year at Job"}
+                              {variable?.displayName}
                               </TableCell>
                               <TableCell
-                                align="left"
-                                style={{
-                                  fontSize: 20,
-                                  fontWeight: 600,
-                                  color: "#393939",
-                                }}
+                              align="left"
+                              
+                              style={{ fontSize:20, fontWeight: 600}}
                               >
-                                <TextField
+                                {switchEditMode ? <TextField
                                   fullWidth
-                                  autoFocus
                                   size="small"
                                   margin="normal"
                                   id="outlined-basic"
                                   variant="outlined"
                                   placeholder="Text"
-                                  value={yearAtJob}
-                                  onChange={(e) => {
-                                    setYearAtJob(e.target.value);
-                                  }}
+                                  name={variable?.systemName}
+                                  value={additionalInfomations?.[variable?.systemName]}
+                                  onChange={onChangeHandler}
                                   style={{ margin: 0 }}
-                                />
-                              </TableCell> */}
+                                /> : contactData?.additionalInformation?.[variable?.systemName] || ""}
+                              </TableCell>
                             </TableRow>
-                          </TableBody>
-                        </Table>
-                      </TableContainer>
-                    </Grid>
-                    <Grid mt={6}>
-                      <p style={{ color: "red" }}> {submitErr} </p>
-                      <div
-                        style={{
-                          marginBottom: 100,
-                          display: "flex",
-                          justifyContent: "left",
-                          margin: 20,
-                        }}
-                      >
-                        <Button
-                          onClick={() => {
-                            handelSubmitContact(contactData.PK);
-                          }}
-                          variant="outlined"
-                        >
-                          Save
-                        </Button>
-                      </div>
-                    </Grid>
+                            )
+                          })}	
+                        </TableBody>
+                      </Table>
+                    </TableContainer>
                   </Grid>
-                </Box>
-              </div>
-            )}
+                  <Grid mt={6}></Grid>
+                </Grid>
+              </Box>
           </TabPanel>
         </Box>
       </Box>

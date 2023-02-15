@@ -31,7 +31,7 @@ const MyAccount = () => {
     const[designation,setDesignation] = useState("");
 
     useEffect(() => {
-        console.log("state",state)
+        console.log("state",state.user)
         setProfileInfo({
             id: state?.user?.PK?.split('#')[1],
             email: state?.user?.info?.email,
@@ -399,7 +399,7 @@ const MyAccount = () => {
         console.log(error);
     }
     };
-
+    
     return (
         <div style={{ padding: "10px 20px", backgroundColor: "#fff" }}>
             {/* <style>{styles}</style> */}

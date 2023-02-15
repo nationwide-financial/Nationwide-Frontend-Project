@@ -46,7 +46,7 @@ import Image from "next/image";
 import { useState } from "react";
 import { _fetchAllContacts, _deleteContact } from "../../services/contactServices";
 import Link from "next/link";
-import {_gatVariabels} from '../../services/variabelService.js';
+import { _gatVariabels } from '../../services/variabelService.js';
 import { _getAllPlatformUserByAdmin } from '../../services/authServices'
 import { s3URL } from '../../utils/config'
 
@@ -161,26 +161,26 @@ function Contact() {
   const [loading, setLoading] = useState(false);
   const [trigger, setTrigger] = useState(0);
   const [users, setUsers] = useState([]);
-  
+
 
   const fetchData = async () => {
     setLoading(true);
     const response = await _fetchAllContacts();
     setLoading(false);
     if (response?.status === 200) {
-      let tableDt = await response?.data?.Items.sort((a,b) => (a.createTime < b.createTime) ? 1 : ((b.createTime < a.createTime) ? -1 : 0));
+      let tableDt = await response?.data?.Items.sort((a, b) => (a.createTime < b.createTime) ? 1 : ((b.createTime < a.createTime) ? -1 : 0));
       setContactData([...tableDt]);
     }
   }
   const [variableData, setVariableData] = useState([]);
-  const getVariables = async () =>{
-    try{
+  const getVariables = async () => {
+    try {
       const res = await _gatVariabels();
-      let data = await res?.data?.data?.Items.filter((variable)=>variable?.variableType == "contact")
-      data = await data.sort((a,b) => (a.createTime > b.createTime) ? 1 : ((b.createTime > a.createTime) ? -1 : 0));
+      let data = await res?.data?.data?.Items.filter((variable) => variable?.variableType == "contact")
+      data = await data.sort((a, b) => (a.createTime > b.createTime) ? 1 : ((b.createTime > a.createTime) ? -1 : 0));
       console.log(res)
       setVariableData([...data])
-    }catch(err){
+    } catch (err) {
       console.log(err)
     }
   }
@@ -227,7 +227,7 @@ function Contact() {
   };
 
   // table-related---
-  const [ searchKey,setSearchKey]=useState('');
+  const [searchKey, setSearchKey] = useState('');
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
   const [selected, setSelected] = React.useState();
@@ -402,15 +402,15 @@ function Contact() {
                     >
                       <TableHead>
                         <TableRow>
-                        {variableData && variableData.map((variable,key)=>{
-                        return( <TableCell key={key}
-                          align="left"
-                          style={{ fontSize: 14, fontWeight: 700 }}
-                        >
-                          {variable?.displayName}
-                        </TableCell>)
-                      })}
-                          {/* <TableCell
+                          {/* {variableData && variableData.map((variable, key) => {
+                            return (<TableCell key={key}
+                              align="left"
+                              style={{ fontSize: 14, fontWeight: 700 }}
+                            >
+                              {variable?.displayName}
+                            </TableCell>)
+                          })} */}
+                          <TableCell
                             align="left"
                             style={{ fontSize: 14, fontWeight: 700 }}
                           >
@@ -433,7 +433,7 @@ function Contact() {
                             style={{ fontSize: 14, fontWeight: 700 }}
                           >
                             EMAIL
-                          </TableCell> */}
+                          </TableCell>
                           <TableCell
                             align="left"
                             style={{ fontSize: 14, fontWeight: 700 }}
@@ -471,7 +471,7 @@ function Contact() {
                                 key={row.name}
                                 onClick={() => handleClickContact(row.PK)}
                               >
-                                {/* <TableCell component="th" scope="row">
+                                <TableCell component="th" scope="row">
                                   {basicInfo.firstName +
                                     " " +
                                     basicInfo.lastName}
@@ -484,10 +484,10 @@ function Contact() {
                                 </TableCell>
                                 <TableCell align="left">
                                   {basicInfo.email}
-                                </TableCell> */}
-                                {variableData && variableData.map((variable, key)=>{
-                                  return(<TableCell key={key} align="left">{basicInfo[variable?.systemName]}</TableCell> )
-                                })}
+                                </TableCell>
+                                {/* {variableData && variableData.map((variable, key) => {
+                                  return (<TableCell key={key} align="left">{basicInfo[variable?.systemName]}</TableCell>)
+                                })} */}
                                 <TableCell align="left">
                                   {moment(row.createTime).format("YYYY-MM-DD")}
                                 </TableCell>

@@ -8,7 +8,7 @@ import MenuItem from "@mui/material/MenuItem";
 import {   Avatar, Box } from "@mui/material";
 import Chip from "@mui/material/Chip";
 import AvatarGroup from "@mui/material/AvatarGroup";
-
+import { s3URL } from '../../utils/config'
 const defaultTask = {
     description: '',
     assignedTo: [],
@@ -17,7 +17,7 @@ const defaultTask = {
     editable: false
 }
 
-const ApplicationTaskPopup = ({ open, onClose, applicationId, team, applicationData, onClickCreate, error }) => {
+const ApplicationTaskPopup = ({users, open, onClose, applicationId, team, applicationData, onClickCreate, error }) => {
     
     console.log("team",team)
     const [taskData, setTaskData] = useState(defaultTask);
@@ -106,16 +106,13 @@ const ApplicationTaskPopup = ({ open, onClose, applicationId, team, applicationD
                         <label style={{ marginBottom: 6 }}>Description</label>
                         <TextField onChange={(e) => handleUpdate('descripition', e.target.value)} size="small" value={taskData.description} />
                     </FormControl>
-                    <div style={{ marginTop: "20px" ,width:500}}>
-                        <FormControl sx={{ m: 1, width: 580 }}>
-                        {/* <InputLabel id="demo-multiple-chip-label">Chip</InputLabel> */}
+                    <div style={{ marginTop: "20px"}}>
+                        <FormControl sx={{width:"100%"}}>
                         <Select
-                            // labelId="demo-multiple-chip-label"
                             id="demo-multiple-chip"
                             multiple
                             value={personName}
                             onChange={handleChangeEditTeamMember}
-                            // input={<OutlinedInput id="select-multiple-chip" label="Chip" />}
                             renderValue={(selected) => (
                             <Box
                                 sx={{
@@ -128,11 +125,9 @@ const ApplicationTaskPopup = ({ open, onClose, applicationId, team, applicationD
                                 <Chip
                                     key={value}
                                     label={value}
+                                    style={{ borderRadius:0 }}
                                     avatar={
-                                    <Avatar
-                                        alt="Natacha"
-                                        src="../images/img1.png"
-                                    />
+                                        <Avatar alt={value} src={`${s3URL}/${users?.filter((user)=>{ return user?.PK == `USER#${value}`})[0]?.imageId}`} />
                                     }
                                 />
                                 ))}

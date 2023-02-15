@@ -5,6 +5,8 @@ import "../styles/globals.css";
 import AdminLayout from "../Layouts/AdminLayout";
 import NormalLayout from "../Layouts/NormalLayout";
 import { Provider } from "../context";
+import { LocalizationProvider } from "@mui/x-date-pickers";
+import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment';
 
 const layouts = {
   AdminLayout: AdminLayout,
@@ -15,11 +17,13 @@ function App({ Component, pageProps }) {
   const Layout = layouts[Component.layout] || ((children) => <>{children}</>);
 
   return (
-    <Provider>
-      <Layout>
-        <Component {...pageProps} />
-      </Layout>
-    </Provider>
+    <LocalizationProvider dateAdapter={AdapterMoment}>
+      <Provider>
+        <Layout>
+          <Component {...pageProps} />
+        </Layout>
+      </Provider>
+    </LocalizationProvider>
   );
 }
 

@@ -370,13 +370,20 @@ function ApplicationDate() {
   };
 
   const [noteList, setNoteList] = useState([]);
+  const [noteListRemoveCreatorDuplicates, setNoteListRemoveCreatorDuplicates] = useState([]);
+
   const getNotesByapplicationId = async (id) => {
     try {
+      const seen = new Set();
       const res = await _getApplicationNotesByApplicationId(id);
       if (res?.status == 200) {
-        // console.log(res)
         setNoteList([...res?.data?.data?.Items]);
-        //  console.log("getNotesByapplicationId***********",noteList);
+        const filteredArr = res?.data?.data?.Items?.filter(el => {
+          const duplicate = seen.has(el.creator);
+          seen.add(el.creator);
+          return !duplicate;
+        });
+        setNoteListRemoveCreatorDuplicates([...filteredArr])
       }
     } catch (err) {
       console.log(err);
@@ -384,13 +391,22 @@ function ApplicationDate() {
   };
 
   const [historyList, setHistoryList] = useState([]);
+  const [historyListRemoveCreatorDuplicates, setHistoryListRemoveCreatorDuplicates] = useState([]);
   const getHistoryByapplicationId = async (id) => {
     try {
+      const seen = new Set();
       const res = await _getAppHistoryByApplicationId(id);
-      //console.log("getHistoryByapplicationId***********",res);
+      console.log("_getAppHistoryByApplicationId",res)
       if (res?.status == 200) {
-        //console.log(res)
         setHistoryList([...res?.data?.data?.Items]);
+
+        const filteredArr = res?.data?.data?.Items?.filter(el => {
+          const duplicate = seen.has(el?.changedby);
+          seen.add(el?.changedby);
+          return !duplicate;
+        });
+        console.log("filteredArr408",filteredArr)
+        setHistoryListRemoveCreatorDuplicates([...filteredArr])
       }
     } catch (err) {
       console.log(err);
@@ -637,6 +653,7 @@ function ApplicationDate() {
         object.teamArr = temp;
         taskDataArray.push(object)
       })
+      
       setTaskList([...taskDataArray]);
     } catch (err) {
       console.log(err)
@@ -822,8 +839,8 @@ function ApplicationDate() {
                 variant="h6"
                 style={{ fontSize: 45, fontWeight: 700 }}
               >
-                {contactData?.basicInformation?.first_name}{" "}
-                {contactData?.basicInformation?.last_name}{" "}
+                {contactData?.basicInformation?.firstName}{" "}
+                {contactData?.basicInformation?.lastName}{" "}
                 <span style={{ color: "#0B72F1" }}>
                   {" "}
                   {applicationData?.applicationBasicInfo?.loan_amount } {"$"}
@@ -999,7 +1016,7 @@ function ApplicationDate() {
                   <Grid item xs={4}>
                     <TableContainer style={{ backgroundColor: "transparent" }}>
                       <Typography fontWeight={700} pl={2}>
-                        Application ID: {applicationData?.PK}
+                        Application ID: #{applicationData?.PK?.split("_")[1]}
                       </Typography>
 
                       <Table aria-label="simple table">
@@ -1067,8 +1084,8 @@ function ApplicationDate() {
                     <TableContainer style={{ backgroundColor: "transparent" }}>
                       <Typography fontWeight={700} pl={2}>
                         Borrower:{" "}
-                        {contactData?.basicInformation?.first_name || ""}{" "}
-                        {contactData?.basicInformation?.last_name || ""}
+                        {contactData?.basicInformation?.firstName || ""}{" "}
+                        {contactData?.basicInformation?.lastName || ""}
                       </Typography>
 
                       <Table aria-label="simple table">
@@ -1112,7 +1129,7 @@ function ApplicationDate() {
                               {"ID Number"}
                             </TableCell>
                             <TableCell align="left" p={1}>
-                              {contactData?.basicInformation?.id_number || ""}
+                              {contactData?.basicInformation?.idNumber || ""}
                             </TableCell>
                           </TableRow>
 
@@ -1142,7 +1159,7 @@ function ApplicationDate() {
                               {"Address"}
                             </TableCell>
                             <TableCell align="left" p={1}>
-                              {contactData?.basicInformation?.street_address ||
+                              {contactData?.basicInformation?.streetAddress ||
                                 ""}
                             </TableCell>
                           </TableRow>
@@ -1164,8 +1181,8 @@ function ApplicationDate() {
                           >
                             <Typography fontWeight={700} pl={2}>
                               Co-Borrower{key + 1} :{" "}
-                              {row?.basicInformation?.first_name || ""}{" "}
-                              {row?.basicInformation?.last_name || ""}
+                              {row?.basicInformation?.firstName || ""}{" "}
+                              {row?.basicInformation?.lastName || ""}
                             </Typography>
                             <Table aria-label="simple table">
                               <TableBody>
@@ -1208,7 +1225,7 @@ function ApplicationDate() {
                                     {"ID Number"}
                                   </TableCell>
                                   <TableCell align="left" p={1}>
-                                    {row?.basicInformation?.id_number || ""}
+                                    {row?.basicInformation?.idNumber || ""}
                                   </TableCell>
                                 </TableRow>
                                 <TableRow
@@ -1236,7 +1253,7 @@ function ApplicationDate() {
                                     {"Address"}
                                   </TableCell>
                                   <TableCell align="left" p={1}>
-                                    {row?.basicInformation?.street_address || ""}
+                                    {row?.basicInformation?.streetAddress || ""}
                                   </TableCell>
                                 </TableRow>
                               </TableBody>
@@ -1261,7 +1278,7 @@ function ApplicationDate() {
                   <Tab label="Tasks " {...a11yProps(1)} />
                   {/* <Tab label="Emails" {...a11yProps(2)} /> */}
                   <Tab label="Notes" {...a11yProps(2)} />
-                  <Tab label="Application History" {...a11yProps(2)} />
+                  <Tab label="Application History" {...a11yProps(3)} />
                 </Tabs>
               </Box>
               <TabPanel value={value} index={0}>
@@ -1773,7 +1790,7 @@ function ApplicationDate() {
               </TabPanel>
               <TabPanel value={value} index={1}>
                 {/* 1st-header-section */}
-                <ApplicationTaskPopup open={openTask} error={taskError} onClose={handleCloseTask} onClickCreate={(taskData) => handleTaskCreate(taskData)} applicationData={applicationData} team={teamMembers} applicationId={applicationData?.PK} />
+                <ApplicationTaskPopup users={users} open={openTask} error={taskError} onClose={handleCloseTask} onClickCreate={(taskData) => handleTaskCreate(taskData)} applicationData={applicationData} team={teamMembers} applicationId={applicationData?.PK} />
                 <Grid container p={0} mb={2}>
                   <Grid item xs={12} md={6}>
                     <Typography style={{ fontSize: 21, fontWeight: 700 }}>
@@ -1812,25 +1829,14 @@ function ApplicationDate() {
                         </Grid>
 
                         {/* active-user-display-section */}
-
-                        <AvatarGroup total={9}>
-                          <Avatar
-                            alt="Remy Sharp"
-                            src="/static/images/avatar/1.jpg"
-                          />
-                          <Avatar
-                            alt="Travis Howard"
-                            src="/static/images/avatar/2.jpg"
-                          />
-                          <Avatar
-                            alt="Agnes Walker"
-                            src="/static/images/avatar/4.jpg"
-                          />
-                          <Avatar
-                            alt="Trevor Henderson"
-                            src="/static/images/avatar/5.jpg"
-                          />
-                        </AvatarGroup>
+                        <AvatarGroup max={4} total={applicationData?.members?.length}>
+                          {applicationData?.members && applicationData?.members?.map((emailId,key)=>{
+                            let user = users.filter((user)=>{return user?.PK == `USER#${emailId}`})[0]
+                            return(
+                             <Avatar key={key} alt={user?.PK.split("#")[1]} src={`${s3URL}/${user?.imageId}`} />
+                            )
+                          })}
+                      </AvatarGroup>                 
                       </Stack>
                     </Grid>
                   </Grid>
@@ -1875,6 +1881,7 @@ function ApplicationDate() {
                         </TableRow>
                       </TableHead>
                       <TableBody>
+                      {console.log("row?.task?.updatedBy",taskList)}
                         {taskList
                           .slice(
                             pages * rowsPerPage,
@@ -1922,10 +1929,7 @@ function ApplicationDate() {
                               <TableCell align="left">{row?.task?.dueDate}</TableCell>
                               <TableCell align="left">
                                 <Stack direction="row" spacing={2}>
-                                  <Avatar
-                                    alt="Remy Sharp"
-                                    src="/Ellise 179(1).png"
-                                  />
+                                <Avatar alt={row?.task?.updatedBy?.split("#")[1]} src={`${s3URL}/${users?.filter((user)=>{ return user?.PK == row?.task?.updatedBy})[0]?.imageId}`} />
                                   <span> {getTime(row?.task?.createTime)}</span>
                                 </Stack>
                               </TableCell>
@@ -2302,7 +2306,7 @@ function ApplicationDate() {
                 )}
               </TabPanel> */}
               {/* Note-related-tab */}
-              <TabPanel value={value} index={3}>
+              <TabPanel value={value} index={2}>
                 {/* 1st-header-section */}
                 <Grid container p={0} mb={2}>
                   <Grid item xs={12} md={6}>
@@ -2433,7 +2437,7 @@ function ApplicationDate() {
 
                         {/* active-user-display-section */}
 
-                        <AvatarGroup total={9}>
+                        {/* <AvatarGroup total={9}>
                           <Avatar
                             alt="Remy Sharp"
                             src="/static/images/avatar/1.jpg"
@@ -2450,7 +2454,15 @@ function ApplicationDate() {
                             alt="Trevor Henderson"
                             src="/static/images/avatar/5.jpg"
                           />
-                        </AvatarGroup>
+                        </AvatarGroup> */}
+                          <AvatarGroup max={4} total={noteListRemoveCreatorDuplicates?.length}>
+                            {noteListRemoveCreatorDuplicates && noteListRemoveCreatorDuplicates?.map((note,key)=>{
+                              let user = users.filter((user)=>{return user?.PK == note?.creator})[0];
+                                return(
+                                <Avatar key={key} alt={user?.PK.split("#")[1]} src={`${s3URL}/${user?.imageId}`} />
+                                )
+                            })}
+                          </AvatarGroup>
                       </Stack>
                     </Grid>
                   </Grid>
@@ -2488,10 +2500,7 @@ function ApplicationDate() {
 
                             <TableCell align="left">
                               <Stack direction="row" spacing={2}>
-                                <Avatar
-                                  alt="Remy Sharp"
-                                  src="/Ellise 179(1).png"
-                                />
+                              <Avatar alt={row?.creator?.split("#")[1]} src={`${s3URL}/${users?.filter((user)=>{ return user?.PK == row?.creator})[0]?.imageId}`} />
                                 <span style={{ marginTop: 5 }}>
                                   {row.creator.split("#")[1]}
                                 </span>
@@ -2530,7 +2539,7 @@ function ApplicationDate() {
                 </Grid>
               </TabPanel>
               {/* Application History -related-tab */}
-              <TabPanel value={value} index={4}>
+              <TabPanel value={value} index={3}>
                 {/* 1st-header-section */}
                 <Grid container p={0} mb={2}>
                   <Grid item xs={12} md={6}>
@@ -2559,7 +2568,7 @@ function ApplicationDate() {
 
                         {/* active-user-display-section */}
 
-                        <AvatarGroup total={9}>
+                        {/* <AvatarGroup total={9}>
                           <Avatar
                             alt="Remy Sharp"
                             src="/static/images/avatar/1.jpg"
@@ -2576,7 +2585,16 @@ function ApplicationDate() {
                             alt="Trevor Henderson"
                             src="/static/images/avatar/5.jpg"
                           />
+                        </AvatarGroup> */}
+                          <AvatarGroup max={4} total={historyListRemoveCreatorDuplicates?.length}>
+                            {historyListRemoveCreatorDuplicates && historyListRemoveCreatorDuplicates?.map((history,key)=>{
+                              let user = users.filter((user)=>{return user?.PK == history?.changedby})[0]
+                              return(
+                              <Avatar key={key} alt={user?.PK.split("#")[1]} src={`${s3URL}/${user?.imageId}`} />
+                              )
+                            })}
                         </AvatarGroup>
+                        
                       </Stack>
                     </Grid>
                   </Grid>
@@ -2630,10 +2648,7 @@ function ApplicationDate() {
 
                             <TableCell align="left">
                               <Stack direction="row" spacing={2}>
-                                <Avatar
-                                  alt="Remy Sharp"
-                                  src="/Ellise 179(1).png"
-                                />
+                              <Avatar alt={row?.changedby?.split("#")[1]} src={`${s3URL}/${users?.filter((user)=>{ return user?.PK == row?.changedby})[0]?.imageId}`} />
                                 <span style={{ marginTop: 5 }}>
                                   {" "}
                                   {getTime(row.createTime)}

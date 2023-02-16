@@ -40,7 +40,7 @@ function AddNewContact() {
 
   const [loading, setLoading] = useState(false);
   const [variableData, setVariableData] = useState([]);
-  const [contactList, setContactList] = useState({});
+  const [contactList, setContactList] = useState([]);
   const [formDisabled, setFormDisabled] = useState(false);
 
   const [basicInfo, setBasicInfo] = useState(defaultBasic)
@@ -65,7 +65,7 @@ function AddNewContact() {
   const getVariables = async () => {
     try {
       const res = await _gatVariabels();
-      let data = await res?.data?.data?.Items.filter((variable) => variable?.variableType == "contact")
+      let data = await res?.data?.data?.Items?.filter((variable) => variable?.variableType == "contact")
       data = await data.sort((a, b) => (a.createTime > b.createTime) ? 1 : ((b.createTime > a.createTime) ? -1 : 0));
       console.log(res)
       setVariableData([...data])
@@ -307,7 +307,7 @@ function AddNewContact() {
                 freeSolo
                 onChange={(event, val) => handleSelectContact(val)}
                 clearOnEscape
-                options={contactList}
+                options={contactList || []}
                 getOptionLabel={(option) => option?.basicInformation?.firstName}
                 renderOption={(props, option, { selected }) => (
                   <li {...props}>
@@ -412,11 +412,11 @@ function AddNewContact() {
               <Stack direction="column" spacing={2} m={2}>
 
 
-                {/* <Grid item >
+                <Grid item >
                   <FormGroup>
-                    <FormControlLabel control={<Checkbox />} label="Create Loan Application" />
+                    {/* <FormControlLabel control={<Checkbox />} label="Create Loan Application" /> */}
                   </FormGroup>
-                </Grid> */}
+                </Grid>
 
 
               </Stack>

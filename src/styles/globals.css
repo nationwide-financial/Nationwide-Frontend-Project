@@ -390,9 +390,9 @@ padding-right: 0 !important;
   padding-left: 65px !important;
 }
 
-.MuiAvatarGroup-root, .css-1lx9n-MuiAvatarGroup-root, .teamAssignmentAvatarGroup {
+/* .MuiAvatarGroup-root, .css-1lx9n-MuiAvatarGroup-root, .teamAssignmentAvatarGroup {
   padding-left: 55px !important;
-}
+} */
 
 .changeStatus_btn1, .css-1brn0l2-MuiButtonBase-root-MuiButton-root {
 background-color: #1478F1 !important;
@@ -537,4 +537,4 @@ color: #fff !important;
   min-width: 580px;
   max-height: "auto";
   padding: 20px;
-  }
+}

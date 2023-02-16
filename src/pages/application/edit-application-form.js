@@ -41,6 +41,7 @@ import Alert from '@mui/material/Alert';
 import { MobileDatePicker } from '@mui/x-date-pickers';
 import {_gatVariabels} from '../../services/variabelService.js';
 import { s3URL } from '../../utils/config'
+import { getDate } from '../../utils/utils'
 
 // import AvatarGroup from '@mui/material/AvatarGroup';
 import {
@@ -374,10 +375,6 @@ function EditApplicationForm() {
     setYearAtJob("");
   }
 
-  function getDate (dateString ){
-    const date = new Date(dateString);
-    return `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
-  } 
   const [submitErr, setSubmitErr] = useState("");
   
   const onChangeHandler = useCallback(
@@ -1229,6 +1226,7 @@ function EditApplicationForm() {
                                   id="outlined-basic"
                                   variant="outlined"
                                   placeholder="Text"
+                                  type={variable.dataType}
                                   name={variable?.systemName}
                                   value={additionalInfomations?.[variable?.systemName]}
                                   onChange={onChangeHandler}

@@ -63,6 +63,7 @@ import { _fetchWorkflowStatuses } from "../../services/loanWorkflowStatusService
 import ApplicationTaskPopup from "../../components/ApplicationTaskPopup/index.js";
 import { getCookie, removeCookie } from 'cookies-next';
 import { _getAllPlatformUserByAdmin } from '../../services/authServices'
+import { getDate } from '../../utils/utils'
 
 function TablePaginationActions(props) {
   const theme = useTheme();
@@ -1144,7 +1145,7 @@ function ApplicationDate() {
                               {"Date OF birth"}
                             </TableCell>
                             <TableCell align="left" p={1}>
-                              {contactData?.basicInformation?.dob || ""}
+                              {getDate(contactData?.basicInformation?.dob) || ""}
                             </TableCell>
                           </TableRow>
 
@@ -1239,7 +1240,7 @@ function ApplicationDate() {
                                     {"Date Of Birth"}
                                   </TableCell>
                                   <TableCell align="left" p={1}>
-                                    {row?.basicInformation?.dob || ""}
+                                    { getDate(row?.basicInformation?.dob) || ""}
                                   </TableCell>
                                 </TableRow>
                                 <TableRow

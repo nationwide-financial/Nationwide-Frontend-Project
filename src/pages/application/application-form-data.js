@@ -18,6 +18,7 @@ import { _gatVariabels } from '../../services/variabelService.js';
 import { MobileDatePicker } from '@mui/x-date-pickers';
 import Snackbar from '@mui/material/Snackbar';
 import Alert from '@mui/material/Alert';
+import { getDate } from "../../utils/utils.js"; 
 
 const Item = styled(Paper)(({ theme }) => ({
   backgroundColor: theme.palette.mode === "dark" ? "#1A2027" : "#fff",
@@ -70,11 +71,6 @@ function ApplicationFormData() {
   const [jobTitle, setJobTitle] = useState("");
   const [additionalInfomations, setAdditionalInfomations] = useState({})
 
-  function getDate (dateString ){
-    const date = new Date(dateString);
-    return `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
-  } 
-  console.log("77",getDate('2023-02-26T18:30:00.000Z'))
   const onChangeHandler = useCallback(
     ({ target }) => {
       setAdditionalInfomations((state) => ({ ...state, [target.name]: target.value }));
@@ -238,7 +234,7 @@ function ApplicationFormData() {
                 </Typography>
 
                 <Grid item xs={12} md={6} mt={2}>
-              <Typography variant="h5" mt={3} mb={2}>
+              <Typography variant="h5" mt={3} mb={2} style={{ textAlign: "left" }}>
                 <span style={{ fontSize: 25, fontWeight: 700 }}>
                   Contact Profile
                 </span>{" "}

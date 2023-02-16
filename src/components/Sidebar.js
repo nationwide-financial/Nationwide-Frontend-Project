@@ -236,7 +236,7 @@ const Sidebar = () => {
     <div style={{ width: isOpen ? "300px" : "50px" }} className="sidebar">
       <div className="top_section">
         <div style={{ display: isOpen ? "block" : "none" }} className="logo">
-          <Image alt="logo" className='logoimg' src="/assets/logo.svg" width={164} height={80} />
+          <Image alt="logo" className='logoimg' src="/images/lunna-loans-logo.png" width={164} height={26} />
         </div>
         {/* <div style={{ marginLeft: isOpen ? "50px" : "0px" }} className="bars">
             <FileCopyIcon onClick={toggle} />

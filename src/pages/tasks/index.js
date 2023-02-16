@@ -422,20 +422,29 @@ const Tasks = () => {
       a.createTime < b.createTime ? 1 : b.createTime < a.createTime ? -1 : 0
     );
     let taskDataArray = [];
+    let allMembersTemp = [];
       await tableDt?.map( async (task)=>{
         console.log(task,"task613")
         let object ={}
         let temp=[]
         object.task = task;
         task?.assignTo?.map((member)=>{
+          allMembersTemp.push(member)
           temp.push(...resAllUsers?.data?.users?.Items?.filter((user)=>{ return user?.PK == `USER#${member}`}))
         }) 
         object.teamArr = temp;
         console.log(object,"object620")
         taskDataArray.push(object)
       })
-    console.log("fetchTasks", response);
-
+      console.log("allMembersTemp440",allMembersTemp)
+      let uniqueTeamMembers  = [...new Set(allMembersTemp)];
+      console.log("uniqueTeamMembers",uniqueTeamMembers)
+      let uniqueTeamMembersData = [];
+      await uniqueTeamMembers?.map((member)=>{
+        uniqueTeamMembersData.push( ...resAllUsers?.data?.users?.Items?.filter((user)=>{ return user?.PK == `USER#${member}`}) )
+      })
+      console.log("uniqueTeamMembersData",uniqueTeamMembersData)
+      setUsers(uniqueTeamMembersData)
     setLoading(false);
     if (response?.status === 200) {
       setTaskData([...taskDataArray]);
@@ -527,6 +536,7 @@ const Tasks = () => {
                         users.map((user, key) => {
                           return (
                             <Avatar
+                              onClick={()=>{}}
                               key={key}
                               alt={user?.PK.split("#")[1]}
                               src={`${s3URL}/${user?.imageId}`}
@@ -670,6 +680,7 @@ const Tasks = () => {
                             .map((task, key) => {
                               return (
                                 <TableRow
+                                  hover
                                   key={key}
                                   container
                                   mt={1}
@@ -715,12 +726,7 @@ const Tasks = () => {
                                     className="task_tbl_cell"
                                     style={{ wordBreak: "break-all" }}
                                   >
-                                    {/* <AvatarGroup max={3} sx={{ width: 30, height: 5 }}>
-                                <Avatar alt='avatar2' src='./images/avatar2.png ' />
-                                <Avatar alt='avatar1' src='./images/avatar1.png' />
-                                <Avatar alt='avatar3' src='./images/avatar3.png' />
-                                <Avatar alt='avatar4' src='./images/avatar4.png' />
-                                </AvatarGroup> */}
+                                   
                                     {task?.task?.assignTo?.length > 1 ? (
                                       <AvatarGroup
                                         total={task?.task?.assignTo?.length}
@@ -976,7 +982,7 @@ const Tasks = () => {
                   options={teamMembers && teamMembers.map((member) => member)}
                 ></Autocomplete> */}
                   <div >
-                        <FormControl sx={{ width:550}}>
+                        <FormControl style={{width:"100%"}}>
                          <label style={{ marginBottom: 6 }}>Assign to</label>
                         <Select
                             // labelId="demo-multiple-chip-label"
@@ -999,7 +1005,7 @@ const Tasks = () => {
                                     label={value}
                                     avatar={
                                     <Avatar
-                                        alt="Natacha"
+                                        alt={value}
                                         src="../images/img1.png"
                                     />
                                     }

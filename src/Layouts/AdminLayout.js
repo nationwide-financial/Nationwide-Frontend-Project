@@ -44,7 +44,7 @@ const AdminLayout = ({ children }) => {
             <main className='pagecontainer'>
               {children}
               {/* <div className="footer_content">© 2022 National Finance</div> */}
-              <div className="footer_content">Nationwide LLC</div>
+              <div className="footer_content">Lunna Loans LLC</div>
             </main>
           </div>
           {/* <div className="footer">

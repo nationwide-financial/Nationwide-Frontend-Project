@@ -242,7 +242,6 @@ const PlatformUsers = () => {
 
   async function getTableData() {
     const response = await _getAllPlatformUserByAdmin();
-    //console.log("_getAllPlatformUserByAdmin",response)
     let tableDt = await response?.data?.users?.sort((a,b) => (a.createTime < b.createTime) ? 1 : ((b.createTime < a.createTime) ? -1 : 0));
     setRows(
       tableDt?.map((row) => ({
@@ -254,6 +253,7 @@ const PlatformUsers = () => {
         permission: row?.role || "",
         phone_auth: "Disabled",
         status: row?.status || "",
+        imageId:row?.imageId
       }))
     );
   }
@@ -680,17 +680,17 @@ const PlatformUsers = () => {
                     <TableCell>{row?.phone_auth}</TableCell>
                     <TableCell>
                       {row?.status == "DEACTIVE" ? (
-                        <span style={{ backgroundColor: "red" , borderRadius:'5px' }}>
+                        <span style={{ backgroundColor: "red" , color:"white", borderRadius:'5px' }}>
                           <span style={{margin:'3px'}}>{row?.status}</span>
                           
                         </span>
                       ) : row?.status == "ACTIVE" ? (
-                        <span style={{ backgroundColor: "green", borderRadius:'5px'  }}>
+                        <span style={{ backgroundColor: "green", color:"white", borderRadius:'5px'  }}>
                          <span style={{margin:'3px'}}>{row?.status}</span>
                         </span>
                       ) : (
                         row?.status == "PENDING" && (
-                          <span style={{ backgroundColor: "orange" , borderRadius:'5px' }}>
+                          <span style={{ backgroundColor: "orange" , color:"white", borderRadius:'5px' }}>
                             <span style={{margin:'3px'}}>{row?.status}</span>
                           </span>
                         )

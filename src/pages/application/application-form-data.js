@@ -783,7 +783,6 @@ function ApplicationFormData() {
                       marginBottom: 100,
                       display: "flex",
                       justifyContent: "left",
-                      margin: 20,
                     }}
                   >
                     <Button variant="outlined" onClick={() => handleContinue(loanType, contactStr)}>

@@ -54,6 +54,8 @@ import CardContent from "@mui/material/CardContent";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import Chip from "@mui/material/Chip";
+import Menu from "@mui/material/Menu";
+
 
 import { Autocomplete, FormControl, Switch } from "@mui/material";
 import { _addTask } from "../../services/loanTaskServices";
@@ -220,6 +222,24 @@ const rows = [createData("Cupcake", 305, 3.7)].sort((a, b) =>
 );
 
 const Tasks = () => {
+  const [anchorElLabelDropDown, setAnchorElLabelDropDown] =
+  React.useState(null);
+const openLabelDropDown = Boolean(anchorElLabelDropDown);
+const handleClickLabelDropDown = (event) => {
+  setAnchorElLabelDropDown(event.currentTarget);
+};
+const handleCloseLabelDropDown = () => {
+  setAnchorElLabelDropDown(null);
+};
+
+const [anchorEl, setAnchorEl] = React.useState(null);
+const openbtn = Boolean(anchorEl);
+const handlebtnClick = (event) => {
+  setAnchorEl(event.currentTarget);
+};
+const handlebtnClose = () => {
+  setAnchorEl(null);
+};
   const [pages, setPages] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
@@ -257,6 +277,7 @@ const Tasks = () => {
   const [applicationData, setApplicationData] = useState([]);
   const [taskError, setTaskError] = useState(false);
   const [openTask, setOpenTask] = useState(false);
+  const [avatarFilterSelect, setAvatarFilterSelect] =useState("all");
   const handleClickOpenTask = () => {
     setOpenTask(true);
   };
@@ -531,9 +552,8 @@ const Tasks = () => {
                 </Grid>
                 <Grid item xs={4}>
                   <div>
-                    <AvatarGroup total={users.length}>
-                      {users &&
-                        users.map((user, key) => {
+                    <AvatarGroup total={users.length} onClick={handleClickLabelDropDown}>
+                      {users && users.map((user, key) => {
                           return (
                             <Avatar
                               onClick={()=>{}}
@@ -546,6 +566,45 @@ const Tasks = () => {
                     </AvatarGroup>
                   </div>
                 </Grid>
+                <div>
+                  <Menu
+                    id="long-menu"
+                    MenuListProps={{
+                      "aria-labelledby": "long-button",
+                    }}
+                    anchorEl={anchorElLabelDropDown}
+                    open={openLabelDropDown}
+                    onClose={handleCloseLabelDropDown}
+                    PaperProps={{
+                      style: {
+                        maxHeight: ITEM_HEIGHT * 4.5,
+                        width: "20ch",
+                      },
+                    }}
+                  >
+                    <MenuItem style={{borderRadius:0, width:"100%", backgroundColor: avatarFilterSelect == "all" ? "#e6e6e6":"white" }} onClick={()=>{setAvatarFilterSelect("all")}}>
+                      <Chip label={"All"} avatar={<Avatar alt='' src="" /> } />
+                    </MenuItem>
+                    {users && users.map((user, key) => {
+                      
+                      return (
+                        <MenuItem key={key} style={{backgroundColor: avatarFilterSelect == user?.PK.split("#")[1] ? "#e6e6e6":"white"}}>
+                          <Chip
+                              onClick={()=>{setAvatarFilterSelect(user?.PK.split("#")[1])}}
+                              style={{ width:"100%"}}
+                              label={user?.PK.split("#")[1]}
+                              avatar={
+                              <Avatar
+                                alt={user?.PK.split("#")[1]}
+                                src={`${s3URL}/${user?.imageId}`}
+                              />
+                              }
+                            />
+                        </MenuItem>
+                      );
+                    })}
+                  </Menu>
+                </div>
                 <Grid item xs={4} alignItems="flex-end">
                   <div
                     style={{
@@ -665,8 +724,14 @@ const Tasks = () => {
                       </TableHead>
                       <TableBody>
                         {taskData &&
-                          taskData
-                            ?.filter((data) => {
+                          taskData?.filter((data)=>{
+                            if(avatarFilterSelect == "all") return data
+                            let members =[];
+                            data?.teamArr?.map((member)=>{
+                              members.push(member?.PK?.split("#")[1])
+                            })
+                            if(members?.includes(avatarFilterSelect)) return data;
+                          }) ?.filter((data) => {
                               if (searchKey == "") {
                                 return data;
                               } else {
@@ -685,9 +750,10 @@ const Tasks = () => {
                                   container
                                   mt={1}
                                   onClick={() => {
-                                    console.log(task);
-                                    setSelectTask(task);
-                                    handleOpenModify();
+                                    // console.log(task);
+                                    // setSelectTask(task);
+                                    router.push(`/tasks/view/${task?.task?.id}`);
+                                    // handleOpenModify();
                                   }}
                                 >
                                   <TableCell
@@ -828,7 +894,6 @@ const Tasks = () => {
         )}
 
         <div>
-          {/* <Button onClick={handleOpen}>Open modal</Button> */}
           <Modal
             open={openModify}
             onClose={handleCloseModify}
@@ -836,24 +901,6 @@ const Tasks = () => {
             aria-describedby="modal-modal-description"
           >
             <Box sx={style}>
-              {/* <Button
-              onClick={() => {
-                router.push(`/tasks/view/${selectTask?.id}`)
-              }}
-            >
-              Edit Task
-            </Button>
-            <br />
-            <Button
-              onClick={() => {
-                deleteTask(selectTask)
-              }}
-            >
-              Delete Task
-            </Button> */}
-
-              {/* custom-btn */}
-
               <Stack direction="column" spacing={2}>
                 <ColorButtonEdit
                   variant="contained"
@@ -879,15 +926,12 @@ const Tasks = () => {
                   Delete Task
                 </ColorButtonDelete>
               </Stack>
-
-              {/* custom-btn */}
             </Box>
           </Modal>
         </div>
-        <div>
-          {/* <Button variant="outlined" onClick={handleClickOpen}>
-        Open alert dialog
-      </Button> */}
+
+        
+        {/* <div>
           <Dialog
             open={openDeleteConfirm}
             onClose={handleCloseDeleteConfirm}
@@ -915,7 +959,7 @@ const Tasks = () => {
               </Button>
             </DialogActions>
           </Dialog>
-        </div>
+        </div> */}
         <Dialog open={openTask} onClose={handleCloseTask} fullWidth m={4}>
           <DialogTitle>
             <Typography

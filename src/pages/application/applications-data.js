@@ -1889,7 +1889,7 @@ function ApplicationDate() {
                             pages * rowsPerPage + rowsPerPage
                           )
                           .map((row, key) => (
-                            <TableRow key={key}>
+                            <TableRow key={key} hover onClick={()=>{ router.push(`/tasks/view/${row?.task?.id}`);}}>
                               <TableCell component="th" scope="row">
                                 <span
                                   className="verified_label"
@@ -1927,7 +1927,7 @@ function ApplicationDate() {
                               <TableCell align="left">
                                 {"BLOCKED STATUSES"}
                               </TableCell>
-                              <TableCell align="left">{row?.task?.dueDate}</TableCell>
+                              <TableCell align="left">{ getDate(row?.task?.dueDate) || "" }</TableCell>
                               <TableCell align="left">
                                 <Stack direction="row" spacing={2}>
                                 <Avatar alt={row?.task?.updatedBy?.split("#")[1]} src={`${s3URL}/${users?.filter((user)=>{ return user?.PK == row?.task?.updatedBy})[0]?.imageId}`} />

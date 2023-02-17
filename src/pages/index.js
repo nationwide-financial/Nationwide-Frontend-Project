@@ -239,7 +239,7 @@ const HomePage = () => {
     console.log("applicationByuserArr",applicationByuserArr)
     let contacts = [];
     await applicationByuserArr.map((application) => {
-      let contactTemp = contactArr.filter(
+      let contactTemp = contactArr?.filter(
         (contact) => contact?.PK == application?.contactId[0]
       );
       if (contactTemp.length > 0) {

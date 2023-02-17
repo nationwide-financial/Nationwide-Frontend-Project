@@ -770,6 +770,7 @@ const ViewTask = () => {
                   {dataEditMode ? (
                     <TextField
                       fullWidth
+                      type="number"
                       size="small"
                       margin="normal"
                       id="outlined-basic"
@@ -816,6 +817,7 @@ const ViewTask = () => {
                 <Grid item xs={8}>
                   {dataEditMode ? (
                     <TextField
+                      type="number"
                       fullWidth
                       size="small"
                       margin="normal"
@@ -863,6 +865,7 @@ const ViewTask = () => {
                 <Grid item xs={8}>
                   {dataEditMode ? (
                     <TextField
+                      type="number"
                       fullWidth
                       size="small"
                       margin="normal"

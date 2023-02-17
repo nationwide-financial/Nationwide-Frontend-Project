@@ -31,7 +31,7 @@ function ApplicationDetails() {
   const [error, setError] = useState('');
 
   const profile = state?.user || {}
-
+  
   const getVariables = async () => {
     try {
       const res = await _gatVariabels();
@@ -348,6 +348,13 @@ function ApplicationDetails() {
                         justifyContent: "left",
                       }}
                     >
+                      <Button
+                        variant="outlined"
+                        onClick={()=>{router.back()}}
+                        style={{ textTransform: "capitalize", fontSize: 16, fontWeight: 700 , marginRight:10}}
+                      >
+                        Go Back
+                      </Button>
                       <Button
                         variant="contained"
                         onClick={handleCreateApplication}

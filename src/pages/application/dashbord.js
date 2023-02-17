@@ -36,7 +36,7 @@ import DialogContentText from '@mui/material/DialogContentText';
 import TextField from '@mui/material/TextField';
 import { Autocomplete } from "@mui/material";
 import MoreVertIcon from '@mui/icons-material/MoreVert';
-import { _getAllPlatformUserByAdmin,_getUser } from '../../services/authServices'
+import { _getAllPlatformUserByAdmin, _getUser } from '../../services/authServices'
 import { _listLabel } from '../../services/labelService'
 import { _gatReason } from '../../services/rejectionOptionService'
 import { _fetchAllContacts } from '../../services/contactServices'
@@ -94,7 +94,7 @@ function LoanApplication() {
   const [rejectionReason, setRejectionReason] = useState("");
   const [selectedRejectionObj, setSelectedRejectionObj] = useState({})
   const [reasonsLoading, setReasonsLoading] = useState(false);
-  const [applicationData,setApplicationData] = useState([]);
+  const [applicationData, setApplicationData] = useState([]);
 
   const [appId, setAppId] = useState('');
   const [days, setDays] = useState(0);
@@ -121,6 +121,7 @@ function LoanApplication() {
     setEditMemberOpen(true);
   };
   const handleEditMemberClose = () => {
+    setPersonName([])
     setEditMemberOpen(false);
   };
   const [personName, setPersonName] = useState([]);
@@ -150,17 +151,17 @@ function LoanApplication() {
       let body = {
         members: users,
       };
-      console.log("152",id , body)
+      console.log("152", id, body)
       setLoadingTeamMemberAssign(true)
       const res = await _manageTeamMembers(id, body);
       if (res && res?.status == 200) {
-       // alert("Updated the team members");
-       
+        // alert("Updated the team members");
+
       }
       await getApplications();
       setLoadingTeamMemberAssign(false)
       handleEditMemberClose();
-      
+
 
     } catch (err) {
       console.log(err);
@@ -214,20 +215,20 @@ function LoanApplication() {
       const responseLabel = await _listLabel();
       const res = await _getAllPlatformUserByAdmin();
       const resLoginUser = await _getUser()
-      console.log("resLoginUser",resLoginUser?.data)
-      console.log("responsePlatformUser",res)
+      // console.log("resLoginUser",resLoginUser?.data)
+      // console.log("responsePlatformUser",res)
       const resContact = await _fetchAllContacts();
-      console.log("responseAllContacts",resContact)
+      // console.log("responseAllContacts",resContact)
       setPlatfromUsers(res?.data?.users)
       const response = await _getApplications();
       if (response?.status === 200) {
         setApplications(response.data.data.Items.length > 0 && response.data.data.Items);
         let tempApplications = response.data.data.Items;
-        let tempUsers =[...res?.data?.users,resLoginUser?.data] ;
+        let tempUsers = [...res?.data?.users, resLoginUser?.data];
         let userIds = [];
         let teamMembers = [];
         setTeamMembersData([...tempUsers])
-  
+
         await tempApplications.map((tempApplications) => {
           if (tempApplications?.members) {
             userIds.push(...tempApplications?.members)
@@ -240,34 +241,34 @@ function LoanApplication() {
         })
         setTeamMembersArr([...teamMembers])
 
-        let tableDataArry =[];
+        let tableDataArry = [];
         await tempApplications.map((application) => {
-          let object ={}
-          let team=[];
+          let object = {}
+          let team = [];
           let labels = [];
           let contact = {};
           object.application = application
-          if (application?.members){
-            application?.members.map((user)=>{
-              team.push(...teamMembers.filter((member)=>{ return member?.PK == 'USER#'+user}));
+          if (application?.members) {
+            application?.members.map((user) => {
+              team.push(...teamMembers.filter((member) => { return member?.PK == 'USER#' + user }));
             })
             object.teamArr = team;
           }
-          
-          if (application?.appLabel){
-            application?.appLabel.map((applabel)=>{
-              labels.push(...responseLabel.data.data.Items.filter((label)=>{ return label?.PK == applabel}));
+
+          if (application?.appLabel) {
+            application?.appLabel.map((applabel) => {
+              labels.push(...responseLabel.data.data.Items.filter((label) => { return label?.PK == applabel }));
             })
             object.labelArr = labels;
           }
-  
-          if (application?.contactId){
-              object.contact= resContact?.data?.Items.filter((con)=>{ return con?.PK == application?.contactId[0]})[0]; 
+
+          if (application?.contactId) {
+            object.contact = resContact?.data?.Items.filter((con) => { return con?.PK == application?.contactId[0] })[0];
           }
           tableDataArry.push(object)
         })
         setApplicationData([...tableDataArry])
-        console.log("tableDataArry",tableDataArry)
+        console.log("tableDataArry", tableDataArry)
       }
     } catch (err) {
       console.log("Error ", err);
@@ -305,15 +306,6 @@ function LoanApplication() {
       } else {
         setRejectionUpdateMsg({ severity: 'error', message: 'Rejection Reasion update failed' })
       }
-    } catch (err) {
-      console.log(err)
-    }
-  }
-
-  const getUsers = async () => {
-    try {
-      const res = await _getAllPlatformUserByAdmin()
-      setPlatfromUsers(res?.data?.users)
     } catch (err) {
       console.log(err)
     }
@@ -384,7 +376,7 @@ function LoanApplication() {
       }
     }
   }
- 
+
   const renderWorkFlows = () => {
     const statusList = [];
     const sorted = workflowStatus.length > 0 && workflowStatus.sort((a, b) => (a.index > b.index) ? 1 : ((b.index > a.index) ? -1 : 0))
@@ -429,46 +421,41 @@ function LoanApplication() {
       if (application?.application?.status_ === status) {
         total = total + parseInt(application?.application?.applicationBasicInfo?.loan_amount)
         applicationList.push(
-          <Draggable  draggableId={application?.application?.PK} index={index} type="application">
+          <Draggable draggableId={application?.application?.PK} index={index} type="application">
             {(provided, snapshot) => (
-              <div ref={provided.innerRef }
+              <div ref={provided.innerRef}
                 {...provided.draggableProps}
                 {...provided.dragHandleProps}
                 style={getItemStyle(
                   snapshot.isDragging,
                   provided.draggableProps.style
                 )}
-                onDoubleClick={()=>{
+                onDoubleClick={() => {
                   router.push(`/application/applications-data?applicationId=${application?.application?.PK}`);
                 }}
-                >
+              >
                 <Paper
                   sx={{ backgroundColor: '#f8f8f8', minHeight: 100, padding: 2 }}
                 >
                   <Stack direction='column' spacing={1}>
                     <Stack direction='row' spacing={0.5}>
-                    <div style={{ display: "flex", border: "none" }}>
-                      {application?.labelArr && application?.labelArr?.map((label,key)=>{
-                        return ( <div key={key}
-                          style={{
-                            backgroundColor: label?.color,
-                            height: 5,
-                            width: 30,
-                            marginRight:5
-                          }}
-                        >
-                        </div>)
-                      })}
-                    </div>
+                      <div style={{ display: "flex", border: "none" }}>
+                        {application?.labelArr && application?.labelArr?.map((label, key) => {
+                          return (<div key={key}
+                            style={{
+                              backgroundColor: label?.color,
+                              height: 5,
+                              width: 30,
+                              marginRight: 5
+                            }}
+                          >
+                          </div>)
+                        })}
+                      </div>
                     </Stack>
                     <Stack direction='row' spacing={1} justifyContent='space-between' >
-                    <Typography variant="h6" sx={{ fontWeight: 600, fontSize: 18 }}>{application?.contact?.basicInformation?.firstName} {application?.contact?.basicInformation?.lastName}</Typography>  
-                    <IconButton style={{height:30,width:30, }} onClick={()=>{
-                      setApplicationDataForMemberSelection(application?.application);
-                      handleEditMemberClickOpen()
-                    }}>
-                      <MoreVertIcon />
-                    </IconButton>
+                      <Typography variant="h6" sx={{ fontWeight: 600, fontSize: 18 }}>{application?.contact?.basicInformation?.firstName} {application?.contact?.basicInformation?.lastName}</Typography>
+
                     </Stack>
                     <Stack direction='row' spacing={1} justifyContent='space-between' sx={{ color: '#a1a1a1' }}>
                       <Typography variant="p">#{application?.application?.productId.split('_')[1]}</Typography>
@@ -477,30 +464,35 @@ function LoanApplication() {
                     </Stack>
                     <Stack direction='row' spacing={1} justifyContent='space-between'>
                       <Grid container>
-                          <Grid item xs={8}>
-                            <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                              $
-                              {
-                                application?.application?.applicationBasicInfo
-                                  ?.loan_amount
-                              }
-                            </Typography>
-                          </Grid>
-                          <Grid item xs={4}>
-                            <AvatarGroup max={3} total={application?.teamArr.length}>
-                              {application?.teamArr &&
-                                application?.teamArr.map((user, key) => {
-                                  return (
-                                    <Avatar
-                                      key={key}
-                                      alt={user?.PK.split("#")[1]}
-                                      src={`${s3URL}/${user?.imageId}`}
-                                    />
-                                  );
-                                })}
-                            </AvatarGroup>
-                          </Grid>
+                        <Grid item xs={8}>
+                          <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                            $
+                            {
+                              application?.application?.applicationBasicInfo
+                                ?.loan_amount
+                            }
+                          </Typography>
                         </Grid>
+                        <Grid item xs={4}>
+                          <AvatarGroup max={3} total={application?.teamArr.length} onClick={() => {
+                            setApplicationDataForMemberSelection(application?.application);
+                            console.log("487", application?.application?.members)
+                            setPersonName([...application?.application?.members])
+                            handleEditMemberClickOpen()
+                          }}>
+                            {application?.teamArr &&
+                              application?.teamArr.map((user, key) => {
+                                return (
+                                  <Avatar
+                                    key={key}
+                                    alt={user?.PK.split("#")[1]}
+                                    src={`${s3URL}/${user?.imageId}`}
+                                  />
+                                );
+                              })}
+                          </AvatarGroup>
+                        </Grid>
+                      </Grid>
                     </Stack>
                   </Stack>
                 </Paper>
@@ -944,7 +936,7 @@ function LoanApplication() {
               container
               spacing={1}
               sx={{
-                zIndex:200,
+                zIndex: 200,
                 visibility: show,
                 position: 'absolute',
                 bottom: 0,
@@ -967,7 +959,7 @@ function LoanApplication() {
                   <Droppable droppableId="won" key="won" type="status">
                     {(provided, snapshot) => (
                       <div
-                      className="hideScroll"
+                        className="hideScroll"
                         {...provided.droppableProps}
                         ref={provided.innerRef}
                         style={{
@@ -1025,7 +1017,7 @@ function LoanApplication() {
                   >
                     {(provided, snapshot) => (
                       <div
-                      className="hideScroll"
+                        className="hideScroll"
                         {...provided.droppableProps}
                         ref={provided.innerRef}
                         style={{
@@ -1082,7 +1074,7 @@ function LoanApplication() {
                   <Droppable droppableId="closed" key="closed" type="status">
                     {(provided, snapshot) => (
                       <div
-                      className="hideScroll"
+                        className="hideScroll"
                         {...provided.droppableProps}
                         ref={provided.innerRef}
                         style={{
@@ -1097,7 +1089,7 @@ function LoanApplication() {
                         {/* <Stack direction='column' spacing={1}>
                           {applicationsLost.componentList}
                         </Stack> */}
-                         <p
+                        <p
                           style={{
                             color: "white",
                             textAlign: "center",
@@ -1170,154 +1162,134 @@ function LoanApplication() {
               </DialogActions>
             </Dialog>
             <Dialog
-	open={EditMemberOpen}
-	onClose={handleEditMemberClose}
-	fullWidth
-  >
-	<Box sx={{ width: 1000, maxWidth: "100%" }}>
-	  <BootstrapDialogTitle
-		id="customized-dialog-title"
-		onClose={handleEditMemberClose}
-	  >
-		<Typography
-		  variant="h6"
-		  style={{
-			fontSize: 30,
-			fontFamily: "Gilroy-Bold",
-			fontWeight: "bold",
-		  }}
-		>
-		  Team Members
-		</Typography>
-		<Typography
-		  variant="h6"
-		  style={{
-			fontSize: 15,
-			fontWeight: "bold",
-			fontFamily: "Montserrat",
-			fontStyle: "normal",
-		  }}
-		>
-		  Assign team Members
-		</Typography>
-	  </BootstrapDialogTitle>
+              open={EditMemberOpen}
+              onClose={handleEditMemberClose}
+              fullWidth
+            >
+              <Box sx={{ width: 1000, maxWidth: "100%" }}>
+                <BootstrapDialogTitle
+                  id="customized-dialog-title"
+                  onClose={handleEditMemberClose}
+                >
+                  <Typography
+                    variant="h6"
+                    style={{
+                      fontSize: 30,
+                      fontFamily: "Gilroy-Bold",
+                      fontWeight: "bold",
+                    }}
+                  >
+                    Team Members
+                  </Typography>
+                  <Typography
+                    variant="h6"
+                    style={{
+                      fontSize: 15,
+                      fontWeight: "bold",
+                      fontFamily: "Montserrat",
+                      fontStyle: "normal",
+                    }}
+                  >
+                    Assign team Members
+                  </Typography>
+                </BootstrapDialogTitle>
 
-	  <DialogContent>
-		<FormControl
-		  style={{ display: "flex", justifyContent: "center" }}
-		>
-		  <label></label>
-		  <Box sx={{ maxWidth: "100%" }}>
-			<Box
-			  sx={{
-				width: "100%",
-				height: 300,
-			  }}
-			>
-			  <div>
-				<Grid container spacing={{ xs: 2, md: 3 }}>
-				  <div style={{ marginTop: "20px" }}>
-					<FormControl sx={{ m: 1, width: 580 }}>
-					  {/* <InputLabel id="demo-multiple-chip-label">Chip</InputLabel> */}
-					  <Select
-						// labelId="demo-multiple-chip-label"
-						id="demo-multiple-chip"
-						multiple
-						value={personName}
-						onChange={handleChangeEditTeamMember}
-						// input={<OutlinedInput id="select-multiple-chip" label="Chip" />}
-						renderValue={(selected) => (
-						  <Box
-							sx={{
-							  display: "flex",
-							  flexWrap: "wrap",
-							  gap: 0.5,
-							}}
-						  >
-							{selected.map((value,key) => {
-							  console.log("value613",value)
-							  let user = teamMembersData.filter((user)=>{
-								return user?.PK == `USER#${value}`
-							  })[0]
-							  console.log(`userName${key}`,user)
-							  return (
-								<Chip
-								style={{borderRadius:0,height:40}}
-								  key={value}
-								  label={`${user?.info?.firstName && user?.info?.lastName ? user?.info?.firstName+" "+user?.info?.lastName : user?.PK.split("#")[1]} `}
-								  avatar={
-									<Avatar key={key} alt={user?.PK.split("#")[1]} src={`${s3URL}/${user?.imageId}`} />
-								  }
-								/>
-							  )
-							})}
-						  </Box>
-						)}
-						MenuProps={MenuProps}
-					  >
-						{teamMembersData.map((object, key) => (
-						  <MenuItem
-							key={key}
-							value={object?.PK.split("#")[1] || ""}
-						   // value={`${object?.PK.split("#")[1] || ""+ object?.info?.firstName && object?.info?.lastName ? "|"+object?.info?.firstName+" "+object?.info?.lastName : "" }`}
-						  >
-							
-							{object?.PK.split("#")[1] || ""} { (object?.info?.firstName || object?.info?.lastName) && "|"} {object?.info?.firstName && object?.info?.lastName} {object?.info?.firstName && object?.info?.lastName}
-						  </MenuItem>
-						))}
-					  </Select>
-					</FormControl>
-				  </div>
-				  {/* {Array.from(Array(6)).map((_, index) => (
-					<Grid item xs={6} sm={6} md={6} key={index}>
-					  {members.map((option) => (
-						<div
-						  key={option.value}
-						  value={option.value}
-						  style={{
-							backgroundColor: "#e0e0e0",
-							width: 200,
-							height: 50,
-							padding: 5,
-						  }}
-						>
-						  <Grid container spacing={1}>
-							<Grid item xs>
-							  <Avatar
-								alt="avatar1"
-								src="../images/img1.png"
-							  />
-							</Grid>
+                <DialogContent>
+                  <FormControl
+                    style={{ display: "flex", justifyContent: "center" }}
+                  >
+                    <label></label>
+                    <Box sx={{ maxWidth: "100%" }}>
+                      <Box
+                        sx={{
+                          width: "100%",
+                          height: 300,
+                        }}
+                      >
+                        <div>
+                          <Grid container spacing={{ xs: 2, md: 3 }}>
+                            <div style={{ marginTop: "20px" }}>
+                              <FormControl sx={{ m: 1, width: 580 }}>
+                                {/* <InputLabel id="demo-multiple-chip-label">Chip</InputLabel> */}
+                                <Select
+                                  // labelId="demo-multiple-chip-label"
+                                  id="demo-multiple-chip"
+                                  multiple
+                                  value={personName}
+                                  onChange={handleChangeEditTeamMember}
+                                  // input={<OutlinedInput id="select-multiple-chip" label="Chip" />}
+                                  renderValue={(selected) => (
+                                    <Box
+                                      sx={{
+                                        display: "flex",
+                                        flexWrap: "wrap",
+                                        gap: 0.5,
+                                      }}
+                                    >
+                                      {selected.map((value, key) => {
+                                        console.log("value613", value)
+                                        let user = teamMembersData.filter((user) => {
+                                          return user?.PK == `USER#${value}`
+                                        })[0]
+                                        console.log(`userName${key}`, user)
+                                        return (
+                                          <Chip
+                                            style={{ borderRadius: 0, height: 40 }}
+                                            key={value}
+                                            label={`${user?.info?.firstName && user?.info?.lastName ? user?.info?.firstName + " " + user?.info?.lastName : user?.PK.split("#")[1]} `}
+                                            avatar={
+                                              <Avatar key={key} alt={user?.PK.split("#")[1]} src={`${s3URL}/${user?.imageId}`} />
+                                            }
+                                          />
+                                        )
+                                      })}
+                                    </Box>
+                                  )}
+                                  MenuProps={MenuProps}
+                                >
+                                  {teamMembersData.map((object, key) => (
+                                    <MenuItem
+                                      key={key}
+                                      value={object?.PK.split("#")[1] || ""}
+                                    // value={`${object?.PK.split("#")[1] || ""+ object?.info?.firstName && object?.info?.lastName ? "|"+object?.info?.firstName+" "+object?.info?.lastName : "" }`}
+                                    >
 
-							<Grid item xs align="left">
-							  <div>{option.label}</div>
-							</Grid>
-						  </Grid>
-						</div>
-					  ))}
-					</Grid>
-				  ))}
-				   */}
-				</Grid>
-			  </div>
-			</Box>
-		  </Box>
-		</FormControl>
-	  </DialogContent>
-
-	  <DialogActions>
-		<Button
-		  variant="contained"
-		  alignItems="left"
-		  onClick={() => {
-			handleAddTeamMember(applicationDataForMemberSelection?.PK, personName);
-		  }}
-		>
-		  Save Changes
-		</Button>
-	  </DialogActions>
-	</Box>
-  </Dialog>
+                                      {object?.PK.split("#")[1] || ""} {(object?.info?.firstName || object?.info?.lastName) && "|"} {object?.info?.firstName && object?.info?.lastName} {object?.info?.firstName && object?.info?.lastName}
+                                    </MenuItem>
+                                  ))}
+                                </Select>
+                              </FormControl>
+                            </div>
+                          </Grid>
+                        </div>
+                      </Box>
+                    </Box>
+                  </FormControl>
+                </DialogContent>
+                <DialogActions>
+                  <Button
+                    variant="contained"
+                    alignItems="left"
+                    onClick={() => {
+                      handleAddTeamMember(applicationDataForMemberSelection?.PK, personName);
+                    }}
+                  >  
+                    {loadingTeamMemberAssign ? "Saving" : "Save"}
+                    {loadingTeamMemberAssign && (
+                    <CircularProgress
+                      style={{
+                        height: 20,
+                        width: 20,
+                        marginLeft: 10,
+                        color: "white",
+                      }}
+                    />
+                  )}
+                  </Button>
+                  
+                </DialogActions>
+              </Box>
+            </Dialog>
           </Grid>
         </Grid>
       </div>

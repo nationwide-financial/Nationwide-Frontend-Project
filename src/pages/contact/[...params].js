@@ -11,6 +11,8 @@ import { _gatVariabels } from '../../services/variabelService.js';
 import { useRouter } from 'next/router'
 import countries from '../../data'
 import { MobileDatePicker } from '@mui/x-date-pickers';
+import LoanApplicationTypePopup from '../../components/LoanApplicationTypePopup';
+
 const defaultBasic = {
   firstName: "",
   lastName: "",
@@ -30,7 +32,6 @@ const defaultJob = {
   jobTitle: ""
 }
 
-
 function AddNewContact() {
   const router = useRouter();
   const id = router.query.params[0];
@@ -47,6 +48,9 @@ function AddNewContact() {
   const [jobInfo, setJobInfo] = useState(defaultJob);
   const [additionalInfo, setAdditionalInfo] = useState({});
   const [selectedId, setSelectedId] = useState();
+  const [createLoan, setCreatLoan] = useState(false);
+  const [popupOpen, setPopupOpen] = useState(false);
+  const [addedUserId, setAddedUserId] = useState();
 
   const [error, setError] = useState('');
   useEffect(() => {
@@ -113,6 +117,7 @@ function AddNewContact() {
         break;
       }
       case 'phone': {
+        validatePhoneNumber(event.target.value);
         setBasicInfo({ ...basicInfo, phone: event.target.value });
         break;
       }
@@ -160,6 +165,12 @@ function AddNewContact() {
     }
   };
 
+  const validatePhoneNumber = (input) => {
+    var re = /^\+?([0-9]{2})\)?[-. ]?([0-9]{4})[-. ]?([0-9]{5})$/;
+
+    return (re.test(input));
+  }
+
   const inputValidations = (contact) => {
     let error = "";
     for (const [key, val] of Object.entries({ ...contact })) {
@@ -182,28 +193,8 @@ function AddNewContact() {
     //  if(inputErrors){
     //   setError(inputErrors)
     //  }
-
-    if (id === 'add' && !applicationProductId) {
-      const contactData = {
-        basicInformation: basicInfo,
-        jobInformation: jobInfo,
-        additionalInformation: additionalInfo
-      }
-      const response = await _addContact(contactData);
-      if (response?.status === 201) {
-        router.push('/contact')
-      } else {
-        setError(response?.response.data['message']);
-      }
-    } else if (id === 'add' && applicationProductId && !applicationUser) {
-      const selectedContact = contactList?.find(con => con?.basicInformation?.firstName === basicInfo?.firstName);
-      if (selectedId && selectedContact && selectedContact?.PK === selectedId) {
-        if (coEnabled && coEnabled === 'coEnabled') {
-          router.push(`/contact/add/${applicationProductId}/coEnabled/${selectedId}`);
-        } else if (coEnabled && coEnabled === 'coDisabled') {
-          router.push(`/application/application-form-data?product=${applicationProductId}&contact=${selectedId}`);
-        }
-      } else {
+    if (validateForm() && validatePhoneNumber(basicInfo.phone)) {
+      if (id === 'add' && !applicationProductId) {
         const contactData = {
           basicInformation: basicInfo,
           jobInformation: jobInfo,
@@ -211,46 +202,84 @@ function AddNewContact() {
         }
         const response = await _addContact(contactData);
         if (response?.status === 201) {
-          if (coEnabled && coEnabled === 'coEnabled') {
-            router.push(`/contact/add/${applicationProductId}/coEnabled/${response.data.ID}`);
-          } else if (coEnabled && coEnabled === 'coDisabled') {
-            router.push(`/application/application-form-data?product=${applicationProductId}&contact=${response.data.ID}`);
+          if (createLoan) {
+            setAddedUserId(response.data.ID)
+            setPopupOpen(true);
+          } else {
+            router.push('/contact')
           }
         } else {
           setError(response?.response.data['message']);
         }
-      }
-    } else if (id === 'add' && applicationProductId && applicationUser) {
-      const selectedContact = contactList?.find(con => con?.basicInformation?.firstName === basicInfo?.firstName);
-      if (selectedId && selectedContact && selectedContact?.PK === selectedId) {
-        router.push(`/application/application-form-data?product=${applicationProductId}&cocontact=${selectedId}&contact=${applicationUser}`);
+      } else if (id === 'add' && applicationProductId && !applicationUser) {
+        const selectedContact = contactList?.find(con => con?.basicInformation?.firstName === basicInfo?.firstName);
+        if (selectedId && selectedContact && selectedContact?.PK === selectedId) {
+          if (coEnabled && coEnabled === 'coEnabled') {
+            router.push(`/contact/add/${applicationProductId}/coEnabled/${selectedId}`);
+          } else if (coEnabled && coEnabled === 'coDisabled') {
+            router.push(`/application/application-form-data?product=${applicationProductId}&contact=${selectedId}`);
+          }
+        } else {
+          const contactData = {
+            basicInformation: basicInfo,
+            jobInformation: jobInfo,
+            additionalInformation: additionalInfo
+          }
+          const response = await _addContact(contactData);
+          if (response?.status === 201) {
+            if (coEnabled && coEnabled === 'coEnabled') {
+              router.push(`/contact/add/${applicationProductId}/coEnabled/${response.data.ID}`);
+            } else if (coEnabled && coEnabled === 'coDisabled') {
+              router.push(`/application/application-form-data?product=${applicationProductId}&contact=${response.data.ID}`);
+            }
+          } else {
+            setError(response?.response.data['message']);
+          }
+        }
+      } else if (id === 'add' && applicationProductId && applicationUser) {
+        const selectedContact = contactList?.find(con => con?.basicInformation?.firstName === basicInfo?.firstName);
+        if (selectedId && selectedContact && selectedContact?.PK === selectedId) {
+          router.push(`/application/application-form-data?product=${applicationProductId}&cocontact=${selectedId}&contact=${applicationUser}`);
+        } else {
+          const contactData = {
+            basicInformation: basicInfo,
+            jobInformation: jobInfo,
+            additionalInformation: additionalInfo
+          }
+          const response = await _addContact(contactData);
+          if (response?.status === 201) {
+            router.push(`/application/application-form-data?product=${applicationProductId}&cocontact=${response.data.ID}&contact=${applicationUser}`);
+          } else {
+            setError(response?.response.data['message']);
+          }
+        }
       } else {
         const contactData = {
           basicInformation: basicInfo,
           jobInformation: jobInfo,
           additionalInformation: additionalInfo
         }
-        const response = await _addContact(contactData);
-        if (response?.status === 201) {
-          router.push(`/application/application-form-data?product=${applicationProductId}&cocontact=${response.data.ID}&contact=${applicationUser}`);
+        const response = await _updateContactById(id, contactData);
+        if (response?.status === 200) {
+          router.push('/contact')
         } else {
-          setError(response?.response.data['message']);
+          setError(response?.response?.data['message']);
         }
       }
     } else {
-      const contactData = {
-        basicInformation: basicInfo,
-        jobInformation: jobInfo,
-        additionalInformation: additionalInfo
-      }
-      const response = await _updateContactById(id, contactData);
-      if (response?.status === 200) {
-        router.push('/contact')
-      } else {
-        setError(response?.response?.data['message']);
-      }
+      setError("Required fields are empty or invalid")
     }
   };
+
+  const validateForm = () => {
+    if (basicInfo.firstName === "" || basicInfo.lastName === "" || basicInfo.email === "" || basicInfo.idNumber === "" ||
+      basicInfo.dob === "" || basicInfo.streetAddress === "" || basicInfo.city === "" || basicInfo.province === "" || basicInfo.postalCode === "" ||
+      basicInfo.country === "") {
+      return false;
+    } else {
+      return true;
+    }
+  }
 
   const renderCountries = () => {
     const countryList = [];
@@ -282,8 +311,13 @@ function AddNewContact() {
     setFormDisabled(false);
   }
 
+  const handlePopupClose = () => {
+    setPopupOpen(false)
+  }
+  console.log("Create Load ", createLoan)
   return (
     <>
+      <LoanApplicationTypePopup popupOpen={!applicationProductId && popupOpen} userId={addedUserId} handleClose={handlePopupClose} />
       {loading ? <CircularProgress /> : <div style={{ backgroundColor: '#fff' }}>
         <Box >
           <Grid container >
@@ -334,11 +368,11 @@ function AddNewContact() {
             </Grid>
             <Grid item xs={6}>
               <label>  <Typography align='left' variant='h6' style={{ fontSize: 17, fontWeight: 700, fontStyle: 'normal' }}>Phone <span style={{ color: '#FF0000' }}>*</span></Typography></label>
-              <TextField fullWidth onChange={(event) => handleChange('phone', event)} size="small" margin="normal" id="outlined-basic" variant="outlined" value={basicInfo?.phone} />
+              <TextField fullWidth error={basicInfo.phone !== "" && !validatePhoneNumber(basicInfo.phone)} onChange={(event) => handleChange('phone', event)} size="small" margin="normal" id="outlined-basic" variant="outlined" value={basicInfo?.phone} />
             </Grid>
             <Grid item xs={6}>
               <label>  <Typography align='left' variant='h6' style={{ fontSize: 17, fontWeight: 700, fontStyle: 'normal' }}>ID Number <span style={{ color: '#FF0000' }}>*</span></Typography></label>
-              <TextField fullWidth onChange={(event) => handleChange('idNumber', event)} size="small" margin="normal" id="outlined-basic" variant="outlined" value={basicInfo?.idNumber} />
+              <TextField type='number' fullWidth onChange={(event) => handleChange('idNumber', event)} size="small" margin="normal" id="outlined-basic" variant="outlined" value={basicInfo?.idNumber} />
             </Grid>
             <Grid item xs={6}>
               <label>  <Typography align='left' variant='h6' style={{ fontSize: 17, fontWeight: 700, fontStyle: 'normal' }}>Date of Birth <span style={{ color: '#FF0000' }}>*</span></Typography></label>
@@ -412,11 +446,11 @@ function AddNewContact() {
               <Stack direction="column" spacing={2} m={2}>
 
 
-                <Grid item >
+                {!applicationProductId && <Grid item >
                   <FormGroup>
-                    {/* <FormControlLabel control={<Checkbox />} label="Create Loan Application" /> */}
+                    <FormControlLabel control={<Checkbox checked={createLoan} onChange={(e, checked) => setCreatLoan(checked)} />} label="Create Loan Application" />
                   </FormGroup>
-                </Grid>
+                </Grid>}
 
 
               </Stack>

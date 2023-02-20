@@ -1,5 +1,5 @@
 import React, { use, useEffect } from "react";
-import {Avatar,Box, Button, FormControlLabel, Grid,IconButton, InputAdornment,TablePagination, TextField, Typography} from "@mui/material";
+import { Avatar, Box, Button, FormControlLabel, Grid, IconButton, InputAdornment, TablePagination, TextField, Typography } from "@mui/material";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
@@ -51,14 +51,14 @@ import { s3URL } from '../../utils/config'
 
 
 
-import {_authMS,_getUser} from '../../services/authServices'
-import {_addApplicationNote, _getApplicationNotesByApplicationId} from "../../services/applictionNotes.js";
+import { _authMS, _getUser } from '../../services/authServices'
+import { _addApplicationNote, _getApplicationNotesByApplicationId } from "../../services/applictionNotes.js";
 import { _getAppHistoryByApplicationId } from "../../services/applicationHistory.js";
 import { _addHistory } from "../../services/applicationHistory.js";
-import {_getApplicationById, _applicationAddLabel, _changeApplicationStatus,_manageApplicationData } from "../../services/applicationService.js";
+import { _getApplicationById, _applicationAddLabel, _changeApplicationStatus, _manageApplicationData } from "../../services/applicationService.js";
 import { _fetchSingleContacts } from "../../services/contactServices.js";
 import { _listLabel, _getSingleLabel } from "../../services/labelService.js";
-import { _addTask, _fetchTaskByapplicationId} from "../../services/loanTaskServices.js";
+import { _addTask, _fetchTaskByapplicationId } from "../../services/loanTaskServices.js";
 import { _fetchWorkflowStatuses } from "../../services/loanWorkflowStatusServices.js";
 import ApplicationTaskPopup from "../../components/ApplicationTaskPopup/index.js";
 import { getCookie, removeCookie } from 'cookies-next';
@@ -189,7 +189,7 @@ function BootstrapDialogTitle(props) {
 }
 
 function ApplicationDate() {
-  const [users, setUsers]=useState([]);
+  const [users, setUsers] = useState([]);
   const [applicationData, setApplicationData] = useState([]);
   const [contactData, setContactData] = useState({});
   const [cocontactData, setCocontactData] = useState([]);
@@ -397,7 +397,7 @@ function ApplicationDate() {
     try {
       const seen = new Set();
       const res = await _getAppHistoryByApplicationId(id);
-      console.log("_getAppHistoryByApplicationId",res)
+      console.log("_getAppHistoryByApplicationId", res)
       if (res?.status == 200) {
         setHistoryList([...res?.data?.data?.Items]);
 
@@ -406,7 +406,7 @@ function ApplicationDate() {
           seen.add(el?.changedby);
           return !duplicate;
         });
-        console.log("filteredArr408",filteredArr)
+        console.log("filteredArr408", filteredArr)
         setHistoryListRemoveCreatorDuplicates([...filteredArr])
       }
     } catch (err) {
@@ -616,7 +616,7 @@ function ApplicationDate() {
           getTaskByApplicationId(applicationId);
           getHistoryByapplicationId(applicationId);
         }
-        console.log("_addTask****", res);rows
+        console.log("_addTask****", res); rows
       }
     } catch (err) {
       console.log(err);
@@ -624,10 +624,10 @@ function ApplicationDate() {
   }
 
   const getLoginUser = async () => {
-    try{
+    try {
       const res = await _getUser()
       return res?.data
-    }catch(err){
+    } catch (err) {
       console.log(err)
     }
   }
@@ -638,23 +638,23 @@ function ApplicationDate() {
       let users = await getUsers();
       const res = await _fetchTaskByapplicationId(id)
       let taskDataArray = [];
-      await res?.data?.loanTasks?.Items?.map( async (task)=>{
-        let object ={}
-        let temp=[]
+      await res?.data?.loanTasks?.Items?.map(async (task) => {
+        let object = {}
+        let temp = []
         object.task = task;
-        await task?.assignTo?.map((member)=>{
-          if (loginUser?.PK == `USER#${member}`){
+        await task?.assignTo?.map((member) => {
+          if (loginUser?.PK == `USER#${member}`) {
             temp.push(loginUser)
-            temp.push(...users.filter((user)=>{ return user?.PK == `USER#${member}`}))
-          }else{
-            temp.push(...users.filter((user)=>{ return user?.PK == `USER#${member}`}))
+            temp.push(...users.filter((user) => { return user?.PK == `USER#${member}` }))
+          } else {
+            temp.push(...users.filter((user) => { return user?.PK == `USER#${member}` }))
           }
-          
+
         })
         object.teamArr = temp;
         taskDataArray.push(object)
       })
-      
+
       setTaskList([...taskDataArray]);
     } catch (err) {
       console.log(err)
@@ -765,15 +765,15 @@ function ApplicationDate() {
     return (!val || val.length === 0) ? true : false;
   }
 
-  const getUsers = async () =>{
-    try{
+  const getUsers = async () => {
+    try {
       const res = await _getAllPlatformUserByAdmin();
       const loginUser = await _getUser();
-      console.log("loginUser754",loginUser)
-      setUsers([...res?.data?.users,loginUser?.data])
-      console.log("getUsers*****",res?.data?.users)
+      console.log("loginUser754", loginUser)
+      setUsers([...res?.data?.users, loginUser?.data])
+      console.log("getUsers*****", res?.data?.users)
       return res?.data?.users;
-    }catch(err){
+    } catch (err) {
       console.log(err)
     }
   }
@@ -781,26 +781,26 @@ function ApplicationDate() {
   useEffect(() => {
     async function getData() {
 
-      const accessToken =  getCookie('accessToken');
+      const accessToken = getCookie('accessToken');
       console.log(accessToken, "accessToken")
-    if (accessToken) {
-      fetch('https://graph.microsoft.com/v1.0/me/messages', {
-        method: 'GET',
-        headers: {
-          Authorization: `Bearer ${accessToken}`
-        },
-      })
-        .then(response => response.json())
-        .then((res) => {
-          console.log(res,  "sssss");
-          console.log(res?.value, "dddd", res?.error?.code);
-          setEmaildatarows(res?.value || []);
-          setShowContent(true);
+      if (accessToken) {
+        fetch('https://graph.microsoft.com/v1.0/me/messages', {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${accessToken}`
+          },
         })
-        .catch((error) => {
-          console.error(error);
-        });
-    }
+          .then(response => response.json())
+          .then((res) => {
+            console.log(res, "sssss");
+            console.log(res?.value, "dddd", res?.error?.code);
+            setEmaildatarows(res?.value || []);
+            setShowContent(true);
+          })
+          .catch((error) => {
+            console.error(error);
+          });
+      }
 
       if (!router.isReady) return;
       const query = router.query;
@@ -833,7 +833,7 @@ function ApplicationDate() {
         </Alert>
       </Snackbar>
       <Grid container>
-        <Stack p={4}>
+        <Stack p={4} width={'100%'}>
           <Grid container>
             <Grid item xs={12} md={8}>
               <Typography
@@ -842,20 +842,29 @@ function ApplicationDate() {
               >
                 {contactData?.basicInformation?.firstName}{" "}
                 {contactData?.basicInformation?.lastName}{" "}
+                <br />
                 <span style={{ color: "#0B72F1" }}>
-                  {" "}
-                  {applicationData?.applicationBasicInfo?.loan_amount } {"$"}
+                  {applicationData?.applicationBasicInfo?.loan_amount} {"$"}
                 </span>
               </Typography>
 
               <Stack direction="row" spacing={1}>
+              <Stack direction="row" spacing={1}>
+                  <Avatar
+                    alt="Remy Sharp"
+                    src={`${s3URL}/${users?.filter((user)=>{ return user?.PK == applicationData?.updateBy})[0]?.imageId}`}
+                    sx={{ width: 24, height: 24 }}
+                  />{" "}
+                  <span style={{ fontSize: 16, fontWeight: 500, marginTop: 2 }}>
+                   Updated {getTime(applicationData?.updateTime)}
+                  </span>
+                </Stack>
                 {existLabels &&
                   existLabels?.map((row, key) => {
                     return (
                       <Chip
                         key={key}
                         label={row?.label}
-                        onClick={() => { }}
                         onDelete={() => {
                           handelDeleteLabel(row?.PK);
                         }}
@@ -911,13 +920,14 @@ function ApplicationDate() {
                 <Stack direction="row" spacing={1}>
                   <Avatar
                     alt="Remy Sharp"
-                    src={`${s3URL}/${users?.filter((user)=>{ return user?.PK == applicationData?.updateBy})[0]?.imageId}`}
+                    src={`${s3URL}/${users?.filter((user) => { return user?.PK == applicationData?.updateBy })[0]?.imageId}`}
                     sx={{ width: 24, height: 24 }}
                   />{" "}
                   <span style={{ fontSize: 16, fontWeight: 500, marginTop: 2 }}>
                     {getTime(applicationData?.updateTime)}
                   </span>
                 </Stack>
+
               </Stack>
             </Grid>
             <Grid item xs={12} md={4}>
@@ -946,14 +956,14 @@ function ApplicationDate() {
                   }}
                 >
                   {workFlowStatus.map((row, key) => {
-                    console.log("929",row?.name === applicationData?.status_)
+                    console.log("929", row?.name === applicationData?.status_)
                     // console.log("applicationData?.status_",applicationData?.status_)
                     // console.log("row?.name",row?.name)
                     return (
                       <MenuItem
                         hover
                         key={key}
-                        style={{ backgroundColor: row?.name == applicationData?.status_ && 'lightblue'}}
+                        style={{ backgroundColor: row?.name == applicationData?.status_ && 'lightblue' }}
                         onClick={() => {
                           handelUpdateApplicationState(applicationId, row.name);
                           handlebtnClose();
@@ -964,38 +974,21 @@ function ApplicationDate() {
                     );
                   })}
                 </Menu>
-
-                {/* <IconButton
-                  sx={{
-                    width: 10,
-                    height: 10,
-                    borderRadius: 1,
-                    border: "1px solid",
-                    borderColor: "gray",
-                    padding: 2,
-                    paddingLeft:2,
-                    marginRight: 2,
-                  }}
-                  style={{ marginLeft:5 }}
-                  aria-label="save"
-                >
-                  <MoreVertIcon fontSize="large" sx={{ color: "gray" }} />
-
-                </IconButton> */}
               </Box>
             </Grid>
           </Grid>
-          {/* body */}
-
           <Box mt={4}>
-            <Grid container backgroundColor={"white"}>
-              <Grid item m={2}>
-                <Grid xs={12} md={12} mt={4}>
-                  <Stack direction="row" spacing={1} pl={2}>
+            <Grid container backgroundColor={"white"} p={1}>
+              <Grid container m={2}>
+                <Grid xs={12} md={12}>
+                  <Stack direction="row" spacing={1}>
                     <Typography variant="h5" className=" page_sub_header">
-                      <span style={{ paddingRight: 5 }}>Final Review</span>
-                      <span style={{ color: "#1478F1" }}>{ workFlowStatus?.map((status)=>{return status?.name == applicationData?.status_ }).indexOf(true)+1}/{workFlowStatus && workFlowStatus?.length}</span>
-                    
+                      <span style={{ marginRight: 20 }}>Final Review</span>
+                      <span style={{ color: "#1478F1", marginRight: 20 }}>
+                        {workFlowStatus?.map((status) => {
+                          return status?.name == applicationData?.status_
+                        }).indexOf(true) + 1}/{workFlowStatus && workFlowStatus?.length}
+                      </span>
                     </Typography>
                     <Link className="page_sub_outlineless_text_btn">
                       <Stack direction="row" spacing={1} mt={1}>
@@ -1012,11 +1005,11 @@ function ApplicationDate() {
                   </Stack>
                 </Grid>
 
-                <Grid container mt={3}>
+                <Grid container mt={3} className="test">
                   {/* col-1 */}
                   <Grid item xs={4}>
                     <TableContainer style={{ backgroundColor: "transparent" }}>
-                      <Typography fontWeight={700} pl={2}>
+                      <Typography fontWeight={700}>
                         Application ID: #{applicationData?.PK?.split("_")[1]}
                       </Typography>
 
@@ -1047,16 +1040,16 @@ function ApplicationDate() {
                             <TableCell component="th" scope="row">
                               {"Team Members"}
                             </TableCell>
-                            {console.log("1032",applicationData)}
+                            {console.log("1032", applicationData)}
                             <TableCell align="left" p={1}>
-                            <AvatarGroup max={4} total={applicationData?.members?.length}>
-                              {applicationData?.members && applicationData?.members?.map((emailId,key)=>{
-                              let user = users.filter((user)=>{return user?.PK == `USER#${emailId}`})[0]
-                              return(
-                                <Avatar key={key} alt={user?.PK.split("#")[1]} src={`${s3URL}/${user?.imageId}`} />
-                              )
-                              })}
-                            </AvatarGroup>
+                              <AvatarGroup max={4} total={applicationData?.members?.length}>
+                                {applicationData?.members && applicationData?.members?.map((emailId, key) => {
+                                  let user = users.filter((user) => { return user?.PK == `USER#${emailId}` })[0]
+                                  return (
+                                    <Avatar key={key} alt={user?.PK.split("#")[1]} src={`${s3URL}/${user?.imageId}`} />
+                                  )
+                                })}
+                              </AvatarGroup>
                             </TableCell>
                           </TableRow>
 
@@ -1083,7 +1076,7 @@ function ApplicationDate() {
 
                   <Grid item xs={4} px={2}>
                     <TableContainer style={{ backgroundColor: "transparent" }}>
-                      <Typography fontWeight={700} pl={2}>
+                      <Typography fontWeight={700}>
                         Borrower:{" "}
                         {contactData?.basicInformation?.firstName || ""}{" "}
                         {contactData?.basicInformation?.lastName || ""}
@@ -1180,7 +1173,7 @@ function ApplicationDate() {
                             style={{ backgroundColor: "transparent" }}
                             key={key}
                           >
-                            <Typography fontWeight={700} pl={2}>
+                            <Typography fontWeight={700}>
                               Co-Borrower{key + 1} :{" "}
                               {row?.basicInformation?.firstName || ""}{" "}
                               {row?.basicInformation?.lastName || ""}
@@ -1240,7 +1233,7 @@ function ApplicationDate() {
                                     {"Date Of Birth"}
                                   </TableCell>
                                   <TableCell align="left" p={1}>
-                                    { getDate(row?.basicInformation?.dob) || ""}
+                                    {getDate(row?.basicInformation?.dob) || ""}
                                   </TableCell>
                                 </TableRow>
                                 <TableRow
@@ -1267,7 +1260,7 @@ function ApplicationDate() {
               </Grid>
             </Grid>
 
-            <Grid>
+            <Grid mt={2}>
               {/* <Box sx={{ width: '100%' }}> */}
               <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
                 <Tabs
@@ -1288,9 +1281,7 @@ function ApplicationDate() {
                     item
                     xs={12}
                     md={6}
-                    my={2}
-                    pl={2}
-                    mt={4}
+                    mt={2}
                     mb={4}
                     display="inline-flex"
                   >
@@ -1337,7 +1328,7 @@ function ApplicationDate() {
                       <TableContainer
                         style={{ backgroundColor: "transparent" }}
                       >
-                        <Typography fontWeight={700} pl={2}>
+                        <Typography fontWeight={700}>
                           Financial Details
                         </Typography>
 
@@ -1511,7 +1502,7 @@ function ApplicationDate() {
                       <TableContainer
                         style={{ backgroundColor: "transparent" }}
                       >
-                        <Typography fontWeight={700} pl={2}>
+                        <Typography fontWeight={700}>
                           Credit Report Summary
                         </Typography>
 
@@ -1702,7 +1693,7 @@ function ApplicationDate() {
                       <TableContainer
                         style={{ backgroundColor: "transparent" }}
                       >
-                        <Typography fontWeight={700} pl={2}>
+                        <Typography fontWeight={700}>
                           Property Information
                         </Typography>
 
@@ -1831,13 +1822,13 @@ function ApplicationDate() {
 
                         {/* active-user-display-section */}
                         <AvatarGroup max={4} total={applicationData?.members?.length}>
-                          {applicationData?.members && applicationData?.members?.map((emailId,key)=>{
-                            let user = users.filter((user)=>{return user?.PK == `USER#${emailId}`})[0]
-                            return(
-                             <Avatar key={key} alt={user?.PK.split("#")[1]} src={`${s3URL}/${user?.imageId}`} />
+                          {applicationData?.members && applicationData?.members?.map((emailId, key) => {
+                            let user = users.filter((user) => { return user?.PK == `USER#${emailId}` })[0]
+                            return (
+                              <Avatar key={key} alt={user?.PK.split("#")[1]} src={`${s3URL}/${user?.imageId}`} />
                             )
                           })}
-                      </AvatarGroup>                 
+                        </AvatarGroup>
                       </Stack>
                     </Grid>
                   </Grid>
@@ -1882,14 +1873,14 @@ function ApplicationDate() {
                         </TableRow>
                       </TableHead>
                       <TableBody>
-                      {console.log("row?.task?.updatedBy",taskList)}
+                        {console.log("row?.task?.updatedBy", taskList)}
                         {taskList
                           .slice(
                             pages * rowsPerPage,
                             pages * rowsPerPage + rowsPerPage
                           )
                           .map((row, key) => (
-                            <TableRow key={key} hover onClick={()=>{ router.push(`/tasks/view/${row?.task?.id}`);}}>
+                            <TableRow key={key} hover onClick={() => { router.push(`/tasks/view/${row?.task?.id}`); }}>
                               <TableCell component="th" scope="row">
                                 <span
                                   className="verified_label"
@@ -1914,12 +1905,12 @@ function ApplicationDate() {
                               <TableCell align="left">
                                 {/* {row?.assignTo || ""} */}
                                 {row?.task?.assignTo?.length > 1 ? <AvatarGroup total={row?.task?.assignTo?.length}>
-                                {row?.teamArr?.map((member, key)=>{
-                                  return <Avatar key={key} alt={member?.PK.split("#")[1]} src={`${s3URL}/${member?.imageId}`} 
-                                />
-                                })}
-                               
-                              </AvatarGroup> :row?.task?.assignTo || "" }
+                                  {row?.teamArr?.map((member, key) => {
+                                    return <Avatar key={key} alt={member?.PK.split("#")[1]} src={`${s3URL}/${member?.imageId}`}
+                                    />
+                                  })}
+
+                                </AvatarGroup> : row?.task?.assignTo || ""}
                               </TableCell>
                               <TableCell align="left">
                                 {row?.task?.description || ""}
@@ -1927,10 +1918,10 @@ function ApplicationDate() {
                               <TableCell align="left">
                                 {"BLOCKED STATUSES"}
                               </TableCell>
-                              <TableCell align="left">{ getDate(row?.task?.dueDate) || "" }</TableCell>
+                              <TableCell align="left">{getDate(row?.task?.dueDate) || ""}</TableCell>
                               <TableCell align="left">
                                 <Stack direction="row" spacing={2}>
-                                <Avatar alt={row?.task?.updatedBy?.split("#")[1]} src={`${s3URL}/${users?.filter((user)=>{ return user?.PK == row?.task?.updatedBy})[0]?.imageId}`} />
+                                  <Avatar alt={row?.task?.updatedBy?.split("#")[1]} src={`${s3URL}/${users?.filter((user) => { return user?.PK == row?.task?.updatedBy })[0]?.imageId}`} />
                                   <span> {getTime(row?.task?.createTime)}</span>
                                 </Stack>
                               </TableCell>
@@ -2456,14 +2447,14 @@ function ApplicationDate() {
                             src="/static/images/avatar/5.jpg"
                           />
                         </AvatarGroup> */}
-                          <AvatarGroup max={4} total={noteListRemoveCreatorDuplicates?.length}>
-                            {noteListRemoveCreatorDuplicates && noteListRemoveCreatorDuplicates?.map((note,key)=>{
-                              let user = users.filter((user)=>{return user?.PK == note?.creator})[0];
-                                return(
-                                <Avatar key={key} alt={user?.PK.split("#")[1]} src={`${s3URL}/${user?.imageId}`} />
-                                )
-                            })}
-                          </AvatarGroup>
+                        <AvatarGroup max={4} total={noteListRemoveCreatorDuplicates?.length}>
+                          {noteListRemoveCreatorDuplicates && noteListRemoveCreatorDuplicates?.map((note, key) => {
+                            let user = users.filter((user) => { return user?.PK == note?.creator })[0];
+                            return (
+                              <Avatar key={key} alt={user?.PK.split("#")[1]} src={`${s3URL}/${user?.imageId}`} />
+                            )
+                          })}
+                        </AvatarGroup>
                       </Stack>
                     </Grid>
                   </Grid>
@@ -2501,7 +2492,7 @@ function ApplicationDate() {
 
                             <TableCell align="left">
                               <Stack direction="row" spacing={2}>
-                              <Avatar alt={row?.creator?.split("#")[1]} src={`${s3URL}/${users?.filter((user)=>{ return user?.PK == row?.creator})[0]?.imageId}`} />
+                                <Avatar alt={row?.creator?.split("#")[1]} src={`${s3URL}/${users?.filter((user) => { return user?.PK == row?.creator })[0]?.imageId}`} />
                                 <span style={{ marginTop: 5 }}>
                                   {row.creator.split("#")[1]}
                                 </span>
@@ -2587,15 +2578,15 @@ function ApplicationDate() {
                             src="/static/images/avatar/5.jpg"
                           />
                         </AvatarGroup> */}
-                          <AvatarGroup max={4} total={historyListRemoveCreatorDuplicates?.length}>
-                            {historyListRemoveCreatorDuplicates && historyListRemoveCreatorDuplicates?.map((history,key)=>{
-                              let user = users.filter((user)=>{return user?.PK == history?.changedby})[0]
-                              return(
+                        <AvatarGroup max={4} total={historyListRemoveCreatorDuplicates?.length}>
+                          {historyListRemoveCreatorDuplicates && historyListRemoveCreatorDuplicates?.map((history, key) => {
+                            let user = users.filter((user) => { return user?.PK == history?.changedby })[0]
+                            return (
                               <Avatar key={key} alt={user?.PK.split("#")[1]} src={`${s3URL}/${user?.imageId}`} />
-                              )
-                            })}
+                            )
+                          })}
                         </AvatarGroup>
-                        
+
                       </Stack>
                     </Grid>
                   </Grid>
@@ -2649,7 +2640,7 @@ function ApplicationDate() {
 
                             <TableCell align="left">
                               <Stack direction="row" spacing={2}>
-                              <Avatar alt={row?.changedby?.split("#")[1]} src={`${s3URL}/${users?.filter((user)=>{ return user?.PK == row?.changedby})[0]?.imageId}`} />
+                                <Avatar alt={row?.changedby?.split("#")[1]} src={`${s3URL}/${users?.filter((user) => { return user?.PK == row?.changedby })[0]?.imageId}`} />
                                 <span style={{ marginTop: 5 }}>
                                   {" "}
                                   {getTime(row.createTime)}

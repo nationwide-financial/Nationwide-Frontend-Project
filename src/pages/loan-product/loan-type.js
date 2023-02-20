@@ -224,6 +224,7 @@ const LoanType = () => {
     setLoanName('')
     setLoanIcon(null)
     setLoanStatus('')
+    setFormError("")
   };
   const fileTypes = ["JPEG", "PNG", "GIF"];
   const currencies = [
@@ -285,7 +286,7 @@ const LoanType = () => {
     setMessage("");
     setOpenSuccessMessage(false);
   };
-
+  const [ formError, setFormError ] = useState("")
   const handleAddFormSubmit = async () => {
     try {
       let body = {
@@ -293,14 +294,23 @@ const LoanType = () => {
         loanIcon: loanIcon,
         loanStatus: loanStatus,
       };
-      const response = await _addLoanType(body);
-      console.log("response", response);
-      if (response?.status == 200) {
-        //alert("you have successfully added");
-        handleSuccessMessage();
-        setMessage("you have successfully added");
-        handleClose();
-        getData();
+      if(!loanName || loanName == "" || loanName == null){
+        setFormError("Loan name can not be empty!")
+      }else if(!loanIcon){
+        setFormError("Please select an image!")
+      }else if(!loanStatus){
+        setFormError("Loan Status can not be empty!")
+      }else{
+        setFormError("")
+        const response = await _addLoanType(body);
+        console.log("response", response);
+        if (response?.status == 200) {
+          //alert("you have successfully added");
+          handleSuccessMessage();
+          setMessage("you have successfully added");
+          handleClose();
+          getData();
+        }
       }
     } catch (error) {
       console.log(error);
@@ -523,6 +533,7 @@ const LoanType = () => {
                         ))}
                       </TextField>
                     </FormControl>
+                    <p style={{color:"red"}}>{formError}</p>
                   </form>
                 </DialogContent>
 
@@ -581,44 +592,21 @@ const LoanType = () => {
               </Grid>
             </Grid>
           </Grid>
-          <Grid item xs={12} md={6}>
-            <Box sx={{ textAlign: "right" }}>
-              {/* <FormControlLabel
-                control={<IOSSwitch sx={{ m: 1 }} />}
-                label="Show inactive"
-              />
-              <IconButton
-                sx={{
-                  width: 10,
-                  height: 10,
-                  borderRadius: 1,
-                  border: "1px solid",
-                  borderColor: "gray",
-                  padding: 2,
-                }}
-                aria-label="save"
-              >
-                <TuneOutlined sx={{ color: "gray" }} />
-              </IconButton> */}
-            </Box>
-          </Grid>
         </Grid>
-
-        {/* body-section */}
         <Grid
           container
           mt={6}
           rowSpacing={2}
           columnSpacing={{ xs: 2, sm: 3, md: 4 }}
         >
+          
           {row
             ?.filter((data) => {
               if (searchKey == "") {
                 return data;
               } else {
-                return data?.loanName
-                  .toLowerCase()
-                  .includes(searchKey.toLocaleLowerCase());
+                return data?.loanName?.toLowerCase()?.includes(searchKey?.toLocaleLowerCase())
+                || data?.loanStatus?.toLowerCase()?.includes(searchKey?.toLocaleLowerCase())
               }
             })
             .map((row, key) => {
@@ -670,182 +658,6 @@ const LoanType = () => {
                 </Grid>
               );
             })}
-
-          {/* <Grid item xs={12} md={6} spacing={2}>
-            <Card variant="outlined" style={{ backgroundColor: "transparent" }}>
-              <Grid container columnSpacing={{ xs: 6 }} p={1}>
-                <Grid item xs={9} ml={2}>
-                  <CardContent style={{}}>
-                    <Typography
-                      variant="h6"
-                      component="div"
-                      style={{
-                        fontSize: 20,
-                        fontWeight: 700,
-                      }}
-                    >
-                      {" "}
-                      Home Improvment{" "}
-                      <span className="verified_label" color="success">
-                        {" "}
-                        ACTIVE{" "}
-                      </span>
-                    </Typography>
-                    <Typography
-                      variant="body2"
-                      style={{ fontSize: 16, fontWeight: 500 }}
-                    >
-                      Updated Jul 23, 2021, 11:37PM
-                    </Typography>
-                  </CardContent>
-                </Grid>
-                <Grid item xs={1} mt={3} ml={0}>
-                  {" "}
-                  <Box sx={{ textAlign: "right" }}>
-                    <HomeOutlinedIcon fontSize="large" />
-                  </Box>
-                </Grid>
-              </Grid>
-            </Card>
-          </Grid> */}
-
-          {/* <Grid item xs={12} md={6} spacing={2}>
-            <Card variant="outlined" style={{ backgroundColor: "transparent" }}>
-              <Grid container columnSpacing={{ xs: 6 }} p={1}>
-                <Grid item xs={9} ml={2}>
-                  <CardContent>
-                    <Typography
-                      variant="h6"
-                      component="div"
-                      style={{ fontSize: 20, fontWeight: 700 }}
-                    >
-                      Consolidate Debt{" "}
-                      <span className="verified_label" color="success">
-                        {" "}
-                        ACTIVE{" "}
-                      </span>
-                    </Typography>
-                    <Typography
-                      variant="body2"
-                      style={{ fontSize: 16, fontWeight: 500 }}
-                    >
-                      Updated Jul 23, 2021, 11:37PM
-                    </Typography>
-                  </CardContent>
-                </Grid>
-                <Grid item xs={1} mt={3} ml={0}>
-                  {" "}
-                  <Box sx={{ textAlign: "right" }}>
-                    <FeedOutlinedIcon fontSize="large" />
-                  </Box>
-                </Grid>
-              </Grid>
-            </Card>
-          </Grid>
-
-         
-
-          <Grid item xs={12} md={6}>
-            <Card variant="outlined" style={{ backgroundColor: "transparent" }}>
-              <Grid container columnSpacing={{ xs: 6 }} p={1}>
-                <Grid item xs={9} ml={2}>
-                  <CardContent>
-                    <Typography
-                      variant="h6"
-                      component="div"
-                      style={{ fontSize: 20, fontWeight: 700 }}
-                    >
-                      {" "}
-                      Pay off Credit Cards{" "}
-                      <span className="verified_label" color="success">
-                        {" "}
-                        ACTIVE{" "}
-                      </span>
-                    </Typography>
-                    <Typography
-                      variant="body2"
-                      style={{ fontSize: 16, fontWeight: 500 }}
-                    >
-                      Updated Jul 23, 2021, 11:37PM
-                    </Typography>
-                  </CardContent>
-                </Grid>
-                <Grid item xs={1} mt={3} ml={0}>
-                  {" "}
-                  <Box sx={{ textAlign: "right" }}>
-                    <CreditCardOutlinedIcon fontSize="large" />
-                  </Box>
-                </Grid>
-              </Grid>
-            </Card>
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <Card variant="outlined" style={{ backgroundColor: "transparent" }}>
-              <Grid container columnSpacing={{ xs: 6 }} p={1}>
-                <Grid item xs={9} ml={2}>
-                  <CardContent>
-                    <Typography
-                      variant="h6"
-                      component="div"
-                      style={{ fontSize: 20, fontWeight: 700 }}
-                    >
-                      {" "}
-                      Refinance my Car{" "}
-                      <span className="verified_label" color="success">
-                        {" "}
-                        ACTIVE{" "}
-                      </span>
-                    </Typography>
-                    <Typography
-                      variant="body2"
-                      style={{ fontSize: 16, fontWeight: 500 }}
-                    >
-                      Updated Jul 23, 2021, 11:37PM
-                    </Typography>
-                  </CardContent>
-                </Grid>
-                <Grid item xs={1} mt={3} ml={0}>
-                  {" "}
-                  <Box sx={{ textAlign: "right" }}>
-                    <DirectionsCarOutlinedIcon fontSize="large" />
-                  </Box>
-                </Grid>
-              </Grid>
-            </Card>
-          </Grid>
-
-         
-
-          <Grid item xs={12} md={6}>
-            <Card variant="outlined" style={{ backgroundColor: "transparent" }}>
-              <Grid container columnSpacing={{ xs: 6 }} p={1}>
-                <Grid item xs={9} ml={2}>
-                  <CardContent>
-                    <Typography
-                      variant="h6"
-                      component="div"
-                      style={{ fontSize: 20, fontWeight: 700 }}
-                    >
-                      {" "}
-                      Something Else{" "}
-                    </Typography>
-                    <Typography
-                      variant="body2"
-                      style={{ fontSize: 16, fontWeight: 500 }}
-                    >
-                      Updated Jul 23, 2021, 11:37PM
-                    </Typography>
-                  </CardContent>
-                </Grid>
-                <Grid item xs={1} mt={3} ml={0}>
-                  {" "}
-                  <Box sx={{ textAlign: "right" }}>
-                    <BusinessCenterOutlinedIcon fontSize="large" />
-                  </Box>
-                </Grid>
-              </Grid>
-            </Card>
-          </Grid>  */}
         </Grid>
       </Box>
     </div>

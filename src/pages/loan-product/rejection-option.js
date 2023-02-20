@@ -104,6 +104,7 @@ function RejectionOption() {
     setOpen(false);
     setToggelAddRejection(false)
     setAddReasion("")
+    setFormError("")
   };
 
   const handleAutomatedClose = () => {
@@ -266,6 +267,7 @@ function RejectionOption() {
           setToggelAddRejection(false)
           getRejections();
         }
+        setAddReasion("")
       }
     } catch (err) {
       console.log(err);
@@ -489,7 +491,18 @@ function RejectionOption() {
                               addRejection();
                             }}
                           >
-                            Add
+                            
+                            {addRejectionLoading ? "Adding" : "Add"}
+                            {addRejectionLoading && (
+                              <CircularProgress
+                                style={{
+                                  height: 20,
+                                  width: 20,
+                                  marginLeft: 10,
+                                  color: "white",
+                                }}
+                              />
+                            )}
                           </Button>
                           <Button
                             style={{ height: 30, marginLeft: 5 }}
@@ -507,6 +520,8 @@ function RejectionOption() {
                         </InputAdornment>
                       }
                     />
+                    <p style={{color:"red"}}>{formError}</p>
+                    <br />
                   </FormControl>
                 )}
                 <Stack direction="row" spacing={1}>

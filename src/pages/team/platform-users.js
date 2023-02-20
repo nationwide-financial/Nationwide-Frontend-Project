@@ -649,12 +649,18 @@ const PlatformUsers = () => {
             </TableRow>
           </TableHead>
           <TableBody>
+            {console.log("652",rows)}
             {rows &&
               rows?.filter((data)=>{
                 if(searchKey == ''){
                   return data;
                 }else{
-                  return data?.email.toLowerCase().includes(searchKey.toLocaleLowerCase()) ;
+                  return data?.email?.toLowerCase()?.includes(searchKey?.toLocaleLowerCase())
+                  || data?.fname?.toLowerCase()?.includes(searchKey?.toLocaleLowerCase())
+                  || data?.lname?.toLowerCase()?.includes(searchKey?.toLocaleLowerCase())
+                  || data?.permission?.toLowerCase()?.includes(searchKey?.toLocaleLowerCase())
+                  || data?.phone_auth?.toLowerCase()?.includes(searchKey?.toLocaleLowerCase())
+                  || data?.status?.toLowerCase()?.includes(searchKey?.toLocaleLowerCase())
                 }
               })
                 .slice(pages * rowsPerPage, pages * rowsPerPage + rowsPerPage)

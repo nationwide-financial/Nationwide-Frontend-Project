@@ -47,7 +47,7 @@ import { useState } from "react";
 import { _fetchAllContacts, _deleteContact } from "../../services/contactServices";
 import Link from "next/link";
 import { _gatVariabels } from '../../services/variabelService.js';
-import { _getAllPlatformUserByAdmin } from '../../services/authServices'
+import { _getAllPlatformUserByAdmin, _getUser } from '../../services/authServices'
 import { s3URL } from '../../utils/config'
 
 const label = { inputProps: { "aria-label": "Switch demo" } };
@@ -161,11 +161,22 @@ function Contact() {
   const [loading, setLoading] = useState(false);
   const [trigger, setTrigger] = useState(0);
   const [users, setUsers] = useState([]);
-
+  
+const fetchPlatformUsersAndLoginUser = async () =>{
+  try{
+    const loginUser = await _getUser();
+    const platformUsers = await _getAllPlatformUserByAdmin();
+    let users = [loginUser?.data,...platformUsers?.data?.users];
+    setUsers(users)
+  }catch(err){
+    console.log(err)
+  }
+}
 
   const fetchData = async () => {
     setLoading(true);
     const response = await _fetchAllContacts();
+    console.log("_fetchAllContacts",response)
     setLoading(false);
     if (response?.status === 200) {
       let tableDt = await response?.data?.Items.sort((a, b) => (a.createTime < b.createTime) ? 1 : ((b.createTime < a.createTime) ? -1 : 0));
@@ -186,8 +197,8 @@ function Contact() {
   }
 
   useEffect(() => {
+    fetchPlatformUsersAndLoginUser()
     fetchData()
-    //getUsers()
     getVariables()
   }, [trigger])
 
@@ -454,9 +465,13 @@ function Contact() {
                             if (searchKey == "") {
                               return data;
                             } else {
-                              return data?.basicInformation?.email
-                                .toLowerCase()
-                                .includes(searchKey.toLocaleLowerCase());
+                              return data?.basicInformation?.email?.toLowerCase()?.includes(searchKey.toLocaleLowerCase())
+                              || data?.basicInformation?.firstName?.toLowerCase()?.includes(searchKey.toLocaleLowerCase())
+                              || data?.basicInformation?.lastName?.toLowerCase()?.includes(searchKey.toLocaleLowerCase())
+                              || data?.basicInformation?.phone?.toLowerCase()?.includes(searchKey.toLocaleLowerCase())
+                              || data?.basicInformation?.idNumber?.toLowerCase()?.includes(searchKey.toLocaleLowerCase())
+                              || moment(data?.updateTime).format("YYYY-MM-DD")?.includes(searchKey)
+                              || moment(data?.createTime).format("YYYY-MM-DD")?.includes(searchKey)
                             }
                           })
                           .slice(
@@ -489,9 +504,11 @@ function Contact() {
                                   return (<TableCell key={key} align="left">{basicInfo[variable?.systemName]}</TableCell>)
                                 })} */}
                                 <TableCell align="left">
+                                <Avatar alt={row?.createdBy?.split("#")[1]} src={`${s3URL}/${users?.filter((user)=>{ return user?.PK == row?.createdBy})[0]?.imageId}`} />
                                   {moment(row.createTime).format("YYYY-MM-DD")}
                                 </TableCell>
                                 <TableCell align="left">
+                                <Avatar alt={row?.updatedBy?.split("#")[1]} src={`${s3URL}/${users?.filter((user)=>{ return user?.PK == row?.updatedBy})[0]?.imageId}`} />
                                   {moment(row.updateTime).format("YYYY-MM-DD")}
                                 </TableCell>
                               </TableRow>

@@ -117,7 +117,6 @@ function ApplicationLabel() {
   const [openModify, setOpenModify] = useState(false);
   const handleOpenModify = () => setOpenModify(true);
   const handleCloseModify = () => {
-    setRowsId("");
     setOpenModify(false);
   };
 
@@ -130,6 +129,7 @@ function ApplicationLabel() {
     setOpen(false);
     setLabelName("");
     setColor("#00ff00");
+    setFormError("")
   };
 
   // edit model
@@ -141,6 +141,7 @@ function ApplicationLabel() {
     setOpenEdit(false);
     setLabelNameEdit("");
     setColorEdit("#00ff00");
+    setFormError("")
   };
 
   // paginations
@@ -258,11 +259,6 @@ const [users,setUsers]=useState([]);
     }
   }
 
-  useEffect(() => {
-    fetchAllUsers();
-    getTableData();
-  }, []);
-
   // edit lable
   const editLable = async (id) => {
     try {
@@ -329,24 +325,34 @@ const [users,setUsers]=useState([]);
   // add lable
   const handleAddFormSubmit = async () => {
     try {
-      console.log(lableName);
-      console.log(color);
-      let body = {
-        label: lableName,
-        color: color,
-      };
-      const reasons = await _addLabel(body);
-      if (reasons?.status == 200) {
-        handleClose();
-        getTableData();
-        handleSuccessMessage();
-        setMessage("you have successfully Added");
+      if(!lableName || lableName == "" || lableName == null){
+        setFormError("lable name can not be empty !");
+      }else if(!color || color == "" || color == null){
+        setFormError("color can not be empty !");
+      }else{
+        setFormError("")
+        let body = {
+          label: lableName,
+          color: color,
+        };
+        const reasons = await _addLabel(body);
+        if (reasons?.status == 200) {
+          handleClose();
+          getTableData();
+          handleSuccessMessage();
+          setMessage("you have successfully Added");
+        }
       }
-      console.log("reasons", reasons);
     } catch (err) {
       console.log(err);
     }
   };
+
+  useEffect(() => {
+    fetchAllUsers();
+    getTableData();
+  }, []);
+
   return (
     <>
       <Box
@@ -467,6 +473,8 @@ const [users,setUsers]=useState([]);
                       />
                     </Box>
                   </FormControl>
+                  <br />
+                  <p style={{color:"red"}}>{formError}</p>
                 </DialogContent>
 
                 <DialogActions mb={5}>
@@ -566,6 +574,7 @@ const [users,setUsers]=useState([]);
                       />
                     </Box>
                   </FormControl>
+                  <br />
                   <p style={{ color: "red" }}> {formError}</p>
                 </DialogContent>
 

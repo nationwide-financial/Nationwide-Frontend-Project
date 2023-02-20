@@ -1033,9 +1033,11 @@ function Variable() {
                     if (searchKey == "") {
                       return data;
                     } else {
-                      return data?.displayName
-                        .toLowerCase()
-                        .includes(searchKey.toLocaleLowerCase());
+                      return data?.displayName?.toLowerCase()?.includes(searchKey?.toLocaleLowerCase())
+                      || data?.dataType?.toLowerCase()?.includes(searchKey?.toLocaleLowerCase())
+                      || data?.description?.toLowerCase()?.includes(searchKey?.toLocaleLowerCase())
+                      || data?.systemName?.toLowerCase()?.includes(searchKey?.toLocaleLowerCase())
+                      || data?.variableType?.toLowerCase()?.includes(searchKey?.toLocaleLowerCase())
                     }
                   })
                   .slice(pages * rowsPerPage, pages * rowsPerPage + rowsPerPage)

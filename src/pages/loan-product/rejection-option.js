@@ -364,14 +364,14 @@ function RejectionOption() {
         </Grid>
 
         {/* dialog-box-- */}
-        <Grid container>
-          <Grid item xs={12}>
+        <Grid container >
+          <Grid item xs={12} >
             <BootstrapDialog
               className="rj-dialog"
               onClose={handleClose}
               aria-labelledby="customized-dialog-title"
               open={open}
-              style={{ minWidth: 550, maxHeight: "auto" }}
+              style={{ minWidth: "600px", maxHeight: "auto" }}
             >
               <BootstrapDialogTitle
                 id="customized-dialog-title"
@@ -380,7 +380,7 @@ function RejectionOption() {
               >
                 Edit Decline Reasons
               </BootstrapDialogTitle>
-              <DialogContent>
+              <DialogContent className="nw-dialog">
                 {reasions &&
                   reasions?.map((reasion, key) => {
                     if (reasion && reasion?.auto_ == false) {
@@ -671,7 +671,7 @@ function RejectionOption() {
               >
                 Edit Automated Rejections
               </BootstrapDialogTitle>
-              <DialogContent>
+              <DialogContent className="nw-dialog">
                 {applications &&
                   applications?.filter((application)=>{return application?.status_ == "closed"}).map((application, key) => {
                     return (<div key={key}>

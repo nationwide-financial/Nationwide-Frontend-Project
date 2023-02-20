@@ -916,18 +916,6 @@ function ApplicationDate() {
                     })}
                   </Menu>
                 </div>
-
-                <Stack direction="row" spacing={1}>
-                  <Avatar
-                    alt="Remy Sharp"
-                    src={`${s3URL}/${users?.filter((user) => { return user?.PK == applicationData?.updateBy })[0]?.imageId}`}
-                    sx={{ width: 24, height: 24 }}
-                  />{" "}
-                  <span style={{ fontSize: 16, fontWeight: 500, marginTop: 2 }}>
-                    {getTime(applicationData?.updateTime)}
-                  </span>
-                </Stack>
-
               </Stack>
             </Grid>
             <Grid item xs={12} md={4}>

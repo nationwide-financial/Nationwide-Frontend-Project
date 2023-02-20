@@ -533,8 +533,6 @@ color: #fff !important;
   display: none;
 }
 
-.css-1t1j96h-MuiPaper-root-MuiDialog-paper {
-  min-width: 580px;
-  max-height: "auto";
-  padding: 20px;
+.nw-dialog {
+  min-width: 550px;
 }

@@ -174,7 +174,7 @@ const Sidebar = () => {
           treeitems: [
             {
               path: "/loan-product/loan-type",
-              name: "Loan Type",
+              name: "Campaigns",
             },
             {
               path: "/loan-product/workflow-status",
@@ -188,10 +188,10 @@ const Sidebar = () => {
               path: "/loan-product/application-label",
               name: "Application Label",
             },
-            {
-              path: "/loan-product/rejection-option",
-              name: "Rejection Option",
-            }
+            // {
+            //   path: "/loan-product/rejection-option",
+            //   name: "Rejection Option",
+            // }
           ]
         }
       ]

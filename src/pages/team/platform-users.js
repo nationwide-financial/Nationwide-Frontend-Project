@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useContext } from "react";
 import {
   Avatar,
   Box,
@@ -68,6 +68,7 @@ import {
   _deactivateUser,
   _editPermissionGroup
 } from "../../services/authServices";
+import { Context } from "../../context";
 
 const PlatformUsers = () => {
 
@@ -106,9 +107,10 @@ const PlatformUsers = () => {
   }
 
   // dialog-box-related----
-
+  const { state, dispatch} = useContext(Context);
   const [open, setOpen] = React.useState(false);
   // const router = useRouter();
+  const profile = state?.user || {}
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -278,7 +280,7 @@ const PlatformUsers = () => {
    
   };
 
-  const userRoles = [
+  const userAdmin = [
     {
       value: "OWNER",
       label: "OWNER",
@@ -288,6 +290,18 @@ const PlatformUsers = () => {
       label: "USER",
     },
   ];
+
+  const userOwner = [
+    {
+      value: "USER",
+      label: "USER",
+    },
+  ];
+
+  let userRoles = userOwner;
+  if(profile?.role === "ADMIN")  userRoles = userAdmin
+
+
 
 
   const [permissionGroupEdit,setPermissionGroupEdit] = useState('');
@@ -364,6 +378,7 @@ const PlatformUsers = () => {
 
         <Grid item xs={12} md={6}>
           <Box sx={{ textAlign: "right" }}>
+          { profile?.role !== "USER" &&
             <Button
               variant="contained"
               sx={{ padding: "10px 40px" }}
@@ -371,6 +386,7 @@ const PlatformUsers = () => {
             >
               Add User
             </Button>
+          }
 
             {/* dialog -start--- */}
 
@@ -476,6 +492,7 @@ const PlatformUsers = () => {
                       margin="normal"
                       onChange={onChangeHandler}
                     >
+
                       {userRoles.map((option) => (
                         <MenuItem
                           key={option.value}

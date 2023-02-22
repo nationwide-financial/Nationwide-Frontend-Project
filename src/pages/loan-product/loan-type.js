@@ -344,7 +344,7 @@ const LoanType = () => {
       <Box p={5} mb={12}>
         <Grid container>
           <Grid item xs={12} md={6}>
-            <h1 className="page_header">Loan Types</h1>
+            <h1 className="page_header">Campaigns</h1>
           </Grid>
           <Grid item xs={12} md={6}>
             <Box sx={{ textAlign: "right" }}>
@@ -358,7 +358,7 @@ const LoanType = () => {
                   textTransform: "capitalize",
                 }}
               >
-                Add Product
+                Add Campaign
               </Button>
             </Box>
 
@@ -373,7 +373,7 @@ const LoanType = () => {
                     style={{ fontSize: 30 }}
                     className="page_header"
                   >
-                    New Product
+                    New Campaign
                   </Typography>
                 </BootstrapDialogTitle>
 
@@ -392,7 +392,7 @@ const LoanType = () => {
                             fontStyle: "normal",
                           }}
                         >
-                          Loan Product Name
+                          Campaign Name
                           <span style={{ color: "#FF0000" }}>*</span>
                         </Typography>
                       </label>
@@ -422,7 +422,7 @@ const LoanType = () => {
                           }}
                           my={1}
                         >
-                          Loan Product Icon
+                          Campaign Icon
                           <span style={{ color: "#FF0000" }}>*</span>
                         </Typography>
                       </label>
@@ -506,7 +506,7 @@ const LoanType = () => {
                             fontStyle: "normal",
                           }}
                         >
-                          Loan Product Status
+                          Campaign Status
                           <span style={{ color: "#FF0000" }}>*</span>
                         </Typography>
                       </label>
@@ -547,7 +547,7 @@ const LoanType = () => {
                       textTransform: "capitalize",
                     }}
                   >
-                    Create Product
+                    Create Campaign
                   </Button>
                 </DialogActions>
               </Box>

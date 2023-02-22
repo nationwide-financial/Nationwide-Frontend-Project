@@ -1,59 +1,44 @@
-import React, { useEffect,useCallback } from "react";
-import {
-  Avatar,
-  Box,
-  Button,
-  Grid,
-  IconButton,
-  TextField,
-  Typography,
-} from "@mui/material";
-import AvatarGroup from "@mui/material/AvatarGroup";
+import React, { useEffect ,useCallback } from "react";
+import { Avatar, Box, Button, Grid, IconButton, TablePagination, TextField, Typography } from "@mui/material";
 import Stack from "@mui/material/Stack";
-import Dialog from "@mui/material/Dialog";
-import DialogActions from "@mui/material/DialogActions";
-import DialogContent from "@mui/material/DialogContent";
-import DialogTitle from "@mui/material/DialogTitle";
-import CloseIcon from "@mui/icons-material/Close";
-import FormControl from "@mui/material/FormControl";
 import { useRouter } from "next/router";
-import Chip from "@mui/material/Chip";
-import NoteAltOutlinedIcon from "@mui/icons-material/NoteAltOutlined";
-import Link from "@mui/material/Link";
 import PropTypes from "prop-types";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
+import moment from "moment";
 import { useTheme } from "@mui/material/styles";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
+import TableFooter from "@mui/material/TableFooter";
 import TableRow from "@mui/material/TableRow";
 import FirstPageIcon from "@mui/icons-material/FirstPage";
 import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
 import KeyboardArrowRight from "@mui/icons-material/KeyboardArrowRight";
 import LastPageIcon from "@mui/icons-material/LastPage";
-import Select from "@mui/material/Select";
-import MenuItem from "@mui/material/MenuItem";
+import TableHead from "@mui/material/TableHead";
+import Image from "next/image";
 import { useState } from "react";
-import Snackbar from '@mui/material/Snackbar';
-import Alert from '@mui/material/Alert';
+import Link from "@mui/material/Link";
+import NoteAltOutlinedIcon from "@mui/icons-material/NoteAltOutlined";
 import { MobileDatePicker } from '@mui/x-date-pickers';
-import {_gatVariabels} from '../../services/variabelService.js';
-import { s3URL } from '../../utils/config'
-import { getDate } from '../../utils/utils'
+import styles from '../../components/searchBox/searchBox.module.scss'
+import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
+import { Snackbar } from "@material-ui/core";
+import { Alert } from "@mui/material";
 
-// import AvatarGroup from '@mui/material/AvatarGroup';
-import {
-  _fetchContactById,
-  _updateContactById,
-} from "../../services/contactServices.js";
-import {
-  _getApplicationById,
-  _manageTeamMembers,
-} from "../../services/applicationService.js";
-import { _getAllPlatformUserByAdmin, _getUser } from "../../services/authServices.js";
 
+import { getDate,getDateWithDay, orderArray } from '../../utils/utils'
+import { _fetchContactById, _updateContactById } from "../../services/contactServices";
+import { _gatVariabels } from "../../services/variabelService.js";
+import { _getUserById } from "../../services/authServices";
+import { _getApplications } from '../../services/applicationService'
+import { s3URL } from "../../utils/config";
+import SearchBox from "../../components/searchBox/searchBox";
+const label = { inputProps: { "aria-label": "Switch demo" } };
+
+// table-with-pagination-------------------
 function TablePaginationActions(props) {
   const theme = useTheme();
   const { count, page, rowsPerPage, onPageChange } = props;
@@ -123,10 +108,6 @@ TablePaginationActions.propTypes = {
   rowsPerPage: PropTypes.number.isRequired,
 };
 
-// table-with-pagination-related-----end---
-
-// tab-set-related-------
-
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
 
@@ -159,265 +140,104 @@ function a11yProps(index) {
     "aria-controls": `simple-tabpanel-${index}`,
   };
 }
-// ------
 
+function Contact() {
+const router = useRouter();
+const [searchKey, setSearchKey] = useState("");
+const [page, setPage] = useState(0);
+const [rowsPerPage, setRowsPerPage] = useState(5);
+const [contactData, setContactData] = useState([]);
+const [value, setValue] = useState(0);
+const [switchEditMode, setSwitchEditMode] = useState(false);
+const [phoneNumber, setPhoneNumber] = useState("");
+const [firstName, setFirstName] = useState("");
+const [lastName, setLastName] = useState("");
+const [email, setEmail] = useState("");
+const [dob, setDob] = useState("");
+const [idNumber, setIdNumber] = useState("");
+const [streetAddress, setStreetAddress] = useState("");
+const [postalCode, setPostalCode] = useState("");
+//const [country, setCountry] = useState("");
+const [companyName, setCompanyName] = useState("");
+const [jobTitle, setJobTitle] = useState("");
+const [city, setCity]= useState("")
+const [province, setProvince] = useState("")
+const [additionalInfomations, setAdditionalInfomations] = useState({})
+const [updatedBy, setUpdatedBy] = useState({})
+const [applications, setApplications] = useState([]);
+const [variableData, setVariableData] = useState([]);
+const [ error, setError ] = useState({formError:"", error:""})
+const [message, setMessage] = useState({})
 
+const handleChangePage = (event, newPage) => {
+  setPage(newPage);
+};
 
-function BootstrapDialogTitle(props) {
-  const { children, onClose, ...other } = props;
+const handleChangeRowsPerPage = (event) => {
+  setRowsPerPage(parseInt(event.target.value, 10));
+  setPage(0);
+};
 
-  return (
-    <DialogTitle sx={{ m: 0, p: 2 }} {...other}>
-      {children}
-      {onClose ? (
-        <IconButton
-          aria-label="close"
-          onClick={onClose}
-          sx={{
-            position: "absolute",
-            right: 8,
-            top: 8,
-            color: (theme) => theme.palette.grey[500],
-          }}
-        >
-          <CloseIcon />
-        </IconButton>
-      ) : null}
-    </DialogTitle>
-  );
-}
-
-function EditApplicationForm() {
-  const [contact, setContact ]=useState({})
-  const [variableData, setVariableData] = useState([]);
-  let midNo = Math.round(variableData.length / 2)
-  let leftCount = variableData.length - midNo;
-  const [switchEditMode, setSwitchEditMode] = useState(false);
-  const [applicationData, setApplicationData] = useState([]);
-  const [contactData, setContactData] = useState({});
-  const [cocontactData, setCocontactData] = useState([]);
-  const [teamMembersData, setTeamMembersData] = useState([]);
-
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [email, setEmail] = useState("");
-  const [dob, setDob] = useState("");
-  const [idNumber, setIdNumber] = useState("");
-  const [city, setCity] = useState("");
-  const [streetAddress, setStreetAddress] = useState("");
-  const [postalCode, setPostalCode] = useState("");
-  const [province, setProvince] = useState("");
-  //const [country, setCountry] = useState("");
-  const [companyName, setCompanyName] = useState("");
-  const [jobTitle, setJobTitle] = useState("");
-  const [yearAtJob, setYearAtJob] = useState("");
-  const [additionalInfomations, setAdditionalInfomations] = useState({})
-
-  const [openSuccessMessage, setOpenSuccessMessage] = useState(false);
-  const [message,setMessage] =useState('');
-  const handleSuccessMessage = () => {
-    setOpenSuccessMessage(true);
-  };
-
-  const handleCloseSuccessMessage = (event, reason) => {
-    if (reason === 'clickaway') {
-      return;
-    }
-    setMessage('')
-    setOpenSuccessMessage(false);
-  };
-
-  const [EditMemberOpen, setEditMemberOpen] = React.useState(false);
-
-  const handleEditMemberClickOpen = () => {
-    setEditMemberOpen(true);
-  };
-  const handleEditMemberClose = () => {
-    setEditMemberOpen(false);
-  };
-
-  const [value, setValue] = React.useState(0);
-
-  const handleChange = (event, newValue) => {
-    setValue(newValue);
-  };
-  const router = useRouter();
- 
-  const ITEM_HEIGHT = 48;
-  const ITEM_PADDING_TOP = 8;
-  const MenuProps = {
-    PaperProps: {
-      style: {
-        maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
-        width: 250,
-      },
-    },
-  };
-
-
-
-
-  //console.log(applicationData?.members);
-  const [personName, setPersonName] = useState([]);
-  const setInitialStateOfTeam = (ids) => {
-    setPersonName([...ids]);
-  };
-  const handleChangeEditTeamMember = async (event) => {
-    const {
-      target: { value },
-    } = event;
-    let users = typeof value === "string" ? value.split(",") : value;
-    setPersonName(users);
-  };
-
-  const handleAddTeamMember = async (id, users) => {
-    try {
-      let body = {
-        members: users,
-      };
-      const res = await _manageTeamMembers(id, body);
-      if (res && res?.status == 200) {
-       // alert("Updated the team members");
-        handleSuccessMessage()
-        setMessage("Updated the team members")
-        getData();
-      }
-    } catch (err) {
-      console.log(err);
-    }
-  };
-
-  const getTeamMembers = async () => {
-    try {
-      const loginUser = await _getUser();
-      const res = await _getAllPlatformUserByAdmin();
-      if (res?.status == 200) {
-        let data = [...res.data?.users,loginUser?.data]
-        return data;
-      }
-    } catch (err) {
-      console.log(err);
-    }
-  };
-
-  const getCocontactData = async (ids) => {
-    try {
-      if (ids) {
-        let cocontactData = [];
-        for (let i = 0; i < ids.length; i++) {
-          const res = await _fetchContactById(ids[i]);
-          cocontactData.push(res?.data?.Item);
-        }
-        return cocontactData;
-      }
-    } catch (err) {
-      console.log(err);
-    }
-  };
-
-  const getContactData = async (id) => {
-    try {
-      if (id) {
-        const res = await _fetchContactById(id);
-        console.log("320_fetchContactById",res)
-        if (res?.data?.Item && res.status == 200) {
-          return res?.data?.Item;
-        }
-      }
-    } catch (err) {
-      console.log(err);
-    }
-  };
-
-  const getApplicationData = async (id) => {
-    try {
-      const res = await _getApplicationById(id);
-      let dataObject = res?.data?.data?.Items[0];
-      return dataObject;
-    } catch (err) {
-      console.log(err);
-    }
-  };
-
-  async function getData() {
-    if (!router.isReady) return;
-    const query = router.query;
-    let applicationID = query.applicationId;
-
-    const applicationDataObject = await getApplicationData(applicationID);
-    setInitialStateOfTeam(applicationDataObject?.members);
-    setApplicationData(applicationDataObject);
-
-    const contactData = await getContactData( applicationDataObject?.contactId[0]);
-    console.log("contactData351",contactData)
-    setContactData(contactData);
-    setAdditionalInfomations(contactData?.additionalInformation)
-    const coContactData = await getCocontactData( applicationDataObject?.cocontactData);
-    setCocontactData(coContactData);
-
-    const teamMembersArray = await getTeamMembers();
-    setTeamMembersData(teamMembersArray);
-
-    setPhoneNumber(contactData?.basicInformation?.phone);
-    setFirstName(contactData?.basicInformation?.firstName);
-    setLastName(contactData?.basicInformation?.lastName);
-    setEmail(contactData?.basicInformation?.email);
-    setDob(contactData?.basicInformation?.dob);
-    setIdNumber(contactData?.basicInformation?.idNumber);
-    setCity(contactData?.basicInformation?.city);
-    setStreetAddress(contactData?.basicInformation?.streetAddress);
-    setPostalCode(contactData?.basicInformation?.postalCode);
-    setProvince(contactData?.basicInformation?.state);
-    //setCountry(contactData?.basicInformation?.country);
-    setCompanyName(contactData?.jobInformation?.companyName);
-    setJobTitle(contactData?.jobInformation?.jobTitle);
-    setYearAtJob("");
-  }
-
-  const [submitErr, setSubmitErr] = useState("");
-  
   const onChangeHandler = useCallback(
     ({ target }) => {
       setAdditionalInfomations((state) => ({ ...state, [target.name]: target.value }));
     }, []
   );
 
-  console.log("additionalInfomations",additionalInfomations)
+  const getVariables = async () => {
+    try {
+      const res = await _gatVariabels();
+      let data = await res?.data?.data?.Items.filter((variable) => variable?.variableType == "contact");
+      data = await orderArray(data,"createTime")
+      setVariableData([...data]);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const fetchUpdatedUser = async (userId) =>{
+    try{
+      const response = await _getUserById(userId);
+      if(response?.status == 200){
+        setUpdatedBy(response?.data?.data?.Items[0])
+      }
+    }catch(err){
+      console.log(err)
+    }
+  } 
 
   const handelSubmitContact = async (id) => {
     try {
       if (!firstName || firstName == "" || firstName == null) {
-        setSubmitErr("first name can not be empty !");
+        setError({...error,formError:"first name can not be empty !"});
       } else if (!lastName || lastName == "" || lastName == null) {
-        setSubmitErr("last name can not be empty !");
+        setError({...error,formError:"last name can not be empty !"});
       } else if (!email || email == "" || email == null) {
-        setSubmitErr("email can not be empty !");
+        setError({...error,formError:"email can not be empty !"});
       } else if (!dob || dob == "" || dob == null) {
-        setSubmitErr("date of birth can not be empty !");
+        setError({...error,formError:"date of birth can not be empty !"});
       } else if (!idNumber || idNumber == "" || idNumber == null) {
-        setSubmitErr("ID number can not be empty !");
+        setError({...error,formError:"ID number can not be empty !"});
       } else if (!city || city == "" || city == null) {
-        setSubmitErr("city can not be empty !");
+        setError({...error,formError:"city can not be empty !"});
       } else if ( !streetAddress || streetAddress == "" || streetAddress == null) {
-        setSubmitErr("street address can not be empty !");
+        setError({...error,formError:"street address can not be empty !"});
       } else if (!postalCode || postalCode == "" || postalCode == null) {
-        setSubmitErr("postal code can not be empty !");
+        setError({...error,formError:"postal code can not be empty !"});
       } else if (!province || province == "" || province == null) {
-        setSubmitErr("province code can not be empty !");
+        setError({...error,formError:"province code can not be empty !"});
       } 
       // else if (!country || country == "" || country == null) {
-      //   setSubmitErr("country code can not be empty !");
+      //   setError({...error,formError:"country code can not be empty !"});
       // } 
       else if (!phoneNumber || phoneNumber == "" || phoneNumber == null) {
-        setSubmitErr("phone number code can not be empty !");
+        setError({...error,formError:"phone number code can not be empty !"});
       } else if (!companyName || companyName == "" || companyName == null) {
-        setSubmitErr("Company Name code can not be empty !");
+        setError({...error,formError:"Company Name code can not be empty !"});
       } else if (!jobTitle || jobTitle == "" || jobTitle == null) {
-        setSubmitErr("job Title code can not be empty !");
+        setError({...error,formError:"job Title code can not be empty !"});
       } else {
-        setSubmitErr("");
-        console.log("inside");
+        setError({...error,formError:""});
         let body = {
           basicInformation: {
             firstName: firstName,
@@ -439,13 +259,14 @@ function EditApplicationForm() {
           additionalInformation:{...additionalInfomations}
         };
         const res = await _updateContactById(id, body);
-        console.log("_updateContactById", res);
         if (res?.status == 200) {
-          //alert("Updated");
-          handleSuccessMessage()
-          setMessage("Updated")
+          setMessage({ severity: 'success', message: 'Profile updated!' })
           setSwitchEditMode((switchEditMode) => !switchEditMode);
-          getData();
+          fetchContactById(contactData?.PK)
+        }else{
+          setMessage({ severity: 'error', message: 'Profile updating failed!' })
+          setSwitchEditMode((switchEditMode) => !switchEditMode);
+          fetchContactById(contactData?.PK)
         }
       }
     } catch (err) {
@@ -453,268 +274,179 @@ function EditApplicationForm() {
     }
   };
 
-  // const handelSubmitContact = async (id) => {
-  //   try { 
-  //     setSubmitErr(""); 
-  //       let body = {
-  //         basicInformation: contact
-  //       }
-  //       const res = await _updateContactById(id, body);
-  //       console.log("_updateContactById", res);
-  //       if (res?.status == 200) {
-  //         handleSuccessMessage()
-  //         setMessage("Updated")
-  //         setSwitchEditMode((switchEditMode) => !switchEditMode);
-  //         getData();
-  //       }
-  //   } catch (err) {
-  //     console.log(err);
-  //   }
-  // };
-
- 
-
-  const getVariables = async () =>{
+  const fetchContactById = async ( contactId )=>{
     try{
-      const res = await _gatVariabels();
-      let data = await res?.data?.data?.Items.filter((variable)=>variable?.variableType == "contact")
-      data = await data.sort((a,b) => (a.createTime > b.createTime) ? 1 : ((b.createTime > a.createTime) ? -1 : 0));
-      //console.log(res)
-      setVariableData([...data])
+      if(contactId){
+        const response = await _fetchContactById(contactId)
+        if(response?.status == 200){
+          let contact = response?.data?.Item;
+          fetchUpdatedUser(contact?.updatedBy?.split("#")[1])
+
+          setContactData(contact)
+          setPhoneNumber(contact?.basicInformation?.phone);
+          setFirstName(contact?.basicInformation?.firstName);
+          setLastName(contact?.basicInformation?.lastName);
+          setEmail(contact?.basicInformation?.email);
+          setDob(contact?.basicInformation?.dob);
+          setIdNumber(contact?.basicInformation?.idNumber);
+          setStreetAddress(contact?.basicInformation?.streetAddress);
+          setPostalCode(contact?.basicInformation?.postalCode);
+          //setCountry(contact?.basicInformation?.country);
+          setCity(contact?.basicInformation?.city)
+          setProvince(contact?.basicInformation?.state)
+          setCompanyName(contact?.jobInformation?.companyName);
+          setJobTitle(contact?.jobInformation?.jobTitle);
+          setAdditionalInfomations(contact?.additionalInformation)
+        }
+      }else{
+        setError({...error, error:"Contact Id not found!"})
+      }
+    }catch(err){
+      console.log(err)
+    }
+  }
+
+  const fetchApplications = async () =>{
+    try{
+      if(applications?.length == 0){
+        const response = await _getApplications();
+        if(response?.status == 200){
+          const applicationsResponse = response?.data?.data?.Items;
+          let filteredApplications = [];
+
+          await applicationsResponse?.map((application)=>{
+            if(application?.contactId?.includes(contactData?.PK)){
+              filteredApplications.push(application)
+            }
+          })
+          const OrderdFilteredApplications = await orderArray(filteredApplications,"createTime")
+          setApplications(OrderdFilteredApplications);
+        }
+      }
     }catch(err){
       console.log(err)
     }
   }
 
   useEffect(() => {
-    getData();
+    if (!router.isReady) return;
+    const query = router.query;
+    let contactId = query?.contactId;
+    fetchContactById(contactId);
     getVariables();
   }, [router.isReady, router.query]);
 
+  const handleChange = (event, newValue) => {
+    setValue(newValue);
+  };
+
+  const handleClickOpen = () => {
+    setOpen(true);
+  };
+
+  const [showContent, setShowContent] = useState(false);
+
+  const handleEditDetails = () => {
+    setShowContent(!showContent);
+  };
+
   return (
     <div>
-      <Snackbar open={openSuccessMessage} autoHideDuration={6000} onClose={handleCloseSuccessMessage}>
-        <Alert onClose={handleCloseSuccessMessage} severity="success" sx={{ width:"100%" }} style={{backgroundColor:'lightgreen'}}>
-          {message}
-        </Alert>
-     </Snackbar>
-      <Box p={4} style={{ marginTop:40 }}>
-        {/* 1st-header-section */}
-        <Grid container mb={5}>
-          <Grid item xs={12}>
-            <Stack direction="row" spacing={1}>
-              <h1 className="page_header">Application Form</h1>
-              <Stack direction="row" spacing={1} pb={2} bottom={15}>
-                <AvatarGroup max={4} total={personName?.length}>
-                  {personName?.map((emailId,key)=>{
-                    let user = teamMembersData.filter((user)=>{return user?.PK == `USER#${emailId}`})[0]
-                    return(
-                      <Avatar key={key} alt={user?.PK.split("#")[1]} src={`${s3URL}/${user?.imageId}`} />
-                    )
-                  })}
-                </AvatarGroup>
+      {message && <Snackbar
+          anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+          open={message}
+          autoHideDuration={3000}
+          onClose={() => setMessage()}
+        >
+          <Alert variant="filled" severity={message.severity}>
+            {message.message}
+          </Alert>
+        </Snackbar>}
 
-                <Link
-                  className="page_sub_outlineless_text_btn"
-                  style={{ textDecoration: "none", cursor: "pointer" }}
-                  onClick={handleEditMemberClickOpen}
-                >
-                  <Stack
-                    direction="row"
-                    spacing={1}
-                    mt={1}
-                    style={{ fontSize: 18, fontWeight: 500 }}
-                  >
-                    <NoteAltOutlinedIcon mt={1} />
-                    <Typography> Edit Team Members </Typography>
-                  </Stack>
-                </Link>
+        <Box p={3} style={{ marginTop: 40 }}>
+          {/* top-Header */}
+          <Grid item xs={12} md={9}>
+            <h1 className="page_header">{firstName} {lastName}</h1>
+            <Grid item xs={12} my={3}>
+              <Stack direction="row" spacing={1}>
+                <Stack direction="row" spacing={1}>
+                <Avatar alt={updatedBy?.PK?.split("#")[1]} src={`${s3URL}/${updatedBy?.imageId}`} />{" "}
+                  <span style={{ fontSize: 16, fontWeight: 500, marginTop: 2 }}>
+                    Updated {getDateWithDay(contactData?.updateTime) || ""}
+                  </span>
+                </Stack>
               </Stack>
-              <Dialog
-                open={EditMemberOpen}
-                onClose={handleEditMemberClose}
-                fullWidth
-              >
-                <Box sx={{ width: 1000, maxWidth: "100%" }}>
-                  <BootstrapDialogTitle
-                    id="customized-dialog-title"
-                    onClose={handleEditMemberClose}
-                  >
-                    <Typography
-                      variant="h6"
-                      style={{
-                        fontSize: 30,
-                        fontFamily: "Gilroy-Bold",
-                        fontWeight: "bold",
-                      }}
-                    >
-                      Team Members
-                    </Typography>
-                    <Typography
-                      variant="h6"
-                      style={{
-                        fontSize: 15,
-                        fontWeight: "bold",
-                        fontFamily: "Montserrat",
-                        fontStyle: "normal",
-                      }}
-                    >
-                      Assign team Members
-                    </Typography>
-                  </BootstrapDialogTitle>
-
-                  <DialogContent>
-                    <FormControl
-                      style={{ display: "flex", justifyContent: "center" }}
-                    >
-                      <label></label>
-                      <Box sx={{ maxWidth: "100%" }}>
-                        <Box
-                          sx={{
-                            width: "100%",
-                            height: 300,
-                          }}
-                        >
-                          <div>
-                            <Grid container spacing={{ xs: 2, md: 3 }}>
-                              <div style={{ marginTop: "20px" }}>
-                                <FormControl sx={{ m: 1, width: 580 }}>
-                                  {/* <InputLabel id="demo-multiple-chip-label">Chip</InputLabel> */}
-                                  <Select
-                                    // labelId="demo-multiple-chip-label"
-                                    id="demo-multiple-chip"
-                                    multiple
-                                    value={personName}
-                                    onChange={handleChangeEditTeamMember}
-                                    // input={<OutlinedInput id="select-multiple-chip" label="Chip" />}
-                                    renderValue={(selected) => (
-                                      <Box
-                                        sx={{
-                                          display: "flex",
-                                          flexWrap: "wrap",
-                                          gap: 0.5,
-                                        }}
-                                      >
-                                        {selected.map((value,key) => {
-                                          console.log("value613",value)
-                                          let user = teamMembersData.filter((user)=>{
-                                            return user?.PK == `USER#${value}`
-                                          })[0]
-                                          console.log(`userName${key}`,user)
-                                          return (
-                                            <Chip
-                                            style={{borderRadius:0,height:40}}
-                                              key={value}
-                                              label={`${user?.info?.firstName && user?.info?.lastName ? user?.info?.firstName+" "+user?.info?.lastName : user?.PK.split("#")[1]} `}
-                                              avatar={
-                                                <Avatar key={key} alt={user?.PK.split("#")[1]} src={`${s3URL}/${user?.imageId}`} />
-                                              }
-                                            />
-                                          )
-                                        })}
-                                      </Box>
-                                    )}
-                                    MenuProps={MenuProps}
-                                  >
-                                    {teamMembersData.map((object, key) => (
-                                      <MenuItem
-                                        key={key}
-                                        value={object?.PK.split("#")[1] || ""}
-                                       // value={`${object?.PK.split("#")[1] || ""+ object?.info?.firstName && object?.info?.lastName ? "|"+object?.info?.firstName+" "+object?.info?.lastName : "" }`}
-                                      >
-                                        
-                                        {object?.PK.split("#")[1] || ""} { (object?.info?.firstName || object?.info?.lastName) && "|"} {object?.info?.firstName && object?.info?.lastName} {object?.info?.firstName && object?.info?.lastName}
-                                      </MenuItem>
-                                    ))}
-                                  </Select>
-                                </FormControl>
-                              </div>
-                              {/* {Array.from(Array(6)).map((_, index) => (
-                                <Grid item xs={6} sm={6} md={6} key={index}>
-                                  {members.map((option) => (
-                                    <div
-                                      key={option.value}
-                                      value={option.value}
-                                      style={{
-                                        backgroundColor: "#e0e0e0",
-                                        width: 200,
-                                        height: 50,
-                                        padding: 5,
-                                      }}
-                                    >
-                                      <Grid container spacing={1}>
-                                        <Grid item xs>
-                                          <Avatar
-                                            alt="avatar1"
-                                            src="../images/img1.png"
-                                          />
-                                        </Grid>
-
-                                        <Grid item xs align="left">
-                                          <div>{option.label}</div>
-                                        </Grid>
-                                      </Grid>
-                                    </div>
-                                  ))}
-                                </Grid>
-                              ))}
-                               */}
-                            </Grid>
-                          </div>
-                        </Box>
-                      </Box>
-                    </FormControl>
-                  </DialogContent>
-
-                  <DialogActions>
-                    <Button
-                      variant="contained"
-                      alignItems="left"
-                      onClick={() => {
-                        handleAddTeamMember(applicationData?.PK, personName);
-                        handleEditMemberClose();
-                      }}
-                    >
-                      Save Changes
-                    </Button>
-                  </DialogActions>
-                </Box>
-              </Dialog>
-            </Stack>
+            </Grid>
           </Grid>
-        </Grid>
+          {/* 1st-header-section */}
+          <Grid container mb={5}>
+            <Grid item xs={12} md={6}>
+              {/* <h1 className="page_header">Contacts</h1> */}
+             {value == 1 && 
+              <div className={styles.search}>
+                  <SearchOutlinedIcon className={styles.icon} fontSize='medium'/>
+                  <TextField 
+                    name="applicationSearch" 
+                    className={styles.input} 
+                    id="input-with-icon-textfield" 
+                    label="Search" 
+                    variant="standard"
+                    onChange={(e)=>setSearchKey(e.target.value)}
+                  />
+              </div>}
+              {value == 2 && 
+              <div className={styles.search}>
+                  <SearchOutlinedIcon className={styles.icon} fontSize='medium'/>
+                  <TextField name="emailSearch" className={styles.input} id="input-with-icon-textfield" label="Search" variant="standard"  />
+              </div>}
+            </Grid>
 
-        {/* body-content-tab-set */}
-        <Box sx={{ width: "100%" }}>
-          <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
-            <Tabs
-              value={value}
-              onChange={handleChange}
-              aria-label="basic tabs example"
-            >
-              <Tab label="Contact Profile" {...a11yProps(0)} />
-              <Tab label="Co-Contact Profile" {...a11yProps(1)} />
-              <Tab label="Application Details" {...a11yProps(2)} />
-            </Tabs>
-          </Box>
+            <Grid item xs={12} md={6}>
+              <Box sx={{ textAlign: "right" }}>
+                {value == 1 && <Button
+                  variant="contained"
+                  sx={{ padding: "10px 40px" }}
+                  style={{ marginLeft: 20, textTransform: "capitalize" }}
+                  onClick={()=>{}}
+                >
+                  New Application
+                </Button> }
+              
+                {value == 2 && <Button
+                  variant="contained"
+                  sx={{ padding: "10px 40px" }}
+                  style={{ marginLeft: 20, textTransform: "capitalize" }}
+                  onClick={()=>{}}
+                >
+                  Send Email
+                </Button>}
+              </Box>
+            </Grid>
+          </Grid>
 
-          {/* Profile-related-tab */}
-          <TabPanel value={value} index={0}>
+          {/* body-content-tab-set */}
+          <Box sx={{ width: "100%" }}>
+            <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
+              <Tabs
+                value={value}
+                onChange={handleChange}
+                aria-label="basic tabs example"
+              >
+                <Tab label="Profile" {...a11yProps(0)} />
+                <Tab label="Applications" {...a11yProps(1)} onClick ={fetchApplications}/>
+                <Tab label="Emails" {...a11yProps(2)} />
+              </Tabs>
+            </Box>
+
+            {/* task-related-tab */}
+            <TabPanel value={value} index={0}>
             <Grid item xs={12} md={6} mt={2}>
               <Typography variant="h5" mt={3} mb={2}>
                 <span style={{ fontSize: 25, fontWeight: 700 }}>
-                  Contact Profile
+                    Profile
                 </span>{" "}
               </Typography>
-
               <Stack direction="row" spacing={1}>
-                <Typography variant="h5">
-                  <span style={{ fontSize: 20, fontWeight: 700 }}>
-                    {contactData?.basicInformation?.firstName || ""}{" "}
-                    {contactData?.basicInformation?.lastName || ""}
-                  </span>{" "}
-                </Typography>
-
                 {!switchEditMode ? (
                   <Link
                     className="page_sub_outlineless_text_btn"
@@ -734,13 +466,20 @@ function EditApplicationForm() {
                     </Stack>
                   </Link>
                 ) : (
-                  <div style={{ marginBottom: 100, display: "flex", justifyContent: "left", margin: 20 }} >
+                  <div style={{ marginBottom: 100, display: "flex", justifyContent: "left", margin: 0 }} >
                     <Button variant="contained" onClick={() => { handelSubmitContact(contactData.PK)}} >
                       Save
                     </Button>
+                    <Button style={{marginLeft:10}} variant="contained" onClick={() => {setSwitchEditMode((switchEditMode) => !switchEditMode)}} >
+                      Close
+                    </Button>
+                    
                   </div>
                 )}
+              
               </Stack>
+              <br />
+              <p style={{color:"red"}}>{error?.formError}</p>
             </Grid>
               <Box sx={{ minWidth: 275 }}>
                 <Grid mt={4}>
@@ -914,6 +653,45 @@ function EditApplicationForm() {
                                 />: contactData?.basicInformation?.streetAddress || ""}
                             </TableCell>
                           </TableRow>
+                          {/* <TableRow
+                            sx={{
+                              "&:last-child td, &:last-child th": { border: 0 },
+                            }}
+                          >
+                            <TableCell
+                              component="th"
+                              scope="row"
+                              style={{
+                                fontSize: 20,
+                                fontWeight: 400,
+                                color: "#393939",
+                              }}
+                            >
+                              {"Country"}
+                            </TableCell>
+                            <TableCell
+                              align="left"
+                              style={{
+                                fontSize: 20,
+                                fontWeight: 600,
+                                color: "#393939",
+                              }}
+                            >
+                              {switchEditMode ?<TextField
+                                  fullWidth
+                                  size="small"
+                                  margin="normal"
+                                  id="outlined-basic"
+                                  variant="outlined"
+                                  placeholder="Text"
+                                  value={country}
+                                  onChange={(e) => {
+                                    setCountry(e.target.value);
+                                  }}
+                                  style={{ margin: 0 }}
+                                />: contactData?.basicInformation?.country || ""}
+                            </TableCell>
+                          </TableRow> */}
                         </TableBody>
                       </Table>
                     </TableContainer>
@@ -1027,10 +805,9 @@ function EditApplicationForm() {
                               {switchEditMode ? <MobileDatePicker
                                 inputFormat="MM/DD/YYYY"
                                 value={dob}
-                                onChange={(event) => {console.log(event) 
-                                  setDob(event)}}
+                                onChange={(event) => setDob(event) }
                                 renderInput={(params) => <TextField size="small" fullWidth margin="normal" {...params} error={false} />}
-                              />: getDate(contactData?.basicInformation?.dob) || "" }
+                              />: moment(contactData?.basicInformation?.dob).format("YYYY-MM-DD") || "" }
                             </TableCell>
                           </TableRow>
 
@@ -1175,7 +952,6 @@ function EditApplicationForm() {
                   </Grid>
 
                   <Grid item xs={6}>
-                  <p style={{ color: "red" }}> {submitErr} </p>
                     <TableContainer style={{ backgroundColor: "transparent" }}>
                       <Table aria-label="simple table">
                         <TableBody>
@@ -1245,12 +1021,308 @@ function EditApplicationForm() {
                   <Grid mt={6}></Grid>
                 </Grid>
               </Box>
-          </TabPanel>
+            </TabPanel>
+            <TabPanel value={value} index={1}>
+              {/* 2st-header-section */}
+
+              {/* 1st-header-section */}
+              <Grid container p={0} mb={2}>
+                <Grid item xs={12} md={6}>
+                  <Typography style={{ fontSize: 21, fontWeight: 700 }}>
+                    Loan Applications Submitted
+                  </Typography>
+                </Grid>
+              </Grid>
+
+              {/* table-related-section----- */}
+              {applications && applications?.length > 0 && (
+                <Grid container>
+                  <TableContainer>
+                    <Table
+                      sx={{ minWidth: 500 }}
+                      aria-label="custom pagination table"
+                    >
+                      <TableHead>
+                        <TableRow>
+                          <TableCell
+                            align="left"
+                            style={{ fontSize: 14, fontWeight: 700 }}
+                          >
+                            CAMPAIGN
+                          </TableCell>
+                          <TableCell
+                            align="left"
+                            style={{ fontSize: 14, fontWeight: 700 }}
+                          >
+                            APPLICATION ID
+                          </TableCell>
+                          <TableCell
+                            align="left"
+                            style={{ fontSize: 14, fontWeight: 700 }}
+                          >
+                            APPLICATION DATE
+                          </TableCell>
+                          <TableCell
+                            align="left"
+                            style={{ fontSize: 14, fontWeight: 700 }}
+                          >
+                            STATUS
+                          </TableCell>
+                          <TableCell
+                            align="left"
+                            style={{ fontSize: 14, fontWeight: 700 }}
+                          >
+                            LOAN AMOUNT
+                          </TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {applications
+                          ?.filter((data) => {
+                            if (searchKey == "") {
+                              return data;
+                            } else {
+                              return data?.applicationBasicInfo?.loan_amount?.toLowerCase()?.includes(searchKey?.toLocaleLowerCase())
+                              || data?.PK?.toLowerCase()?.includes(searchKey?.toLocaleLowerCase())
+                              || data?.status_?.toLowerCase()?.includes(searchKey?.toLocaleLowerCase())
+                              || moment(data?.createTime).format("YYYY-MM-DD")?.includes(searchKey)
+                            }
+                          })
+                          .slice(
+                            page * rowsPerPage,
+                            page * rowsPerPage + rowsPerPage
+                          )
+                          .map((row,key) => {
+                            
+                            return (
+                              <TableRow
+                                className="contact-list-row"
+                                key={key}
+                                onClick={() =>{}}
+                              >
+                                <TableCell component="th" scope="row">
+                                  Application {key + 1}
+                                </TableCell>
+                                <TableCell align="left">
+                                  {row?.PK?.split("_")[1] || ""}
+                                </TableCell>
+                                <TableCell align="left">
+                                  {moment(row.createTime).format("YYYY-MM-DD") || ""}
+                                </TableCell>
+                                <TableCell align="left">
+                                  {row?.status_ || ""}
+                                </TableCell>
+                                <TableCell align="left">
+                                $ {row?.applicationBasicInfo?.loan_amount || ""}
+                                </TableCell>
+                              </TableRow>
+                            );
+                          })}
+                      </TableBody>
+                      <TableFooter>
+                        <TableRow>
+                          <TablePagination
+                            rowsPerPageOptions={[
+                              5,
+                              10,
+                              25,
+                              { label: "All", value: -1 },
+                            ]}
+                            count={applications?.length}
+                            rowsPerPage={rowsPerPage}
+                            page={page}
+                            SelectProps={{
+                              inputProps: {
+                                "aria-label": "rows per page",
+                              },
+                              native: true,
+                            }}
+                            onPageChange={handleChangePage}
+                            onRowsPerPageChange={handleChangeRowsPerPage}
+                            ActionsComponent={TablePaginationActions}
+                          />
+                        </TableRow>
+                      </TableFooter>
+                    </Table>
+                  </TableContainer>
+                </Grid>
+              )}
+            </TabPanel>
+            <TabPanel value={value} index={2}>
+              {/* 2st-header-section */}
+
+              {/* 1st-header-section */}
+              <Grid container p={0} mb={2}>
+                <Grid item xs={12} md={6}>
+                  <Typography style={{ fontSize: 21, fontWeight: 700 }}>
+                    Past Emails Submitted
+                  </Typography>
+                </Grid>
+              </Grid>
+
+              {/* table-related-section----- */}
+              {contactData && contactData.length > 0 && (
+                <Grid container>
+                  <TableContainer>
+                    <Table
+                      sx={{ minWidth: 500 }}
+                      aria-label="custom pagination table"
+                    >
+                      <TableHead>
+                        <TableRow>
+                          <TableCell
+                            align="left"
+                            style={{ fontSize: 14, fontWeight: 700 }}
+                          >
+                            DATE
+                          </TableCell>
+                          <TableCell
+                            align="left"
+                            style={{ fontSize: 14, fontWeight: 700 }}
+                          >
+                            FROM
+                          </TableCell>
+                          <TableCell
+                            align="left"
+                            style={{ fontSize: 14, fontWeight: 700 }}
+                          >
+                            TO
+                          </TableCell>
+                          <TableCell
+                            align="left"
+                            style={{ fontSize: 14, fontWeight: 700 }}
+                          >
+                            SUBJECT
+                          </TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {[]
+                          ?.filter((data) => {
+                            if (searchKey == "") {
+                              return data;
+                            } else {
+                              return data?.basicInformation?.email
+                                .toLowerCase()
+                                .includes(searchKey.toLocaleLowerCase());
+                            }
+                          })
+                          .slice(
+                            page * rowsPerPage,
+                            page * rowsPerPage + rowsPerPage
+                          )
+                          .map((row) => {
+                            const basicInfo = row.basicInformation;
+                            return (
+                              <TableRow
+                                className="contact-list-row"
+                                key={row.name}
+                                onClick={() =>{}}
+                              >
+                                <TableCell component="th" scope="row">
+                                  {basicInfo.firstName +
+                                    " " +
+                                    basicInfo.lastName}
+                                </TableCell>
+                                <TableCell align="left">
+                                  {basicInfo.idNumber}
+                                </TableCell>
+                                <TableCell align="left">
+                                  {basicInfo.phone}
+                                </TableCell>
+                                <TableCell align="left">
+                                  {basicInfo.email}
+                                </TableCell>
+                              </TableRow>
+                            );
+                          })}
+                      </TableBody>
+                      <TableFooter>
+                        <TableRow>
+                          <TablePagination
+                            rowsPerPageOptions={[
+                              5,
+                              10,
+                              25,
+                              { label: "All", value: -1 },
+                            ]}
+                            count={[].length}
+                            rowsPerPage={rowsPerPage}
+                            page={page}
+                            SelectProps={{
+                              inputProps: {
+                                "aria-label": "rows per page",
+                              },
+                              native: true,
+                            }}
+                            onPageChange={()=>{}}
+                            onRowsPerPageChange={()=>{}}
+                            ActionsComponent={()=>{}}
+                          />
+                        </TableRow>
+                      </TableFooter>
+                    </Table>
+                  </TableContainer>
+                </Grid>
+              )}
+            </TabPanel>
+            <TabPanel value={value} name="email-tab" index={3}>
+              {/* 1st-header-section */}
+              <Grid container p={0} mb={2}>
+                <Grid item xs={12} md={6}>
+                  <Typography style={{ fontSize: 21, fontWeight: 700 }}>
+                    Emails
+                  </Typography>
+                </Grid>
+
+                <Grid item xs={12} md={6}>
+                  <Box sx={{ textAlign: "right" }}>
+                    <Button
+                      variant="outlined"
+                      sx={{ padding: "10px 40px" }}
+                      onClick={handleClickOpen}
+                    >
+                      Connect Email
+                    </Button>
+                    <Button
+                      variant="contained"
+                      sx={{ padding: "10px 40px", marginLeft: "5px" }}
+                      onClick={handleClickOpen}
+                    >
+                      Send Email
+                    </Button>
+                  </Box>
+                </Grid>
+              </Grid>
+
+              <Grid container>
+                <Grid xs={8}>
+                  <Typography>
+                    To connect emails to the DigiFi Loan Origination System,
+                    please CC or BCC the following email address on your
+                    outbound emails:
+                  </Typography>
+
+                  <Typography mt={1}>
+                    0-fw19519jeweweeruidfkjdfh@mail.digifyllc
+                  </Typography>
+                </Grid>
+
+                <Grid xs={4}>
+                  <Image
+                    src="/Group 455.svg"
+                    alt="Picture of the author"
+                    width={500}
+                    height={500}
+                  />
+                </Grid>
+              </Grid>
+            </TabPanel>
+          </Box>
         </Box>
-      </Box>
     </div>
   );
 }
-EditApplicationForm.layout = "AdminLayout";
+Contact.layout = "AdminLayout";
 
-export default EditApplicationForm;
+export default Contact;

@@ -3,7 +3,9 @@ import { Alert, Avatar, Backdrop, Box, Button, Chip, CircularProgress, FormContr
 import Paper from "@mui/material/Paper";
 import { styled } from "@mui/material/styles";
 import AvatarGroup from "@mui/material/AvatarGroup";
-import { SettingsPhoneTwoTone, TuneOutlined } from "@mui/icons-material";
+import { 
+ // SettingsPhoneTwoTone, 
+  TuneOutlined } from "@mui/icons-material";
 import Switch from "@mui/material/Switch";
 import FormGroup from "@mui/material/FormGroup";
 import Stack from "@mui/material/Stack";
@@ -17,9 +19,9 @@ import SyncAltOutlinedIcon from "@mui/icons-material/SyncAltOutlined";
 import DashboardOutlinedIcon from "@mui/icons-material/DashboardOutlined";
 import ViewCompactOutlinedIcon from "@mui/icons-material/ViewCompactOutlined";
 import SyncOutlinedIcon from "@mui/icons-material/SyncOutlined";
-import Card from "@mui/material/Card";
-import CardActions from "@mui/material/CardActions";
-import CardContent from "@mui/material/CardContent";
+// import Card from "@mui/material/Card";
+// import CardActions from "@mui/material/CardActions";
+// import CardContent from "@mui/material/CardContent";
 import Checkbox from "@mui/material/Checkbox";
 import SearchBox from "../../components/searchBox/searchBox";
 // import Draggable from "@material-ui/core/SwipeableDrawer";
@@ -27,18 +29,23 @@ import SearchBox from "../../components/searchBox/searchBox";
 import { useRouter } from "next/router";
 import { _gatLoanType, _getImage } from "../../services/loanTypeService.js";
 import { _fetchWorkflowStatuses } from "../../services/loanWorkflowStatusServices";
-import { _getApplications, _updateApplicationStatus, _updateRejections, _manageTeamMembers } from "../../services/applicationService";
+import {
+   _getApplications, 
+  _updateApplicationStatus, 
+  //_updateRejections, 
+  _manageTeamMembers 
+} from "../../services/applicationService";
 import { s3URL } from '../../utils/config'
 import { DragDropContext, Draggable, Droppable } from "react-beautiful-dnd";
 import moment from "moment";
 import { Snackbar } from "@material-ui/core";
-import DialogContentText from '@mui/material/DialogContentText';
-import TextField from '@mui/material/TextField';
-import { Autocomplete } from "@mui/material";
-import MoreVertIcon from '@mui/icons-material/MoreVert';
+// import DialogContentText from '@mui/material/DialogContentText';
+// import TextField from '@mui/material/TextField';
+// import { Autocomplete } from "@mui/material";
+// import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { _getAllPlatformUserByAdmin, _getUser } from '../../services/authServices'
 import { _listLabel } from '../../services/labelService'
-import { _gatReason } from '../../services/rejectionOptionService'
+//import { _gatReason } from '../../services/rejectionOptionService'
 import { _fetchAllContacts } from '../../services/contactServices'
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
@@ -84,22 +91,22 @@ function LoanApplication() {
   const [product, setProduct] = useState('');
   const [workflowStatus, setWorkflowStatus] = useState([]);
   const [applications, setApplications] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState();
+  // const [loading, setLoading] = useState(false);
+  // const [error, setError] = useState();
   const [trigger, setTrigger] = useState();
   const [apiStatus, setApiStatus] = useState();
   const [rejectionUpdateMsg, setRejectionUpdateMsg] = useState();
   const [teamMembersArr, setTeamMembersArr] = useState([]);
   const [platfromUsers, setPlatfromUsers] = useState([]);
-  const [rejectionReason, setRejectionReason] = useState("");
-  const [selectedRejectionObj, setSelectedRejectionObj] = useState({})
-  const [reasonsLoading, setReasonsLoading] = useState(false);
+  // const [rejectionReason, setRejectionReason] = useState("");
+  // const [selectedRejectionObj, setSelectedRejectionObj] = useState({})
+  // const [reasonsLoading, setReasonsLoading] = useState(false);
   const [applicationData, setApplicationData] = useState([]);
 
   const [appId, setAppId] = useState('');
-  const [days, setDays] = useState(0);
-  const [reasons, setReasons] = useState([]);
-  const [checkedReasonAuto, setCheckedReasonAuto] = useState(false);
+  // const [days, setDays] = useState(0);
+  // const [reasons, setReasons] = useState([]);
+  // const [checkedReasonAuto, setCheckedReasonAuto] = useState(false);
   const [show, setShow] = useState('hidden')
 
   const [applicationIdForRejection, setApplicationIdForRejection] = useState();
@@ -112,9 +119,9 @@ function LoanApplication() {
 
 
 
-  const handleChangeReasonAuto = (event) => {
-    setCheckedReasonAuto(event.target.checked);
-  };
+  // const handleChangeReasonAuto = (event) => {
+  //   setCheckedReasonAuto(event.target.checked);
+  // };
   const [EditMemberOpen, setEditMemberOpen] = React.useState(false);
 
   const handleEditMemberClickOpen = () => {
@@ -125,9 +132,9 @@ function LoanApplication() {
     setEditMemberOpen(false);
   };
   const [personName, setPersonName] = useState([]);
-  const setInitialStateOfTeam = (ids) => {
-    setPersonName([...ids]);
-  };
+  // const setInitialStateOfTeam = (ids) => {
+  //   setPersonName([...ids]);
+  // };
   const handleChangeEditTeamMember = async (event) => {
     const {
       target: { value },
@@ -151,18 +158,11 @@ function LoanApplication() {
       let body = {
         members: users,
       };
-      console.log("152", id, body)
       setLoadingTeamMemberAssign(true)
       const res = await _manageTeamMembers(id, body);
-      if (res && res?.status == 200) {
-        // alert("Updated the team members");
-
-      }
       await getApplications();
       setLoadingTeamMemberAssign(false)
       handleEditMemberClose();
-
-
     } catch (err) {
       console.log(err);
     }
@@ -173,7 +173,7 @@ function LoanApplication() {
     getWorkflowStatus();
     getLoanType();
     getApplications();
-    getRejections();
+    //getRejections();
   }, [trigger]);
 
   const getLoanType = async () => {
@@ -246,7 +246,6 @@ function LoanApplication() {
           let object = {}
           let team = [];
           let labels = [];
-          let contact = {};
           object.application = application
           if (application?.members) {
             application?.members.map((user) => {
@@ -276,72 +275,72 @@ function LoanApplication() {
     }
   }
 
-  const addRejection = async (id, data) => {
-    try {
-      let { auto, description, days } = data;
-      let body = {
-        applicationRejection: {
-          auto: auto,
-          days: days,
-          reason: description
-        }
-      }
-      setReasonsLoading(true)
-      const res = await _updateRejections(id, body)
-      if (res?.status == 200) {
-        handleCloseRejectionPopup();
-        setRejectionUpdateMsg({ severity: 'success', message: 'Rejection Reasion updated' })
-        const response = await _updateApplicationStatus(id, bodyDataIdForRejection);
-        //  setLoading(false);
-        if (response?.status === 200) {
-          setReasonsLoading(false)
-          setBodyDataIdForRejection({})
-          setApiStatus({ severity: 'success', message: 'Status updated' })
-        } else {
-          setReasonsLoading(false)
-          setBodyDataIdForRejection({})
-          setApiStatus({ severity: 'error', message: 'Status update failed' })
-          setTrigger(moment())
-        }
-      } else {
-        setRejectionUpdateMsg({ severity: 'error', message: 'Rejection Reasion update failed' })
-      }
-    } catch (err) {
-      console.log(err)
-    }
-  }
+  // const addRejection = async (id, data) => {
+  //   try {
+  //     let { auto, description, days } = data;
+  //     let body = {
+  //       applicationRejection: {
+  //         auto: auto,
+  //         days: days,
+  //         reason: description
+  //       }
+  //     }
+  //     setReasonsLoading(true)
+  //     const res = await _updateRejections(id, body)
+  //     if (res?.status == 200) {
+  //       handleCloseRejectionPopup();
+  //       setRejectionUpdateMsg({ severity: 'success', message: 'Rejection Reasion updated' })
+  //       const response = await _updateApplicationStatus(id, bodyDataIdForRejection);
+  //       //  setLoading(false);
+  //       if (response?.status === 200) {
+  //         setReasonsLoading(false)
+  //         setBodyDataIdForRejection({})
+  //         setApiStatus({ severity: 'success', message: 'Status updated' })
+  //       } else {
+  //         setReasonsLoading(false)
+  //         setBodyDataIdForRejection({})
+  //         setApiStatus({ severity: 'error', message: 'Status update failed' })
+  //         setTrigger(moment())
+  //       }
+  //     } else {
+  //       setRejectionUpdateMsg({ severity: 'error', message: 'Rejection Reasion update failed' })
+  //     }
+  //   } catch (err) {
+  //     console.log(err)
+  //   }
+  // }
 
-  const getRejections = async () => {
-    try {
-      const res = await _gatReason()
-      setReasons(res?.data?.data?.Items)
-    } catch (err) {
-      console.log(err)
-    }
-  }
+  // const getRejections = async () => {
+  //   try {
+  //     const res = await _gatReason()
+  //     setReasons(res?.data?.data?.Items)
+  //   } catch (err) {
+  //     console.log(err)
+  //   }
+  // }
 
-  const getTeamMembers = async (tempApplications) => {
-    try {
-      const res = await _getAllPlatformUserByAdmin()
-      let tempUsers = res?.data?.users;
-      let userIds = [];
-      let teamMembers = [];
+  // const getTeamMembers = async (tempApplications) => {
+  //   try {
+  //     const res = await _getAllPlatformUserByAdmin()
+  //     let tempUsers = res?.data?.users;
+  //     let userIds = [];
+  //     let teamMembers = [];
 
-      await tempApplications.map((tempApplications) => {
-        if (tempApplications?.members) {
-          userIds.push(...tempApplications?.members)
-        }
-      })
-      let removedduplicatesUsers = [...new Set(userIds)];
-      await removedduplicatesUsers.map(async (id) => {
-        let tempU = await tempUsers.filter((user) => user?.PK == 'USER#' + id)
-        teamMembers.push(...tempU)
-      })
-      setTeamMembersArr([...teamMembers])
-    } catch (err) {
-      console.log(err)
-    }
-  }
+  //     await tempApplications.map((tempApplications) => {
+  //       if (tempApplications?.members) {
+  //         userIds.push(...tempApplications?.members)
+  //       }
+  //     })
+  //     let removedduplicatesUsers = [...new Set(userIds)];
+  //     await removedduplicatesUsers.map(async (id) => {
+  //       let tempU = await tempUsers.filter((user) => user?.PK == 'USER#' + id)
+  //       teamMembers.push(...tempU)
+  //     })
+  //     setTeamMembersArr([...teamMembers])
+  //   } catch (err) {
+  //     console.log(err)
+  //   }
+  // }
 
 
   const onDragEnd = async (result) => {
@@ -359,11 +358,11 @@ function LoanApplication() {
         const updatedIndex = applicationCopy.findIndex(application => application.PK === applicationId);
         const updated = [...applications, applications[updatedIndex].status_ = newStatus];
         // setLoading(true);
-        if (newStatus.toLowerCase() == "closed") {
-          handleClickOpenRejectionPopup()
-          setApplicationIdForRejection(applicationId)
-          setBodyDataIdForRejection(body)
-        } else {
+        // if (newStatus.toLowerCase() == "closed") {
+        //   handleClickOpenRejectionPopup()
+        //   setApplicationIdForRejection(applicationId)
+        //   setBodyDataIdForRejection(body)
+        // } else {
           const response = await _updateApplicationStatus(applicationId, body);
           // setLoading(false);
           if (response?.status === 200) {
@@ -372,7 +371,7 @@ function LoanApplication() {
             setApiStatus({ severity: 'error', message: 'Status update failed' })
             setTrigger(moment())
           }
-        }
+       // }
       }
     }
   }
@@ -507,18 +506,18 @@ function LoanApplication() {
 
 
 
-  const [openRejectionPopup, setOpenRejectionPopup] = useState(false);
+ // const [openRejectionPopup, setOpenRejectionPopup] = useState(false);
 
-  const handleClickOpenRejectionPopup = () => {
-    setOpenRejectionPopup(true);
-  };
+  // const handleClickOpenRejectionPopup = () => {
+  //   setOpenRejectionPopup(true);
+  // };
 
-  const handleCloseRejectionPopup = () => {
-    // setDays(0);
-    setCheckedReasonAuto(false);
-    setAppId('');
-    setOpenRejectionPopup(false);
-  };
+  // const handleCloseRejectionPopup = () => {
+  //   setDays(0);
+  //   setCheckedReasonAuto(false);
+  //   setAppId('');
+  //   setOpenRejectionPopup(false);
+  // };
 
 
   const handleClickOpen = () => {
@@ -710,7 +709,7 @@ function LoanApplication() {
                             marginBottom: 10,
                           }}
                         >
-                          Selected Product
+                          Selecte Campaign
                         </Typography>
                       </label>
 
@@ -943,7 +942,7 @@ function LoanApplication() {
                 maxWidth: window.innerWidth - 300,
               }}
             >
-              <Grid item xs={4} >
+              {/* <Grid item xs={4} >
                 <Box
                   sx={{
                     backgroundColor: "green",
@@ -951,11 +950,7 @@ function LoanApplication() {
                     borderRadius: '12px 12px 12px 12px',
                   }}
                 >
-                  {/* <Stack direction='row' justifyContent='space-between'>
-                    <Typography variant="h6" sx={{ fontWeight: 600 }} color='#4a794c'>Won</Typography>
-                    <Typography variant="h6" sx={{ fontWeight: 400, color: '#a1a1a1' }}>{applicationsWon.componentList.length}</Typography>
-                  </Stack> */}
-                  {/* <Typography variant="h6" sx={{ fontWeight: 400 }}>$ {applicationsWon.total}</Typography> */}
+                  
                   <Droppable droppableId="won" key="won" type="status">
                     {(provided, snapshot) => (
                       <div
@@ -995,21 +990,8 @@ function LoanApplication() {
                   }}
                 >
                   <Stack direction="row" justifyContent="space-between">
-                    {/* <Typography
-                      variant="h6"
-                      sx={{ fontWeight: 600 }}
-                      color="#c8a524"
-                    >
-                      ABANDONED
-                    </Typography>
-                    <Typography
-                      variant="h6"
-                      sx={{ fontWeight: 400, color: "#a1a1a1" }}
-                    >
-                      {applicationsAbandoned.componentList.length}
-                    </Typography> */}
+                   
                   </Stack>
-                  {/* <Typography variant="h6" sx={{ fontWeight: 400 }}>$ {applicationsAbandoned.total}</Typography> */}
                   <Droppable
                     droppableId="abandoned"
                     key="abandoned"
@@ -1029,9 +1011,6 @@ function LoanApplication() {
                           background: snapshot.isDraggingOver && "#d9d9d9",
                         }}
                       >
-                        {/* <Stack direction='column' spacing={1}>
-                          {applicationsAbandoned.componentList}
-                        </Stack> */}
                         <p
                           style={{
                             color: "#666666",
@@ -1055,22 +1034,7 @@ function LoanApplication() {
                     borderRadius: 2,
                   }}
                 >
-                  <Stack direction="row" justifyContent="space-between">
-                    {/* <Typography
-                      variant="h6"
-                      sx={{ fontWeight: 600 }}
-                      color="#d72700"
-                    >
-                      Closed
-                    </Typography>
-                    <Typography
-                      variant="h6"
-                      sx={{ fontWeight: 400, color: "#a1a1a1" }}
-                    >
-                      {applicationsLost.componentList.length}
-                    </Typography> */}
-                  </Stack>
-                  {/* <Typography variant="h6" sx={{ fontWeight: 400 }}>$ {applicationsLost.total}</Typography> */}
+                  
                   <Droppable droppableId="closed" key="closed" type="status">
                     {(provided, snapshot) => (
                       <div
@@ -1086,9 +1050,7 @@ function LoanApplication() {
                           background: snapshot.isDraggingOver && "red",
                         }}
                       >
-                        {/* <Stack direction='column' spacing={1}>
-                          {applicationsLost.componentList}
-                        </Stack> */}
+                    
                         <p
                           style={{
                             color: "white",
@@ -1103,7 +1065,7 @@ function LoanApplication() {
                     )}
                   </Droppable>
                 </Box>
-              </Grid>
+              </Grid> */}
             </Grid>
           </DragDropContext>
         </Grid>
@@ -1111,7 +1073,7 @@ function LoanApplication() {
       <div>
         <Grid container>
           <Grid item xs={12}>
-            <Dialog open={openRejectionPopup}>
+            {/* <Dialog open={openRejectionPopup}>
               <DialogTitle>Rejection</DialogTitle>
               <DialogContent>
                 <div>
@@ -1160,7 +1122,7 @@ function LoanApplication() {
                   )}
                 </Button>
               </DialogActions>
-            </Dialog>
+            </Dialog> */}
             <Dialog
               open={EditMemberOpen}
               onClose={handleEditMemberClose}
@@ -1210,14 +1172,11 @@ function LoanApplication() {
                           <Grid container spacing={{ xs: 2, md: 3 }}>
                             <div style={{ marginTop: "20px" }}>
                               <FormControl sx={{ m: 1, width: 580 }}>
-                                {/* <InputLabel id="demo-multiple-chip-label">Chip</InputLabel> */}
                                 <Select
-                                  // labelId="demo-multiple-chip-label"
                                   id="demo-multiple-chip"
                                   multiple
                                   value={personName}
                                   onChange={handleChangeEditTeamMember}
-                                  // input={<OutlinedInput id="select-multiple-chip" label="Chip" />}
                                   renderValue={(selected) => (
                                     <Box
                                       sx={{
@@ -1251,7 +1210,6 @@ function LoanApplication() {
                                     <MenuItem
                                       key={key}
                                       value={object?.PK.split("#")[1] || ""}
-                                    // value={`${object?.PK.split("#")[1] || ""+ object?.info?.firstName && object?.info?.lastName ? "|"+object?.info?.firstName+" "+object?.info?.lastName : "" }`}
                                     >
 
                                       {object?.PK.split("#")[1] || ""} {(object?.info?.firstName || object?.info?.lastName) && "|"} {object?.info?.firstName && object?.info?.lastName} {object?.info?.firstName && object?.info?.lastName}

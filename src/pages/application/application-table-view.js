@@ -47,6 +47,10 @@ import LoanApplicatioTable from "../../components/table/table";
 const label = { inputProps: { "aria-label": "Checkbox demo" } };
 import { useRouter } from "next/router";
 import LoanAppDialogFormController from "../../components/applicationTableDialogboxFormController/loanApplicationDialogFormController";
+import Menu from "@mui/material/Menu";
+import MenuItem from "@mui/material/MenuItem";
+import Chip from "@mui/material/Chip";
+
 import { s3URL } from '../../utils/config'
 import { _getAllPlatformUserByAdmin, _getUser } from '../../services/authServices'
 import { _getApplications } from '../../services/applicationService';
@@ -126,11 +130,35 @@ const card = (
 // card-related---
 
 function ApplicationTableView() {
+
+const [anchorElLabelDropDown, setAnchorElLabelDropDown] = useState(null);
+const openLabelDropDown = Boolean(anchorElLabelDropDown);
+const handleClickLabelDropDown = (event) => {
+  setAnchorElLabelDropDown(event.currentTarget);
+};
+const handleCloseLabelDropDown = () => {
+  setAnchorElLabelDropDown(null);
+};
+ 
+
+  const ITEM_HEIGHT = 48;
+  const ITEM_PADDING_TOP = 8;
+  const MenuProps = {
+    PaperProps: {
+      style: {
+        maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+        width: 250,
+      },
+    },
+  };
+
   // const [value, setValue] = useState("t");
   const [tableData, setTableData] = useState([])
   const [teamMembersArr, setTeamMembersArr] = useState([]);
   const router = useRouter();
   const [searchKey, setSearchKey] = useState("");
+  const [avatarFilterSelect, setAvatarFilterSelect] =useState("all");
+
   console.log(searchKey)
   // const changeStatOfElement = () =>{
 
@@ -391,21 +419,54 @@ function ApplicationTableView() {
           </Grid>
           {/* active-user-display-section */}
           <Grid item xs={12} md={1}>
-            <AvatarGroup total={teamMembersArr.length}>
-              {teamMembersArr && teamMembersArr.map((user, key) => {
+            <AvatarGroup total={teamMembersArr?.length} onClick={handleClickLabelDropDown}>
+              {teamMembersArr && teamMembersArr?.map((user, key) => {
                 return (
                   <Avatar key={key} alt={user?.PK.split("#")[1]} src={`${s3URL}/${user?.imageId}`} />
                 )
               })}
               <Avatar alt="Remy Sharp" src="/static/images/avatar/1.jpg" />
-              {/* <Avatar alt="Travis Howard" src="/static/images/avatar/2.jpg" />
-              <Avatar alt="Agnes Walker" src="/static/images/avatar/4.jpg" />
-              <Avatar
-                alt="Trevor Henderson"
-                src="/static/images/avatar/5.jpg"
-              /> */}
             </AvatarGroup>
           </Grid>
+          <div>
+            <Menu
+              id="long-menu"
+              MenuListProps={{
+                "aria-labelledby": "long-button",
+              }}
+              anchorEl={anchorElLabelDropDown}
+              open={openLabelDropDown}
+              onClose={handleCloseLabelDropDown}
+              PaperProps={{
+                style: {
+                  maxHeight: ITEM_HEIGHT * 4.5,
+                  width: "20ch",
+                },
+              }}
+            >
+              <MenuItem style={{borderRadius:0, width:"100%", backgroundColor: avatarFilterSelect == "all" ? "#e6e6e6":"white" }} onClick={()=>{setAvatarFilterSelect("all")}}>
+                <Chip label={"All"} avatar={<Avatar alt='' src="" /> } />
+              </MenuItem>
+              {teamMembersArr && teamMembersArr?.map((user, key) => {
+                
+                return (
+                  <MenuItem key={key} style={{backgroundColor: avatarFilterSelect == user?.PK.split("#")[1] ? "#e6e6e6":"white"}}>
+                    <Chip
+                        onClick={()=>{setAvatarFilterSelect(user?.PK.split("#")[1])}}
+                        style={{ width:"100%"}}
+                        label={user?.PK.split("#")[1]}
+                        avatar={
+                        <Avatar
+                          alt={user?.PK.split("#")[1]}
+                          src={`${s3URL}/${user?.imageId}`}
+                        />
+                        }
+                      />
+                  </MenuItem>
+                );
+              })}
+            </Menu>
+          </div>
           {/* other-icon-set */}
           <Grid item xs={12} md={6}>
             <Box sx={{ textAlign: "right" }}>
@@ -492,7 +553,7 @@ function ApplicationTableView() {
         {/*body-content  */}
         <Grid container spacing={2} mt={2}>
           <Grid item xs={12}>
-            <LoanApplicatioTable applications={tableData} searchKey={searchKey} />
+            <LoanApplicatioTable applications={tableData} searchKey={searchKey} filterBy={avatarFilterSelect}/>
           </Grid>
         </Grid>
       </Box>
@@ -526,7 +587,7 @@ function ApplicationTableView() {
                       marginBottom: 10,
                     }}
                   >
-                    Selected Product
+                    Selecte Campaign
                   </Typography>
                 </label>
 

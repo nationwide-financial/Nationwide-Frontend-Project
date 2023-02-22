@@ -66,7 +66,7 @@ function ApplicationFormData() {
   const [streetAddress, setStreetAddress] = useState("");
   const [postalCode, setPostalCode] = useState("");
   const [province, setProvince] = useState("");
-  const [country, setCountry] = useState("");
+ // const [country, setCountry] = useState("");
   const [companyName, setCompanyName] = useState("");
   const [jobTitle, setJobTitle] = useState("");
   const [additionalInfomations, setAdditionalInfomations] = useState({})
@@ -96,9 +96,11 @@ function ApplicationFormData() {
         setSubmitErr("postal code can not be empty !");
       } else if (!province || province == "" || province == null) {
         setSubmitErr("province code can not be empty !");
-      } else if (!country || country == "" || country == null) {
-        setSubmitErr("country code can not be empty !");
-      } else if (!phoneNumber || phoneNumber == "" || phoneNumber == null) {
+      } 
+      // else if (!country || country == "" || country == null) {
+      //   setSubmitErr("country code can not be empty !");
+      // } 
+      else if (!phoneNumber || phoneNumber == "" || phoneNumber == null) {
         setSubmitErr("phone number code can not be empty !");
       } else if (!companyName || companyName == "" || companyName == null) {
         setSubmitErr("Company Name code can not be empty !");
@@ -119,7 +121,7 @@ function ApplicationFormData() {
             city: city,
             state: province,
             postalCode: postalCode,
-            country: country,
+           // country: country,
           },
           jobInformation: {
             companyName: companyName,
@@ -164,7 +166,7 @@ function ApplicationFormData() {
           setStreetAddress(res?.data?.Item?.basicInformation?.streetAddress);
           setPostalCode(res?.data?.Item?.basicInformation?.postalCode);
           setProvince(res?.data?.Item?.basicInformation?.state);
-          setCountry(res?.data?.Item?.basicInformation?.country);
+          //setCountry(res?.data?.Item?.basicInformation?.country);
           setCompanyName(res?.data?.Item?.jobInformation?.companyName);
           setJobTitle(res?.data?.Item?.jobInformation?.jobTitle);
           setAdditionalInfomations(res?.data?.Item?.additionalInformation)

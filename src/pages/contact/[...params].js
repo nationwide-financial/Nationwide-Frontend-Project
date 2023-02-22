@@ -145,10 +145,10 @@ function AddNewContact() {
         setBasicInfo({ ...basicInfo, postalCode: event.target.value });
         break;
       }
-      case 'country': {
-        setBasicInfo({ ...basicInfo, country: event.target.value });
-        break;
-      }
+      // case 'country': {
+      //   setBasicInfo({ ...basicInfo, country: event.target.value });
+      //   break;
+      // }
       case 'companyName': {
         setJobInfo({ ...jobInfo, companyName: event.target.value });
         break;
@@ -171,22 +171,22 @@ function AddNewContact() {
     return (re.test(input));
   }
 
-  const inputValidations = (contact) => {
-    let error = "";
-    for (const [key, val] of Object.entries({ ...contact })) {
-      if (val.length === 0 || val === '') {
-        setError("Required field cannot be empty!");
-        error = "Required field cannot be empty!";
-      } else {
-        setError();
-      }
-    }
-    if (Object.keys(contact).length < variableData.length) {
-      setError("Missing required fields");
-      error = "Missing required fields";
-    }
-    return error;
-  }
+  // const inputValidations = (contact) => {
+  //   let error = "";
+  //   for (const [key, val] of Object.entries({ ...contact })) {
+  //     if (val.length === 0 || val === '') {
+  //       setError("Required field cannot be empty!");
+  //       error = "Required field cannot be empty!";
+  //     } else {
+  //       setError();
+  //     }
+  //   }
+  //   if (Object.keys(contact).length < variableData.length) {
+  //     setError("Missing required fields");
+  //     error = "Missing required fields";
+  //   }
+  //   return error;
+  // }
 
   const handleContinue = async () => {
     //  let inputErrors = await inputValidations(contact);
@@ -281,18 +281,18 @@ function AddNewContact() {
     }
   }
 
-  const renderCountries = () => {
-    const countryList = [];
-    countries.forEach(country => {
-      countryList.push(
-        <MenuItem value={country.name} >
-          <Typography align='left'>{country.name}</Typography>
-        </MenuItem>
-      )
-    })
+  // const renderCountries = () => {
+  //   const countryList = [];
+  //   countries.forEach(country => {
+  //     countryList.push(
+  //       <MenuItem value={country.name} >
+  //         <Typography align='left'>{country.name}</Typography>
+  //       </MenuItem>
+  //     )
+  //   })
 
-    return countryList;
-  }
+  //   return countryList;
+  // }
 
   const handleSelectContact = (value) => {
     if (applicationProductId) {
@@ -400,7 +400,7 @@ function AddNewContact() {
               <label>  <Typography align='left' variant='h6' style={{ fontSize: 17, fontWeight: 700, fontStyle: 'normal' }}>Zip or Postal Code <span style={{ color: '#FF0000' }}>*</span></Typography></label>
               <TextField fullWidth onChange={(event) => handleChange('postalCode', event)} size="small" margin="normal" id="outlined-basic" variant="outlined" value={basicInfo?.postalCode} />
             </Grid>
-            <Grid item xs={6}>
+            {/* <Grid item xs={6}>
               <label>  <Typography align='left' variant='h6' style={{ fontSize: 17, fontWeight: 700, fontStyle: 'normal' }}>Country<span style={{ color: '#FF0000' }}>*</span></Typography></label>
               <FormControl fullWidth size='small' margin="normal">
                 <Select
@@ -414,7 +414,7 @@ function AddNewContact() {
                   {renderCountries()}
                 </Select>
               </FormControl>
-            </Grid>
+            </Grid> */}
           </Grid>
 
           <Grid container spacing={1} mx={1}>

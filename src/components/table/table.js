@@ -63,18 +63,18 @@ const nameAndBarSet = (
   </React.Fragment>
 );
 
-const avatarSet = (
-  <React.Fragment>
-    <Grid item md={1} align="right" paddingLeft={25}>
-      <AvatarGroup total={9}>
-        <Avatar alt="Remy Sharp" src="/static/images/avatar/1.jpg" />
-        <Avatar alt="Travis Howard" src="/static/images/avatar/2.jpg" />
-        <Avatar alt="Agnes Walker" src="/static/images/avatar/4.jpg" />
-        <Avatar alt="Trevor Henderson" src="/static/images/avatar/5.jpg" />
-      </AvatarGroup>
-    </Grid>
-  </React.Fragment>
-);
+// const avatarSet = (
+//   <React.Fragment>
+//     <Grid item md={1} align="right" paddingLeft={25}>
+//       <AvatarGroup total={9}>
+//         <Avatar alt="Remy Sharp" src="/static/images/avatar/1.jpg" />
+//         <Avatar alt="Travis Howard" src="/static/images/avatar/2.jpg" />
+//         <Avatar alt="Agnes Walker" src="/static/images/avatar/4.jpg" />
+//         <Avatar alt="Trevor Henderson" src="/static/images/avatar/5.jpg" />
+//       </AvatarGroup>
+//     </Grid>
+//   </React.Fragment>
+// );
 
 function TablePaginationActions(props) {
   
@@ -146,160 +146,12 @@ TablePaginationActions.propTypes = {
   rowsPerPage: PropTypes.number.isRequired,
 };
 
-// function createData(
-//   contact,
-//   applicationId,
-//   applicationDate,
-//   status,
-//   email,
-//   teamMembers,
-//   loanAmount
-// ) {
-//   return {
-//     contact,
-//     applicationId,
-//     applicationDate,
-//     status,
-//     email,
-//     teamMembers,
-//     loanAmount,
-//   };
-// }
-
-// const rows = [
-//   createData(
-//     nameAndBarSet,
-//     "NF0120323",
-//     <Stack direction="row" spacing={2}>
-//       <span>Dec 19,2021 11.24 AM</span>
-//     </Stack>,
-//     "New Opportunities",
-//     "janecooper@example.com",
-//     avatarSet,
-//     "$32,600 "
-//   ),
-//   createData(
-//     nameAndBarSet,
-//     "NF0120323",
-//     <Stack direction="row" spacing={2}>
-//       <span>Dec 19,2021 11.24 AM</span>
-//     </Stack>,
-//     "New Opportunities",
-//     "janecooper@example.com",
-//     avatarSet,
-//     "$32,600 "
-//   ),
-//   createData(
-//     nameAndBarSet,
-//     "NF0120323",
-//     <Stack direction="row" spacing={2}>
-//       <span>Dec 19,2021 11.24 AM</span>
-//     </Stack>,
-//     "New Opportunities",
-//     "janecooper@example.com",
-//     avatarSet,
-//     "$32,600 "
-//   ),
-//   createData(
-//     nameAndBarSet,
-//     "NF0120323",
-//     <Stack direction="row" spacing={2}>
-//       <span>Dec 19,2021 11.24 AM</span>
-//     </Stack>,
-//     "New Opportunities",
-//     "janecooper@example.com",
-//     avatarSet,
-//     "$32,600 "
-//   ),
-//   createData(
-//     nameAndBarSet,
-//     "NF0120323",
-//     <Stack direction="row" spacing={2}>
-//       <span>Dec 19,2021 11.24 AM</span>
-//     </Stack>,
-//     "New Opportunities",
-//     "janecooper@example.com",
-//     avatarSet,
-//     "$32,600 "
-//   ),
-//   createData(
-//     nameAndBarSet,
-//     "NF0120323",
-//     <Stack direction="row" spacing={2}>
-//       <span>Dec 19,2021 11.24 AM</span>
-//     </Stack>,
-//     "New Opportunities",
-//     "janecooper@example.com",
-//     avatarSet,
-//     "$32,600 "
-//   ),
-//   createData(
-//     nameAndBarSet,
-//     "NF0120323",
-//     <Stack direction="row" spacing={2}>
-//       <span>Dec 19,2021 11.24 AM</span>
-//     </Stack>,
-//     "New Opportunities",
-//     "janecooper@example.com",
-//     avatarSet,
-//     "$32,600 "
-//   ),
-//   createData(
-//     nameAndBarSet,
-//     "NF0120323",
-//     <Stack direction="row" spacing={2}>
-//       <span>Dec 19,2021 11.24 AM</span>
-//     </Stack>,
-//     "New Opportunities",
-//     "janecooper@example.com",
-//     avatarSet,
-//     "$32,600 "
-//   ),
-//   createData(
-//     nameAndBarSet,
-//     "NF0120323",
-//     <Stack direction="row" spacing={2}>
-//       <span>Dec 19,2021 11.24 AM</span>
-//     </Stack>,
-//     "New Opportunities",
-//     "janecooper@example.com",
-//     avatarSet,
-//     "$32,600 "
-//   ),
-//   createData(
-//     nameAndBarSet,
-//     "NF0120323",
-//     <Stack direction="row" spacing={2}>
-//       <span>Dec 19,2021 11.24 AM</span>
-//     </Stack>,
-//     "New Opportunities",
-//     "janecooper@example.com",
-//     avatarSet,
-//     "$32,600 "
-//   ),
-//   createData(
-//     nameAndBarSet,
-//     "NF0120323",
-//     <Stack direction="row" spacing={2}>
-//       <span>Dec 19,2021 11.24 AM</span>
-//     </Stack>,
-//     "New Opportunities",
-//     "janecooper@example.com",
-//     avatarSet,
-//     "$32,600 "
-//   ),
-// ].sort((a, b) => (a.contact < b.contact ? -1 : 1));
-
-function TableNW({applications,searchKey=""}) {
+function TableNW({applications,searchKey="",filterBy}) {
   console.log("applications294",applications)
   console.log(searchKey)
   const router = useRouter();
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
-
-  // Avoid a layout jump when reaching the last page with empty rows.
-  // const emptyRows =
-  //   page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -403,17 +255,25 @@ function TableNW({applications,searchKey=""}) {
           </TableHead>
           <TableBody>
             {applications?.filter((data) => {
-                    if (searchKey == "") {
-                      return data;
-                    } else {
-                      return data?.application?.PK.toLowerCase().includes(searchKey.toLocaleLowerCase()) 
-                      || data?.contact?.basicInformation?.first_name.toLowerCase().includes(searchKey.toLocaleLowerCase()) 
-                      ||  data?.contact?.basicInformation?.last_name.toLowerCase().includes(searchKey.toLocaleLowerCase()) 
-                      ||  data?.application?.status_ .toLowerCase().includes(searchKey.toLocaleLowerCase()) 
-                      || data?.contact?.basicInformation?.email .toLowerCase().includes(searchKey.toLocaleLowerCase()) 
-                      || data?.application?.applicationBasicInfo?.loan_amount .toLowerCase().includes(searchKey.toLocaleLowerCase());
-                    }
-                  }).map((row,key) => (
+              if (filterBy == "all") return data
+              let members = [];
+              data?.teamArr?.map((member) => {
+                members.push(member?.PK?.split("#")[1])
+              })
+              if (members?.includes(filterBy)) return data;
+            })?.filter((data) => {
+              if (searchKey == "") {
+                return data;
+              } else {
+                return data?.application?.PK?.toLowerCase().includes(searchKey.toLocaleLowerCase())
+                  || data?.contact?.basicInformation?.first_name?.toLowerCase().includes(searchKey.toLocaleLowerCase())
+                  || data?.contact?.basicInformation?.last_name?.toLowerCase().includes(searchKey.toLocaleLowerCase())
+                  || data?.application?.status_?.toLowerCase().includes(searchKey.toLocaleLowerCase())
+                  || data?.contact?.basicInformation?.email?.toLowerCase().includes(searchKey.toLocaleLowerCase())
+                  || data?.application?.applicationBasicInfo?.loan_amount?.toLowerCase()?.includes(searchKey.toLocaleLowerCase())
+                  || String(getTime(data?.application?.createTime))?.toLocaleLowerCase()?.includes(searchKey.toLocaleLowerCase());
+              }
+            }).map((row,key) => (
               <TableRow
                 key={key}
                 sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
@@ -443,22 +303,6 @@ function TableNW({applications,searchKey=""}) {
                         </div>)
                       })}
                    
-                      {/* <div
-                        style={{
-                          backgroundColor: "#22CAB5",
-                          height: 5,
-                          width: 20,
-                          marginLeft: 5,
-                        }}
-                      ></div>
-                      <div
-                        style={{
-                          backgroundColor: "#2D5680",
-                          height: 5,
-                          width: 20,
-                          marginLeft: 5,
-                        }}
-                      ></div> */}
                     </div>
                     <Typography align="left" fontWeight={600}>
                       {row?.contact?.basicInformation?.firstName || ""} {" "} {row?.contact?.basicInformation?.lastName || ""} 

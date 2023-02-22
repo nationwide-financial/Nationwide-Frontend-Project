@@ -835,7 +835,9 @@ function ApplicationDate() {
       <Grid container>
         <Stack p={4} width={'100%'}>
           <Grid container>
-            <Grid item xs={12} md={8}>
+            {/* <Grid item xs={12} md={8}> */}
+            <Box>
+              <Stack direction="row">
               <Typography
                 variant="h6"
                 style={{ fontSize: 45, fontWeight: 700 }}
@@ -843,11 +845,13 @@ function ApplicationDate() {
                 {contactData?.basicInformation?.firstName}{" "}
                 {contactData?.basicInformation?.lastName}{" "}
                 <br />
+                </Typography>
+                <Typography style={{ fontSize: 45, fontWeight: 700 }}>
                 <span style={{ color: "#0B72F1" }}>
                   {applicationData?.applicationBasicInfo?.loan_amount} {"$"}
                 </span>
-              </Typography>
-
+                </Typography>
+              </Stack>
               <Stack direction="row" spacing={1}>
               <Stack direction="row" spacing={1}>
                   <Avatar
@@ -917,9 +921,11 @@ function ApplicationDate() {
                   </Menu>
                 </div>
               </Stack>
-            </Grid>
-            <Grid item xs={12} md={4}>
-              <Box sx={{ textAlign: "right" }}>
+            </Box>
+             
+            {/* </Grid> */}
+            {/* <Grid item xs={12} md={4}> */}
+              <Box sx={{ textAlign: "right" }}  pt={1}>
                 <Button
                   variant="contained"
                   sx={{ padding: "10px 40px", fontSize: 16, fontWeight: 700 }}
@@ -963,7 +969,7 @@ function ApplicationDate() {
                   })}
                 </Menu>
               </Box>
-            </Grid>
+            {/* </Grid> */}
           </Grid>
           <Box mt={4}>
             <Grid container backgroundColor={"white"} p={1}>

@@ -83,7 +83,7 @@ const MyAccount = () => {
       setOpenEditProfile(false);
     };
     
-
+console.log( "86",state?.user)
     const updateProfileInfo = async () =>{
         try{
             if(!setError || firstName == "" || firstName == null){
@@ -98,6 +98,7 @@ const MyAccount = () => {
                 let body = {
                     info:{
                         email: state?.user?.info?.email,
+                        phone: state?.user?.info?.phone,
                         notification: profileInfo?.notification,
                         firstName:firstName,
                         lastName:lastName,

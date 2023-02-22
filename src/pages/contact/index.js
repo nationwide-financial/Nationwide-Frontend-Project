@@ -285,7 +285,7 @@ const fetchPlatformUsersAndLoginUser = async () =>{
             <DialogContent>
               <Stack direction="column" spacing={2}>
                 <Button
-                  onClick={() => router.push("/contact/" + selected)}
+                  onClick={() => router.push(`/contact/view-edit-contact?contactId=${selected}`)}
                   variant="contained"
                 >
                   Edit Contact

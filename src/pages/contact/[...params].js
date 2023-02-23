@@ -171,22 +171,22 @@ function AddNewContact() {
     return (re.test(input));
   }
 
-  // const inputValidations = (contact) => {
-  //   let error = "";
-  //   for (const [key, val] of Object.entries({ ...contact })) {
-  //     if (val.length === 0 || val === '') {
-  //       setError("Required field cannot be empty!");
-  //       error = "Required field cannot be empty!";
-  //     } else {
-  //       setError();
-  //     }
-  //   }
-  //   if (Object.keys(contact).length < variableData.length) {
-  //     setError("Missing required fields");
-  //     error = "Missing required fields";
-  //   }
-  //   return error;
-  // }
+  const inputValidations = (contact) => {
+    let error = "";
+    for (const [key, val] of Object.entries({ ...contact })) {
+      if (val.length === 0 || val === '') {
+        setError("Required field cannot be empty!");
+        error = "Required field cannot be empty!";
+      } else {
+        setError();
+      }
+    }
+    if (Object.keys(contact).length < variableData.length) {
+      setError("Missing required fields");
+      error = "Missing required fields";
+    }
+    return error;
+  }
 
   const handleContinue = async () => {
     //  let inputErrors = await inputValidations(contact);
@@ -200,6 +200,7 @@ function AddNewContact() {
           jobInformation: jobInfo,
           additionalInformation: additionalInfo
         }
+        console.log("203",contactData)
         const response = await _addContact(contactData);
         if (response?.status === 201) {
           if (createLoan) {
@@ -272,9 +273,15 @@ function AddNewContact() {
   };
 
   const validateForm = () => {
-    if (basicInfo.firstName === "" || basicInfo.lastName === "" || basicInfo.email === "" || basicInfo.idNumber === "" ||
-      basicInfo.dob === "" || basicInfo.streetAddress === "" || basicInfo.city === "" || basicInfo.province === "" || basicInfo.postalCode === "" ||
-      basicInfo.country === "") {
+    if (basicInfo.firstName === "" 
+    || basicInfo.lastName === "" 
+    || basicInfo.email === "" 
+    || basicInfo.idNumber === "" 
+    || basicInfo.dob === "" 
+    || basicInfo.streetAddress === "" 
+    || basicInfo.city === "" 
+    || basicInfo.province === "" 
+    || basicInfo.postalCode === "" ) {
       return false;
     } else {
       return true;

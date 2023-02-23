@@ -35,6 +35,7 @@ import {
   //_updateRejections, 
   _manageTeamMembers 
 } from "../../services/applicationService";
+import { _addHistory } from '../../services/applicationHistory'
 import { s3URL } from '../../utils/config'
 import { DragDropContext, Draggable, Droppable } from "react-beautiful-dnd";
 import moment from "moment";
@@ -366,6 +367,12 @@ function LoanApplication() {
           const response = await _updateApplicationStatus(applicationId, body);
           // setLoading(false);
           if (response?.status === 200) {
+            let history = {
+              action: "Changed state",
+              description: `The application state change to ${newStatus}`,
+              applicationId: applicationId,
+            };
+            const resHistory = await _addHistory(history);
             setApiStatus({ severity: 'success', message: 'Status updated' })
           } else {
             setApiStatus({ severity: 'error', message: 'Status update failed' })
@@ -1211,8 +1218,8 @@ function LoanApplication() {
                                       key={key}
                                       value={object?.PK.split("#")[1] || ""}
                                     >
-
-                                      {object?.PK.split("#")[1] || ""} {(object?.info?.firstName || object?.info?.lastName) && "|"} {object?.info?.firstName && object?.info?.lastName} {object?.info?.firstName && object?.info?.lastName}
+                                      {(object?.info?.firstName && object?.info?.lastName) ? `${object?.info?.firstName && object?.info?.lastName} ${object?.info?.firstName && object?.info?.lastName }` : `${object?.PK.split("#")[1] || ""}` }
+                                    
                                     </MenuItem>
                                   ))}
                                 </Select>

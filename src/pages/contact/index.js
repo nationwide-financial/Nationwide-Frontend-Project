@@ -47,7 +47,7 @@ import { useState } from "react";
 import { _fetchAllContacts, _deleteContact } from "../../services/contactServices";
 import Link from "next/link";
 import { _gatVariabels } from '../../services/variabelService.js';
-import { _getAllPlatformUserByAdmin, _getUser } from '../../services/authServices'
+import { _getAllPlatformUserByAdmin, _getUser ,_getUserByIdArray} from '../../services/authServices'
 import { s3URL } from '../../utils/config'
 
 const label = { inputProps: { "aria-label": "Switch demo" } };
@@ -176,6 +176,19 @@ const fetchPlatformUsersAndLoginUser = async () =>{
   const fetchData = async () => {
     setLoading(true);
     const response = await _fetchAllContacts();
+
+    
+    let usersFilterFromContacts = [];
+    await response?.data?.Items?.map((contact)=>{
+      usersFilterFromContacts.push(contact?.createdBy?.split("#")[1] || "")
+      usersFilterFromContacts.push(contact?.updatedBy?.split("#")[1]  || "")
+    })
+    let uniqueUsersFilterFromContacts = [...new Set(usersFilterFromContacts)]?.filter((user)=>user !="")
+    // let body = {
+    //   users:uniqueUsersFilterFromContacts
+    // }
+    // const responseUsers = await _getUserByIdArray(body)
+    console.log("uniqueUsersFilterFromContacts",uniqueUsersFilterFromContacts)
     console.log("_fetchAllContacts",response)
     setLoading(false);
     if (response?.status === 200) {
@@ -504,12 +517,24 @@ const fetchPlatformUsersAndLoginUser = async () =>{
                                   return (<TableCell key={key} align="left">{basicInfo[variable?.systemName]}</TableCell>)
                                 })} */}
                                 <TableCell align="left">
-                                <Avatar alt={row?.createdBy?.split("#")[1]} src={`${s3URL}/${users?.filter((user)=>{ return user?.PK == row?.createdBy})[0]?.imageId}`} />
-                                  {moment(row.createTime).format("YYYY-MM-DD")}
+                                  <div style={{ display: 'inline-flex' }}>
+                                    <div>
+                                      <Avatar alt={row?.createdBy?.split("#")[1]} src={`${s3URL}/${users?.filter((user) => { return user?.PK == row?.createdBy })[0]?.imageId}`} />
+                                    </div>
+                                    <div style={{ alignSelf: 'center', marginLeft:5 }}>
+                                      {moment(row.createTime).format("YYYY-MM-DD")}
+                                    </div>
+                                  </div>
                                 </TableCell>
                                 <TableCell align="left">
-                                <Avatar alt={row?.updatedBy?.split("#")[1]} src={`${s3URL}/${users?.filter((user)=>{ return user?.PK == row?.updatedBy})[0]?.imageId}`} />
-                                  {moment(row.updateTime).format("YYYY-MM-DD")}
+                                  <div style={{ display: 'inline-flex' }}>
+                                    <div>
+                                      <Avatar alt={row?.updatedBy?.split("#")[1]} src={`${s3URL}/${users?.filter((user) => { return user?.PK == row?.updatedBy })[0]?.imageId}`} />
+                                    </div>
+                                    <div style={{ alignSelf: 'center', marginLeft:5 }}>
+                                      {moment(row.updateTime).format("YYYY-MM-DD")}
+                                    </div>
+                                  </div>
                                 </TableCell>
                               </TableRow>
                             );

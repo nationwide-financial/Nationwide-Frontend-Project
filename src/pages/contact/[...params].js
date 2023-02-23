@@ -117,7 +117,6 @@ function AddNewContact() {
         break;
       }
       case 'phone': {
-        validatePhoneNumber(event.target.value);
         setBasicInfo({ ...basicInfo, phone: event.target.value });
         break;
       }
@@ -193,7 +192,7 @@ function AddNewContact() {
     //  if(inputErrors){
     //   setError(inputErrors)
     //  }
-    if (validateForm() && validatePhoneNumber(basicInfo.phone)) {
+    if (validateForm() ) {
       if (id === 'add' && !applicationProductId) {
         const contactData = {
           basicInformation: basicInfo,
@@ -375,7 +374,9 @@ function AddNewContact() {
             </Grid>
             <Grid item xs={6}>
               <label>  <Typography align='left' variant='h6' style={{ fontSize: 17, fontWeight: 700, fontStyle: 'normal' }}>Phone <span style={{ color: '#FF0000' }}>*</span></Typography></label>
-              <TextField fullWidth error={basicInfo.phone !== "" && !validatePhoneNumber(basicInfo.phone)} onChange={(event) => handleChange('phone', event)} size="small" margin="normal" id="outlined-basic" variant="outlined" value={basicInfo?.phone} />
+              {/* <TextField fullWidth error={basicInfo.phone !== "" && !validatePhoneNumber(basicInfo.phone)} onChange={(event) => handleChange('phone', event)} size="small" margin="normal" id="outlined-basic" variant="outlined" value={basicInfo?.phone} /> */}
+              <TextField fullWidth  onChange={(event) => handleChange('phone', event)} size="small" margin="normal" id="outlined-basic" variant="outlined" value={basicInfo?.phone} />
+
             </Grid>
             <Grid item xs={6}>
               <label>  <Typography align='left' variant='h6' style={{ fontSize: 17, fontWeight: 700, fontStyle: 'normal' }}>ID Number <span style={{ color: '#FF0000' }}>*</span></Typography></label>

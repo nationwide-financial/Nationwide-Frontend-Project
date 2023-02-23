@@ -48,6 +48,7 @@ import Alert from "@mui/material/Alert";
 import MuiAlert, { AlertProps } from "@mui/material/Alert";
 import { assign } from "lodash";
 import { s3URL } from '../../utils/config'
+import { orderArray } from '../../utils/utils'
 
 
 
@@ -676,12 +677,22 @@ function ApplicationDate() {
         status_: applicationState,
       };
       const res = await _changeApplicationStatus(id, body);
+      if(res?.status == 200){
+        let history = {
+          action: "Changed state",
+          description: `The application state change to ${applicationState}`,
+          applicationId: id,
+        };
+        const resHistory = await _addHistory(history);
 
-      //alert("Application Status Updated successfuly")
-      handleSuccessMessage();
-      setMessage("Application Status Updated successfuly");
-      console.log("_changeApplicationStatus", res);
-      getApplicationData();
+        handleSuccessMessage();
+        setMessage("Application Status Updated successfuly");
+        getApplicationData();
+        getHistoryByapplicationId(id);
+      }else{
+        getApplicationData();
+      }
+     
     } catch (err) {
       console.log(err);
     }
@@ -2596,11 +2607,11 @@ function ApplicationDate() {
                     >
                       <TableBody>
                         {(rowsPerPage > 0
-                          ? historyList.slice(
+                          ? orderArray(historyList,"createTime")?.slice(
                             pages * rowsPerPage,
                             pages * rowsPerPage + rowsPerPage
                           )
-                          : historyList
+                          : orderArray(historyList,"createTime")
                         ).map((row, key) => (
                           <TableRow key={key}>
                             <TableCell component="th" scope="row">

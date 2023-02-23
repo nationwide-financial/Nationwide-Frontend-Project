@@ -623,7 +623,9 @@ function EditApplicationForm() {
                                        // value={`${object?.PK.split("#")[1] || ""+ object?.info?.firstName && object?.info?.lastName ? "|"+object?.info?.firstName+" "+object?.info?.lastName : "" }`}
                                       >
                                         
-                                        {object?.PK.split("#")[1] || ""} { (object?.info?.firstName || object?.info?.lastName) && "|"} {object?.info?.firstName && object?.info?.lastName} {object?.info?.firstName && object?.info?.lastName}
+                                        {(object?.info?.firstName && object?.info?.lastName) 
+                                        ? `${object?.info?.firstName && object?.info?.lastName} ${object?.info?.firstName && object?.info?.lastName }` 
+                                        : `${object?.PK.split("#")[1] || ""}` }
                                       </MenuItem>
                                     ))}
                                   </Select>

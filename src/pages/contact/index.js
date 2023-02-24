@@ -29,9 +29,6 @@ import PropTypes from "prop-types";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 import moment from "moment";
-import Menu from "@mui/material/Menu";
-import MenuItem from "@mui/material/MenuItem";
-import Chip from "@mui/material/Chip";
 
 import { useTheme } from "@mui/material/styles";
 import Table from "@mui/material/Table";
@@ -159,53 +156,47 @@ function a11yProps(index) {
 }
 
 function Contact() {
-const [anchorElLabelDropDown, setAnchorElLabelDropDown] = useState(null);
-const openLabelDropDown = Boolean(anchorElLabelDropDown);
-const handleClickLabelDropDown = (event) => {
-  setAnchorElLabelDropDown(event.currentTarget);
-};
-const handleCloseLabelDropDown = () => {
-  setAnchorElLabelDropDown(null);
-};
-const ITEM_HEIGHT = 48;
-const ITEM_PADDING_TOP = 8;
-const MenuProps = {
-  PaperProps: {
-    style: {
-      maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
-      width: 250,
-    },
-  },
-};
   const [contactData, setContactData] = useState([]);
-  const [value, setValue] = useState(0);
+  const [value, setValue] = React.useState(0);
   const [loading, setLoading] = useState(false);
   const [trigger, setTrigger] = useState(0);
   const [users, setUsers] = useState([]);
-  const [variableData, setVariableData] = useState([]);
-  const [avatarFilterSelect, setAvatarFilterSelect] =useState("all");
+  
+const fetchPlatformUsersAndLoginUser = async () =>{
+  try{
+    const loginUser = await _getUser();
+    const platformUsers = await _getAllPlatformUserByAdmin();
+    let users = [loginUser?.data,...platformUsers?.data?.users];
+    setUsers(users)
+  }catch(err){
+    console.log(err)
+  }
+}
 
   const fetchData = async () => {
     setLoading(true);
     const response = await _fetchAllContacts();
-    // fetch users 
+
+    
     let usersFilterFromContacts = [];
     await response?.data?.Items?.map((contact)=>{
       usersFilterFromContacts.push(contact?.createdBy?.split("#")[1] || "")
       usersFilterFromContacts.push(contact?.updatedBy?.split("#")[1]  || "")
     })
     let uniqueUsersFilterFromContacts = [...new Set(usersFilterFromContacts)]?.filter((user)=>user !="")
-    let body = { users:uniqueUsersFilterFromContacts }
-    const responseUsers = await _getUserByIdArray(body)
-    setUsers(responseUsers?.data?.users)
-
+    // let body = {
+    //   users:uniqueUsersFilterFromContacts
+    // }
+    // const responseUsers = await _getUserByIdArray(body)
+    console.log("uniqueUsersFilterFromContacts",uniqueUsersFilterFromContacts)
+    console.log("_fetchAllContacts",response)
     setLoading(false);
     if (response?.status === 200) {
       let tableDt = await response?.data?.Items.sort((a, b) => (a.createTime < b.createTime) ? 1 : ((b.createTime < a.createTime) ? -1 : 0));
       setContactData([...tableDt]);
     }
   }
-
+  const [variableData, setVariableData] = useState([]);
   const getVariables = async () => {
     try {
       const res = await _gatVariabels();
@@ -219,6 +210,7 @@ const MenuProps = {
   }
 
   useEffect(() => {
+    fetchPlatformUsersAndLoginUser()
     fetchData()
     getVariables()
   }, [trigger])
@@ -293,6 +285,7 @@ const MenuProps = {
     setSelected(id);
   }
 
+  console.log("Selected ", selected)
 
   return (
     <div>
@@ -384,7 +377,7 @@ const MenuProps = {
 
                       {/* active-user-display-section */}
 
-                      <AvatarGroup total={users?.length} onClick={handleClickLabelDropDown}>
+                      <AvatarGroup total={users.length}>
                         {users &&
                           users.map((user, key) => {
                             return (
@@ -396,46 +389,6 @@ const MenuProps = {
                             );
                           })}
                       </AvatarGroup>
-                      <div>
-                        <Menu
-                          id="long-menu"
-                          MenuListProps={{
-                            "aria-labelledby": "long-button",
-                          }}
-                          anchorEl={anchorElLabelDropDown}
-                          open={openLabelDropDown}
-                          onClose={handleCloseLabelDropDown}
-                          PaperProps={{
-                            style: {
-                              maxHeight: ITEM_HEIGHT * 4.5,
-                              width: "20ch",
-                            },
-                          }}
-                        >
-                          <MenuItem style={{borderRadius:0, width:"100%", backgroundColor: avatarFilterSelect == "all" ? "#e6e6e6":"white" }} onClick={()=>{setAvatarFilterSelect("all")}}>
-                            <Chip label={"All"} avatar={<Avatar alt='' src="" /> } />
-                          </MenuItem>
-                          {users && users.map((user, key) => {
-                            
-                            return (
-                              <MenuItem key={key} style={{backgroundColor: avatarFilterSelect == user?.PK.split("#")[1] ? "#e6e6e6":"white"}}>
-                                <Chip
-                                    onClick={()=>{
-                                      setAvatarFilterSelect(user?.PK.split("#")[1])}}
-                                    style={{ width:"100%"}}
-                                    label={user?.PK.split("#")[1]}
-                                    avatar={
-                                    <Avatar
-                                      alt={user?.PK.split("#")[1]}
-                                      src={`${s3URL}/${user?.imageId}`}
-                                    />
-                                    }
-                                  />
-                              </MenuItem>
-                            );
-                          })}
-                        </Menu>
-                      </div>
                     </Stack>
                   </Grid>
                 </Grid>
@@ -520,12 +473,8 @@ const MenuProps = {
                         </TableRow>
                       </TableHead>
                       <TableBody>
-                        {console.log("contactData",contactData)}
-                        {contactData?.filter((data)=>{
-                            if(avatarFilterSelect == "all") return data
-                            if((data?.createdBy?.split("#")[1] == setAvatarFilterSelect || data?.updatedBy?.split("#")[1] == avatarFilterSelect) ) return data;
-                          })
-                        ?.filter((data) => {
+                        {contactData
+                          ?.filter((data) => {
                             if (searchKey == "") {
                               return data;
                             } else {

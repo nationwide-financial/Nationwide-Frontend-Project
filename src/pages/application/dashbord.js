@@ -19,12 +19,6 @@ import SyncAltOutlinedIcon from "@mui/icons-material/SyncAltOutlined";
 import DashboardOutlinedIcon from "@mui/icons-material/DashboardOutlined";
 import ViewCompactOutlinedIcon from "@mui/icons-material/ViewCompactOutlined";
 import SyncOutlinedIcon from "@mui/icons-material/SyncOutlined";
-import Menu from "@mui/material/Menu";
-import styles from '../../components/searchBox/searchBox.module.scss'
-import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
-import TextField from '@mui/material/TextField';
-
-//import styles from './searchBox.module.scss'
 // import Card from "@mui/material/Card";
 // import CardActions from "@mui/material/CardActions";
 // import CardContent from "@mui/material/CardContent";
@@ -50,7 +44,7 @@ import { Snackbar } from "@material-ui/core";
 // import TextField from '@mui/material/TextField';
 // import { Autocomplete } from "@mui/material";
 // import MoreVertIcon from '@mui/icons-material/MoreVert';
-import { _getAllPlatformUserByAdmin, _getUser, _getUserByIdArray } from '../../services/authServices'
+import { _getAllPlatformUserByAdmin, _getUser } from '../../services/authServices'
 import { _listLabel } from '../../services/labelService'
 //import { _gatReason } from '../../services/rejectionOptionService'
 import { _fetchAllContacts } from '../../services/contactServices'
@@ -92,16 +86,6 @@ function BootstrapDialogTitle(props) {
 }
 
 function LoanApplication() {
-  const [anchorElLabelDropDown, setAnchorElLabelDropDown] =
-  React.useState(null);
-const openLabelDropDown = Boolean(anchorElLabelDropDown);
-const handleClickLabelDropDown = (event) => {
-  setAnchorElLabelDropDown(event.currentTarget);
-};
-const handleCloseLabelDropDown = () => {
-  setAnchorElLabelDropDown(null);
-};
-
   const router = useRouter();
   const [open, setOpen] = React.useState(false);
   const [loanTypeData, setLoanTypeData] = useState([]);
@@ -119,8 +103,6 @@ const handleCloseLabelDropDown = () => {
   // const [selectedRejectionObj, setSelectedRejectionObj] = useState({})
   // const [reasonsLoading, setReasonsLoading] = useState(false);
   const [applicationData, setApplicationData] = useState([]);
-  const [applicationDataTempForFilter, setApplicationDataTempForFilter] = useState([])
-  const [avatarFilterSelect, setAvatarFilterSelect] =useState("all");
 
   const [appId, setAppId] = useState('');
   // const [days, setDays] = useState(0);
@@ -128,14 +110,14 @@ const handleCloseLabelDropDown = () => {
   // const [checkedReasonAuto, setCheckedReasonAuto] = useState(false);
   const [show, setShow] = useState('hidden')
 
-  // const [applicationIdForRejection, setApplicationIdForRejection] = useState();
-  // const [bodyDataIdForRejection, setBodyDataIdForRejection] = useState();
+  const [applicationIdForRejection, setApplicationIdForRejection] = useState();
+  const [bodyDataIdForRejection, setBodyDataIdForRejection] = useState();
 
   const [teamMembersData, setTeamMembersData] = useState([]);
   const [applicationDataForMemberSelection, setApplicationDataForMemberSelection] = useState({});
 
   const [loadingTeamMemberAssign, setLoadingTeamMemberAssign] = useState(false)
-  const [searchKey, setSearchKey] = useState("")
+
 
 
   // const handleChangeReasonAuto = (event) => {
@@ -186,35 +168,7 @@ const handleCloseLabelDropDown = () => {
       console.log(err);
     }
   };
-console.log("applicationData",applicationData)
 
-  const filterApplications = () =>{
-    let filledData = applicationDataTempForFilter?.filter((data) => {
-      if (avatarFilterSelect == "all") return data
-      let members = [];
-      data?.teamArr?.map((member) => {
-        members.push(member?.PK?.split("#")[1])
-      })
-      if (members?.includes(avatarFilterSelect)) return data;
-    })
-  ?.filter((data) => {
-      if (searchKey == "") {
-        return data;
-      } else {
-        return data?.contact?.basicInformation?.firstName?.toLowerCase()?.includes(searchKey.toLocaleLowerCase())
-        || data?.contact?.basicInformation?.lastName?.toLowerCase()?.includes(searchKey.toLocaleLowerCase())
-        || `${data?.contact?.basicInformation?.lastName} ${data?.contact?.basicInformation?.lastName}`?.toLowerCase()?.includes(searchKey.toLocaleLowerCase())
-        || data?.application?.PK?.split("_")[1]?.toLowerCase()?.includes(searchKey.toLocaleLowerCase())
-        || data?.application?.applicationBasicInfo?.loan_amount?.toLowerCase()?.includes(searchKey.toLocaleLowerCase())
-        || moment(data?.application?.createTime).format('YYYY-MM-DD')?.toLowerCase()?.includes(searchKey.toLocaleLowerCase())
-      }
-    })
-    setApplicationData(filledData)
-  }
-
-  useEffect(() => {
-    filterApplications()
-  }, [avatarFilterSelect,searchKey]);
 
   useEffect(() => {
     getWorkflowStatus();
@@ -260,13 +214,21 @@ console.log("applicationData",applicationData)
   const getApplications = async () => {
     try {
       const responseLabel = await _listLabel();
+      const res = await _getAllPlatformUserByAdmin();
+      const resLoginUser = await _getUser()
+      // console.log("resLoginUser",resLoginUser?.data)
+      // console.log("responsePlatformUser",res)
       const resContact = await _fetchAllContacts();
+      // console.log("responseAllContacts",resContact)
+      setPlatfromUsers(res?.data?.users)
       const response = await _getApplications();
       if (response?.status === 200) {
         setApplications(response.data.data.Items.length > 0 && response.data.data.Items);
         let tempApplications = response.data.data.Items;
+        let tempUsers = [...res?.data?.users, resLoginUser?.data];
         let userIds = [];
         let teamMembers = [];
+        setTeamMembersData([...tempUsers])
 
         await tempApplications.map((tempApplications) => {
           if (tempApplications?.members) {
@@ -274,11 +236,12 @@ console.log("applicationData",applicationData)
           }
         })
         let removedduplicatesUsers = [...new Set(userIds)];
-        let body = { users:removedduplicatesUsers }
-        const responseUsers = await _getUserByIdArray(body)
-        setTeamMembersArr(responseUsers?.data?.users || [])
-        setTeamMembersData(responseUsers?.data?.users || [])
-        teamMembers = responseUsers?.data?.users
+        await removedduplicatesUsers.map(async (id) => {
+          let tempU = await tempUsers.filter((user) => user?.PK == 'USER#' + id)
+          teamMembers.push(...tempU)
+        })
+        setTeamMembersArr([...teamMembers])
+
         let tableDataArry = [];
         await tempApplications.map((application) => {
           let object = {}
@@ -305,7 +268,6 @@ console.log("applicationData",applicationData)
           tableDataArry.push(object)
         })
         setApplicationData([...tableDataArry])
-        setApplicationDataTempForFilter([...tableDataArry])
         console.log("tableDataArry", tableDataArry)
       }
     } catch (err) {
@@ -869,14 +831,11 @@ console.log("applicationData",applicationData)
         <Grid container mt={2}>
           {/* header-search-section */}
           <Grid item xs={12} md={4} pr={2}>
-            <div className={styles.search}>
-                <SearchOutlinedIcon className={styles.icon} fontSize='medium'/>
-                <TextField onChange={(e)=> setSearchKey(e.target.value)}  className={styles.input} id="input-with-icon-textfield" label="Search" variant="standard"  />
-            </div>
+            <SearchBox />
           </Grid>
           {/* active-user-display-section */}
           <Grid item xs={12} md={2} pl={2}>
-            <AvatarGroup total={teamMembersArr.length} onClick={handleClickLabelDropDown}>
+            <AvatarGroup total={teamMembersArr.length}>
               {teamMembersArr &&
                 teamMembersArr.map((user, key) => {
                   return (
@@ -888,47 +847,6 @@ console.log("applicationData",applicationData)
                   );
                 })}
             </AvatarGroup>
-            <div>
-              <Menu
-                id="long-menu"
-                MenuListProps={{
-                  "aria-labelledby": "long-button",
-                }}
-                anchorEl={anchorElLabelDropDown}
-                open={openLabelDropDown}
-                onClose={handleCloseLabelDropDown}
-                PaperProps={{
-                  style: {
-                    maxHeight: ITEM_HEIGHT * 4.5,
-                    width: "20ch",
-                  },
-                }}
-              >
-                <MenuItem style={{borderRadius:0, width:"100%", backgroundColor: avatarFilterSelect == "all" ? "#e6e6e6":"white" }} onClick={()=>{setAvatarFilterSelect("all")}}>
-                  <Chip label={"All"} avatar={<Avatar alt='' src="" /> } />
-                </MenuItem>
-                {teamMembersArr && teamMembersArr.map((user, key) => {
-                  
-                  return (
-                    <MenuItem key={key} style={{backgroundColor: avatarFilterSelect == user?.PK.split("#")[1] ? "#e6e6e6":"white"}}>
-                      <Chip
-                          onClick={()=>{
-                            setAvatarFilterSelect(user?.PK.split("#")[1])
-                          }}
-                          style={{ width:"100%"}}
-                          label={user?.PK.split("#")[1]}
-                          avatar={
-                          <Avatar
-                            alt={user?.PK.split("#")[1]}
-                            src={`${s3URL}/${user?.imageId}`}
-                          />
-                          }
-                        />
-                    </MenuItem>
-                  );
-                })}
-              </Menu>
-            </div>
           </Grid>
           {/* other-icon-set */}
           <Grid item xs={12} md={6} align="right">

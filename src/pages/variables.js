@@ -44,7 +44,7 @@ import Alert from "@mui/material/Alert";
 import Select from "@mui/material/Select";
 
 import { s3URL } from "../utils/config";
-import { _getAllPlatformUserByAdmin } from "../services/authServices";
+import { _getAllPlatformUserByAdmin ,_getUserByIdArray} from "../services/authServices";
 const style = {
   position: "absolute",
   top: "50%",
@@ -223,21 +223,33 @@ function Variable() {
   // fetch table data
   async function getTableData() {
     const response = await _gatVariabels();
-    console.log(response?.data?.data?.Items);
+    console.log("_gatVariabels",response?.data?.data?.Items);
+
+    let usersFilterFromVariable = [];
+    await response?.data?.data?.Items?.map((variable)=>{
+      usersFilterFromVariable.push(variable?.createdBy?.split("#")[1] || "")
+      usersFilterFromVariable.push(variable?.updatedBy?.split("#")[1]  || "")
+    })
+    let uniqueUsersFilterFromVariable= [...new Set(usersFilterFromVariable)]?.filter((user)=>user !="")
+    let body = { users:uniqueUsersFilterFromVariable }
+    const responseUsers = await _getUserByIdArray(body)
+    setUsers(responseUsers?.data?.users)
+
     let tableDt = await response?.data?.data?.Items.sort((a, b) =>
       a.createTime < b.createTime ? 1 : b.createTime < a.createTime ? -1 : 0
     );
     setData(
       tableDt?.map((row) => {
-        let uT = getTime(row.updateTime);
+        let uT = getTime(row?.updateTime);
         return {
           rowId: row.PK,
-          systemName: row.systemName,
-          displayName: row.displayName,
-          dataType: row.dataType,
+          systemName: row?.systemName,
+          displayName: row?.displayName,
+          dataType: row?.dataType,
           uT: uT,
-          description: row.description,
-          variableType: row.variableType,
+          description: row?.description,
+          variableType: row?.variableType,
+          updatedBy:row?.updatedBy
         };
       })
     );
@@ -245,7 +257,7 @@ function Variable() {
 
   useEffect(() => {
     getTableData();
-    getUsers();
+   // getUsers();
   }, []);
 
   const [onClickObj, setOnClickObj] = useState({});
@@ -322,14 +334,14 @@ function Variable() {
       console.log(err);
     }
   };
-  const getUsers = async () => {
-    try {
-      const res = await _getAllPlatformUserByAdmin();
-      setUsers([...res?.data?.users]);
-    } catch (err) {
-      console.log(err);
-    }
-  };
+  // const getUsers = async () => {
+  //   try {
+  //     const res = await _getAllPlatformUserByAdmin();
+  //     setUsers([...res?.data?.users]);
+  //   } catch (err) {
+  //     console.log(err);
+  //   }
+  // };
 
   // update variable states
   const [displayNameUpdate, setDisplayNameUpdate] = useState("");
@@ -1122,7 +1134,7 @@ function Variable() {
                         }}
                       >
                         <Stack direction="row" spacing={2}>
-                          <Avatar alt="Remy Sharp" src="/Ellise 179(1).png" />
+                        <Avatar alt={row?.updatedBy?.split("#")[1]}  src={`${s3URL}/${users?.filter((user)=>{ return user?.PK == row?.updatedBy})[0]?.imageId}`} />
                           <span>{row?.uT}</span>
                         </Stack>
                       </TableCell>

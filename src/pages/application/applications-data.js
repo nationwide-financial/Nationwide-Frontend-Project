@@ -845,10 +845,10 @@ function ApplicationDate() {
       </Snackbar>
       <Grid container>
         <Stack p={4} width={'100%'}>
-          <Grid container>
+          <Grid container  style={{ display: "flex", justifyContent: "space-between" }}>
             {/* <Grid item xs={12} md={8}> */}
             <Box>
-              <Stack direction="row">
+              <Stack direction="row" spacing={1}>
               <Typography
                 variant="h6"
                 style={{ fontSize: 45, fontWeight: 700 }}
@@ -859,7 +859,7 @@ function ApplicationDate() {
                 </Typography>
                 <Typography style={{ fontSize: 45, fontWeight: 700 }}>
                 <span style={{ color: "#0B72F1" }}>
-                  {applicationData?.applicationBasicInfo?.loan_amount} {"$"}
+                {"$"} {applicationData?.applicationBasicInfo?.loan_amount?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} 
                 </span>
                 </Typography>
               </Stack>
@@ -947,10 +947,11 @@ function ApplicationDate() {
                   aria-expanded={open ? "true" : undefined}
                   onClick={handlebtnClick}
                   mr={2}
-                  style={{ textTransform: "capitalize" }}
+                  style={{ textTransform: "capitalize"}}
                 >
                   Change Status
                 </Button>
+
                 <Menu
                   id="basic-menu"
                   anchorEl={anchorEl}

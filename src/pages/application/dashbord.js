@@ -186,7 +186,6 @@ const handleCloseLabelDropDown = () => {
       console.log(err);
     }
   };
-console.log("applicationData",applicationData)
 
   const filterApplications = () =>{
     let filledData = applicationDataTempForFilter?.filter((data) => {
@@ -440,7 +439,7 @@ console.log("applicationData",applicationData)
             <Typography variant="h6" sx={{ fontWeight: 400, color: '#a1a1a1' }}>{componentList.length}</Typography>
           </Stack>
 
-          <Typography variant="h6" sx={{ fontWeight: 400 }}>$ {total}</Typography>
+          <Typography variant="h6" sx={{ fontWeight: 400 }}>$ {total?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}</Typography>
           <Droppable droppableId={status.name} key={status.name} type="status">
             {(provided, snapshot) => (
               <div {...provided.droppableProps} ref={provided.innerRef} style={{ ...getListStyle(snapshot.isDraggingOver) }}>
@@ -512,8 +511,7 @@ console.log("applicationData",applicationData)
                           <Typography variant="h6" sx={{ fontWeight: 600 }}>
                             $
                             {
-                              application?.application?.applicationBasicInfo
-                                ?.loan_amount
+                              application?.application?.applicationBasicInfo?.loan_amount?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
                             }
                           </Typography>
                         </Grid>

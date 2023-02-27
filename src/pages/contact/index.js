@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useContext } from "react";
 import {
   Avatar,
   Box,
@@ -32,6 +32,7 @@ import moment from "moment";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import Chip from "@mui/material/Chip";
+import { Autocomplete } from "@mui/material";
 
 import { useTheme } from "@mui/material/styles";
 import Table from "@mui/material/Table";
@@ -46,12 +47,16 @@ import KeyboardArrowRight from "@mui/icons-material/KeyboardArrowRight";
 import LastPageIcon from "@mui/icons-material/LastPage";
 import TableHead from "@mui/material/TableHead";
 import Image from "next/image";
+import { Snackbar } from "@material-ui/core";
+import { Alert } from "@mui/material";
+
 import { useState } from "react";
-import { _fetchAllContacts, _deleteContact } from "../../services/contactServices";
+import { _fetchAllContacts, _deleteContact, _assignContact } from "../../services/contactServices";
 import Link from "next/link";
 import { _gatVariabels } from '../../services/variabelService.js';
 import { _getAllPlatformUserByAdmin, _getUser ,_getUserByIdArray} from '../../services/authServices'
 import { s3URL } from '../../utils/config'
+import { Context } from "../../context";
 
 const label = { inputProps: { "aria-label": "Switch demo" } };
 
@@ -159,6 +164,9 @@ function a11yProps(index) {
 }
 
 function Contact() {
+const { state, dispatch} = useContext(Context);
+const profile = state?.user || {}
+console.log("169",profile)
 const [anchorElLabelDropDown, setAnchorElLabelDropDown] = useState(null);
 const openLabelDropDown = Boolean(anchorElLabelDropDown);
 const handleClickLabelDropDown = (event) => {
@@ -182,12 +190,34 @@ const MenuProps = {
   const [loading, setLoading] = useState(false);
   const [trigger, setTrigger] = useState(0);
   const [users, setUsers] = useState([]);
+  const [platfromUsers, setPlatfromUsers] = useState([]);
   const [variableData, setVariableData] = useState([]);
   const [avatarFilterSelect, setAvatarFilterSelect] =useState("all");
+  const [openAssignContact, setOpenAssignContact] = useState(false);
+  const [assignedUser,setAssignedUser] = useState("")
+  const [assignedContact,setAssignedContact] = useState("")
+  const [assignContactMsg, setAssignContactMsg] = useState();
+  const [assignContactFormError, setAssignContactFormError] = useState("");
+
+
+  const handleClickOpenAssignContact = () => {
+    setOpenAssignContact(true);
+  };
+   const handleCloseAssignContact = () => {
+    setOpenAssignContact("")
+    setAssignedUser("")
+    setAssignedContact("")
+    setAssignContactFormError("")
+    setOpenAssignContact(false);
+  };
 
   const fetchData = async () => {
     setLoading(true);
     const response = await _fetchAllContacts();
+    const resPlatformUsers = await _getAllPlatformUserByAdmin();
+    setPlatfromUsers(resPlatformUsers?.data?.users)
+    
+    console.log(response)
     // fetch users 
     let usersFilterFromContacts = [];
     await response?.data?.Items?.map((contact)=>{
@@ -217,6 +247,41 @@ const MenuProps = {
       console.log(err)
     }
   }
+  const assignContact = async () => {
+    try{
+      if(assignedUser && assignedUser != "" && assignedContact && assignedContact !=""){
+        setAssignContactFormError("")
+        let contactId = `CONTACT_${assignedContact?.split("|")[1]}`
+        let userId = `USER#${assignedUser?.split("|")[0]}`
+        let connect = await contactData?.filter((contact) => contact?.PK == contactId) 
+        if(!connect[0]?.assignTo?.includes(userId)){
+          setAssignContactFormError("")
+          let body ={
+            assignTo:[...connect[0]?.assignTo,userId]
+          }
+          const response = await _assignContact(contactId,body);
+          if(response?.status == 200){
+            fetchData()
+            handleCloseAssignContact()
+            setAssignContactMsg({ severity: 'success', message: `Contact is assigned to ${assignedUser?.split("|")[0]}` })
+          }else{
+            fetchData()
+            setAssignContactMsg({ severity: 'error', message: 'Contact is assignment failed' })
+          }
+        }else{
+          setAssignContactFormError("You have already assigned this user!")
+        }
+
+      }else{
+        setAssignContactFormError("Please select a user and contact!")
+      }
+     
+    }catch(err){
+      console.log(err)
+    }
+    
+  }
+ 
 
   useEffect(() => {
     fetchData()
@@ -322,18 +387,18 @@ const MenuProps = {
           </Dialog>
           {/* 1st-header-section */}
           <Grid container mb={5}>
-            <Grid item xs={12} md={6}>
+            <Grid item xs={12} md={4}>
               <h1 className="page_header">Contacts</h1>
             </Grid>
 
-            <Grid item xs={12} md={6}>
+            <Grid item xs={12} md={8}>
               <Box sx={{ textAlign: "right" }}>
                 <Link href={"/contact/import"}>
                   <Button variant="contained" sx={{ padding: "10px 40px" }}>
                     Upload List
                   </Button>
                 </Link>
-                <Button
+               <Button
                   variant="contained"
                   sx={{ padding: "10px 40px" }}
                   style={{ marginLeft: 20 }}
@@ -341,6 +406,89 @@ const MenuProps = {
                 >
                   Add Contacts
                 </Button>
+               
+                
+                {(profile?.role == "OWNER" || profile?.role ==  "ADMIN") &&  <Button
+                  variant="contained"
+                  sx={{ padding: "10px 40px" }}
+                  style={{ marginLeft: 20 }}
+                  onClick={handleClickOpenAssignContact}
+                >
+                  Assign Contact
+                </Button>}
+                <Dialog open={openAssignContact} onClose={handleCloseAssignContact} fullWidth m={4}>
+                <DialogTitle>
+                  <Typography
+                    variant="h6"
+                    style={{
+                      fontSize: 21,
+                      fontWeight: 700,
+                      fontStyle: "normal",
+                    }}
+                  >
+                    Assign Connect
+                  </Typography>
+                </DialogTitle>
+                <DialogContent>
+                  <Stack direction="column" spacing={2}>
+      
+                    <FormControl>
+                      <label style={{ marginBottom: 6 }}>Select User</label>
+                      <Autocomplete
+                        value={assignedUser}
+                        renderInput={(params) => (
+                          <TextField {...params} size="small" label="User" />
+                        )}
+                        onChange={(e, val) => { 
+                          setAssignedUser(val)
+                         }}
+                        options={platfromUsers?.map((user) => {
+                          let s = `${user?.PK?.split("#")[1]}|${(user?.info?.firstName|| user?.info?.lastName) ? user?.info?.firstName+" "+user?.info?.lastName:"No user name"} `;
+                          return s;
+                        })}
+                      ></Autocomplete>
+                    </FormControl>
+                    <FormControl>
+                      <label style={{ marginBottom: 6 }}>Select Contact</label>
+                      <Autocomplete
+                        value={assignedContact}
+                        renderInput={(params) => (
+                          <TextField {...params} size="small" label="Contact" />
+                        )}
+                        onChange={(e, val) => { 
+                          setAssignedContact(val)
+                         }}
+                        options={contactData?.map((contact) => {
+                          let s = `${contact?.basicInformation?.firstName} ${contact?.basicInformation?.lastName}|${contact?.PK?.split("_")[1]}`;
+                          return s ;
+                        })}
+                      ></Autocomplete>
+                    </FormControl>
+                    <p style={{color:"red"}}>{assignContactFormError}</p>
+                    <FormControl style={{display:"flex", justifyContent:"flex-end", alignItems:'flex-end'}}>
+                      <Button
+                        onClick={assignContact}
+                        variant="contained"
+                        sx={{ maxWidth: 220, marginTop: 2, marginBottom: 2 }}
+                      >
+                        Assign Contact
+                      </Button>
+                    </FormControl>
+                  </Stack>
+                </DialogContent>
+              </Dialog>
+
+              <Snackbar
+                anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+                open={assignContactMsg}
+                autoHideDuration={3000}
+                onClose={() => setAssignContactMsg()}
+              >
+                <Alert variant="filled" severity={assignContactMsg?.severity}>
+                  {assignContactMsg?.message}
+                </Alert>
+              </Snackbar>
+              
               </Box>
             </Grid>
           </Grid>

@@ -345,7 +345,7 @@ function TableNW({applications,searchKey="",filterBy}) {
                   className="remove_x_padding"
                   style={{ fontWeight: 600 }}
                 >
-                 $ {row?.application?.applicationBasicInfo?.loan_amount || ""}
+                 $ {row?.application?.applicationBasicInfo?.loan_amount?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") || ""}
                 </TableCell>
               </TableRow>
             ))}

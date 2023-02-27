@@ -791,7 +791,7 @@ const ViewTask = () => {
                       pt={3}
                       pb={3}
                     >
-                      ${task?.taskData?.startedIncome || ""}
+                      $ {task?.taskData?.startedIncome?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") || ""}
                     </Typography>
                   )}
                 </Grid>
@@ -839,7 +839,7 @@ const ViewTask = () => {
                       pt={3}
                       pb={3}
                     >
-                      ${task?.taskData?.bureauIncome || ""}
+                      $ {task?.taskData?.bureauIncome?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") || ""}
                     </Typography>
                   )}
                 </Grid>
@@ -887,7 +887,7 @@ const ViewTask = () => {
                       pt={3}
                       pb={3}
                     >
-                      ${task?.taskData?.verifiedStatus || ""}
+                      $ {task?.taskData?.verifiedStatus?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") || ""}
                     </Typography>
                   )}
                 </Grid>

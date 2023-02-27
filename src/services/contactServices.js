@@ -8,3 +8,5 @@ export const _fetchSingleContacts = (id) => BackendClient.get(`${baseURL}/contac
 export const _deleteContact = (id) => BackendClient.delete(`${baseURL}/contact/${id}`);
 export const _fetchContactById = (id) => BackendClient.get(`${baseURL}/contact/${id}`);
 export const _updateContactById = (id, body) => BackendClient.put(`${baseURL}/contact/${id}`, body);
+export const _assignContact = (id, body) => BackendClient.put(`${baseURL}/contact/assign-contact/${id}`, body);
+

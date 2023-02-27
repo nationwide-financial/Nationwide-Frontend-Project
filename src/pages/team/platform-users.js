@@ -296,6 +296,10 @@ const PlatformUsers = () => {
       value: "USER",
       label: "USER",
     },
+    {
+      value: "OWNER",
+      label: "OWNER",
+    },
   ];
 
   let userRoles = userOwner;

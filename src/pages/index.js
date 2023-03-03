@@ -431,7 +431,7 @@ const HomePage = () => {
         </Typography>
         {team && team.length > 0 && <>
           <AvatarGroup length={team.length} max={6} onClick={e => handleTeamFilterOpen(e)}>
-            {team.map(member => <Avatar src={`${s3URL}/${member?.imageId}`} />)}
+            {team.map((member, key) => <Avatar key={key} src={`${s3URL}/${member?.imageId}`} />)}
           </AvatarGroup>
           <Menu
             id={teamFilterId}
@@ -453,7 +453,7 @@ const HomePage = () => {
               <Chip label={"All"} avatar={<Avatar alt='' src="" />} style={{ width: '100%', justifyContent: 'flex-start'}}/>
             </MenuItem>
             {
-              team.map(member => <MenuItem onClick={() => setMemberFiter(member?.PK)}>
+              team.map((member, key) => <MenuItem key={key} onClick={() => setMemberFiter(member?.PK)}>
                 <Chip
                   style={{ width: "100%", justifyContent: 'flex-start' }}
                   label={member?.PK.split("#")[1]}

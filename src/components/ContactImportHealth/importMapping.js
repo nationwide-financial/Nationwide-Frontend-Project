@@ -24,7 +24,7 @@ function ImportMapping({ data, onPressBack, onPressImport }) {
     console.log("App State ", appHeaderState);
 
     const renderTableHead = () => {
-        const tableHead = [<TableCell sx={{ minWidth: 150 }}><b>APP HEADERS</b></TableCell>];
+        const tableHead = [<TableCell key="1" sx={{ minWidth: 150 }}><b>APP HEADERS</b></TableCell>];
         let i = 0;
         appHeaders.forEach((item, key) => {
             tableHead.push(
@@ -55,7 +55,7 @@ function ImportMapping({ data, onPressBack, onPressImport }) {
 
     }
     const renderFileHeaders = () => {
-        const fileHeaders = [<TableCell sx={{ minWidth: 150 }}><b>Your Headers</b></TableCell>];
+        const fileHeaders = [<TableCell key="2" sx={{ minWidth: 150 }}><b>Your Headers</b></TableCell>];
         data && data[0] && data.length > 0 && Object.entries(data[0]).forEach(([key, item]) => {
             fileHeaders.push(
                 <TableCell key={key}>

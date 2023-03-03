@@ -199,7 +199,17 @@ const MenuProps = {
   const [assignContactMsg, setAssignContactMsg] = useState();
   const [assignContactFormError, setAssignContactFormError] = useState("");
 
-
+  console.log("C DATA ", contactData)
+  const fetchPlatformUsersAndLoginUser = async () =>{
+    try{
+      const loginUser = await _getUser();
+      const platformUsers = await _getAllPlatformUserByAdmin();
+      let users = [loginUser?.data,...platformUsers?.data?.users];
+      setUsers(users)
+    }catch(err){
+      console.log(err)
+    }
+  }
   const handleClickOpenAssignContact = () => {
     setOpenAssignContact(true);
   };
@@ -224,7 +234,8 @@ const MenuProps = {
       usersFilterFromContacts.push(contact?.createdBy?.split("#")[1] || "")
       usersFilterFromContacts.push(contact?.updatedBy?.split("#")[1]  || "")
     })
-    let uniqueUsersFilterFromContacts = [...new Set(usersFilterFromContacts)]?.filter((user)=>user !="")
+    let uniqueUsersFilterFromContacts = [...new Set(usersFilterFromContacts)]?.filter((user) => user !="" && user != null)
+
     let body = { users:uniqueUsersFilterFromContacts }
     const responseUsers = await _getUserByIdArray(body)
     setUsers(responseUsers?.data?.users)
@@ -699,18 +710,18 @@ const MenuProps = {
                                 onClick={() => handleClickContact(row.PK)}
                               >
                                 <TableCell component="th" scope="row">
-                                  {basicInfo.firstName +
+                                  {basicInfo && basicInfo.firstName +
                                     " " +
-                                    basicInfo.lastName}
+                                    basicInfo && basicInfo.lastName}
                                 </TableCell>
                                 <TableCell align="left">
-                                  {basicInfo.idNumber}
+                                  {basicInfo && basicInfo.idNumber}
                                 </TableCell>
                                 <TableCell align="left">
-                                  {basicInfo.phone}
+                                  {basicInfo && basicInfo.phone}
                                 </TableCell>
                                 <TableCell align="left">
-                                  {basicInfo.email}
+                                  {basicInfo && basicInfo.email}
                                 </TableCell>
                                 {/* {variableData && variableData.map((variable, key) => {
                                   return (<TableCell key={key} align="left">{basicInfo[variable?.systemName]}</TableCell>)

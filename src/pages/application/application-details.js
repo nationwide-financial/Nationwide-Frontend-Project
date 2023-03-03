@@ -96,19 +96,25 @@ function ApplicationDetails() {
       }
       //console.log("body",body)
       const res = await _addApplication(body)
-      let history = {
-        action: "Application Created",
-        description: `The application for ${constactFname} ${contactLname} was created`,
-        applicationId: res?.data?.applicationId
+      console.log("res?.status == 400",res)
+      if(res?.status == 200){
+        let history = {
+          action: "Application Created",
+          description: `The application for ${constactFname} ${contactLname} was created`,
+          applicationId: res?.data?.applicationId
+        }
+        const resHistory = await _addHistory(history)
+       
+        if (res?.status == 200 && resHistory?.status == 200 && contactDetails?.status == 200) {
+          router.push("/application/dashbord");
+        } else {
+          setError('some thing worng!')
+        }
+      }else {
+        if(res?.response?.status == 400){
+          setError(`${res?.response?.data?.message}`)
+        }
       }
-      const resHistory = await _addHistory(history)
-     
-      if (res?.status == 200 && resHistory?.status == 200 && contactDetails?.status == 200) {
-        router.push("/application/dashbord");
-      } else {
-        setError('some thing worng!')
-      }
-      console.log("_addApplication", res)
     }
   };
 

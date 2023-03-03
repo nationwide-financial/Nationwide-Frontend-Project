@@ -55,6 +55,8 @@ import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import Chip from "@mui/material/Chip";
 import Menu from "@mui/material/Menu";
+import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
+
 
 
 import { Autocomplete, FormControl, Switch } from "@mui/material";
@@ -1073,12 +1075,18 @@ const handlebtnClose = () => {
               </FormControl>
               <FormControl>
                 <label style={{ marginBottom: 6 }}>Due Date</label>
-                <TextField
+                {/* <TextField
                   value={taskDueDate}
                   onChange={(e) => {
                     setTaskDueDate(e.target.value);
                   }}
                   size="small"
+                /> */}
+                 <DateTimePicker
+                    //inputFormat="MM/DD/YYYY"
+                    value={taskDueDate}
+                    onChange={(event) => setTaskDueDate(event)}
+                    renderInput={(params) => <TextField size="small" fullWidth margin="normal" {...params} error={false} />}
                 />
               </FormControl>
               <FormControl>

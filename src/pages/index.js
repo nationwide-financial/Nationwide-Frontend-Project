@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import Table from "../components/table/table";
 import Bars from "../components/Bars/bars";
+import { Context } from "../context";
 // import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
 import {
@@ -19,8 +20,13 @@ import {
   CardHeader,
   CardContent,
   Snackbar,
-  Alert
+  Alert,
+  AvatarGroup,
+  Popover,
+  Menu,
+  MenuItem
 } from "@mui/material";
+import { s3URL } from "../utils/config";
 
 import Container from "@mui/material/Container";
 import DashBoardCards from "../components/dashBoardCards/dashBoardCards";
@@ -42,13 +48,13 @@ import {
 } from "../services/applicationService.js";
 import { _fetchWorkflowStatuses } from "../services/loanWorkflowStatusServices.js";
 import { _fetchAllTasks } from "../services/loanTaskServices.js";
-import {_authMSToken} from "../services/authServices"
+import { _authMSToken, _getUsersByOwner } from "../services/authServices"
 import { getCookies, setCookies, removeCookies, getCookie } from 'cookies-next';
 
 function NestedGrid({ task }) {
   const router = useRouter();
 
- // console.log(task);
+  // console.log(task);
   function getTime(ts) {
     let date = new Date(ts);
     return date.toDateString();
@@ -141,11 +147,12 @@ const HomePage = () => {
   const percentage = 23;
 
   const router = useRouter();
-
+  const { state } = useContext(Context);
   const [leadsData, setLeadsData] = useState();
   const [applications, setApplications] = useState([]);
   const [workFlowStatus, setworkFlowStatus] = useState([]);
   const [loanStatusesChart, setLoanStatusesChart] = useState([]);
+  const [team, setTeam] = useState([]);
 
   const [ytdLoanClose, setYtdLoanClose] = useState(0);
   const [mtdLoanClose, setMtdLoanClose] = useState(0);
@@ -163,7 +170,10 @@ const HomePage = () => {
   const [taskDueToday, setTaskDueToday] = useState(0);
   const [taskTotal, setTotal] = useState(0);
   const [mailConnect, setMailConnect] = useState("");
-  
+
+  const [teamFilterOpen, setTeamFilterOpen] = useState(null);
+  const [memberFilter, setMemberFiter] = useState();
+
 
   const currentDate = new Date();
   const month = [
@@ -236,7 +246,7 @@ const HomePage = () => {
   }
 
   const getLeadData = async (applicationByuserArr, contactArr) => {
-    console.log("applicationByuserArr",applicationByuserArr)
+    console.log("applicationByuserArr", applicationByuserArr)
     let contacts = [];
     await applicationByuserArr.map((application) => {
       let contactTemp = contactArr?.filter(
@@ -314,7 +324,7 @@ const HomePage = () => {
       workFlow.push(data?.name);
     });
     let c = 0;
-    workFlow = [...workFlow,"won","closed","abandoned"]
+    workFlow = [...workFlow, "won", "closed", "abandoned"]
     //console.log(workFlow)
     for (let i = 0; i < workFlow.length; i++) {
       for (let j = 0; j < applicationArr.length; j++) {
@@ -346,24 +356,40 @@ const HomePage = () => {
     //console.log("dueToday",dueToday)
   };
 
+  const getUsersByOwner = async () => {
+    try {
+      const response = await _getUsersByOwner();
+      if (response.status === 200) {
+        setTeam(response.data.users);
+      } else {
+        console.log("Error fetching team members ", response.status)
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
   async function fetchAllData() {
+    getUsersByOwner();
     const contactArr = await getContact();
+    const filteredContactArr = memberFilter ? contactArr.filter(con => con.createdBy === memberFilter) : contactArr;
+    console.log("Contact Arr ", contactArr, filteredContactArr)
     //console.log("_fetchAllContacts", contactArr);
 
     const applicationArr = await getApplication();
-   // console.log("_getApplications", applicationArr);
+    // console.log("_getApplications", applicationArr);
 
     const applicationByuserArr = await getApplicationByuser();
     //console.log("applicationByuserArr", applicationByuserArr);
 
     const workFlowStatusArr = await getWorkFlowStatus();
-   // console.log("_fetchWorkflowStatuses", workFlowStatusArr);
+    // console.log("_fetchWorkflowStatuses", workFlowStatusArr);
 
     const workTaskArr = await getTasks();
     let myTask = await workTaskArr.sort((a, b) =>
       a.createTime < b.createTime ? 1 : b.createTime < a.createTime ? -1 : 0
     );
-   // console.log("_fetchAllTasks", myTask);
+    // console.log("_fetchAllTasks", myTask);
     setTaskData([...myTask]);
 
     taskCalculations(workTaskArr);
@@ -372,26 +398,76 @@ const HomePage = () => {
     getLeadData(applicationByuserArr, contactArr);
   }
 
-  const {code, client_info} = router.query
+  const handleTeamFilterOpen = (e) => {
+    setTeamFilterOpen(e.currentTarget)
+  }
+
+  const handleCloseTeamFilter = () => {
+    setTeamFilterOpen(null);
+  }
+
+  const { code, client_info } = router.query
 
   useEffect(() => {
     fetchAllData();
   }, []);
 
+  const openTeamFilter = Boolean(teamFilterOpen);
+  const teamFilterId = openTeamFilter ? 'simple-popover' : undefined;
+
   return (
     <div style={{ padding: "10px 20px" }}>
       {mailConnect &&
-        <Snackbar open={mailConnect? true : false} autoHideDuration={6000} onClose={() => setMailConnect("")}>
-            <Alert variant='filled' severity="success">
-                {mailConnect}
-            </Alert>
+        <Snackbar open={mailConnect ? true : false} autoHideDuration={6000} onClose={() => setMailConnect("")}>
+          <Alert variant='filled' severity="success">
+            {mailConnect}
+          </Alert>
         </Snackbar>
       }
-      <Box mt={4}>
+      <Box mt={4} mb={4} display='flex' alignItems='center' justifyContent='space-between'>
         {/* header section-dashboard */}
         <Typography style={{ fontSize: 45, fontWeight: 700 }}>
           Dashboard
         </Typography>
+        {team && team.length > 0 && <>
+          <AvatarGroup length={team.length} max={6} onClick={e => handleTeamFilterOpen(e)}>
+            {team.map(member => <Avatar src={`${s3URL}/${member?.imageId}`} />)}
+          </AvatarGroup>
+          <Menu
+            id={teamFilterId}
+            open={openTeamFilter}
+            anchorEl={teamFilterOpen}
+            onClose={handleCloseTeamFilter}
+            anchorOrigin={{
+              vertical: 'bottom',
+              horizontal: 'right'
+            }}
+            PaperProps={{
+              style: {
+                maxHeight: 500,
+                width: "30ch",
+              },
+            }}
+          >
+            <MenuItem onClick={() => setMemberFiter(undefined)}>
+              <Chip label={"All"} avatar={<Avatar alt='' src="" />} style={{ width: '100%', justifyContent: 'flex-start'}}/>
+            </MenuItem>
+            {
+              team.map(member => <MenuItem onClick={() => setMemberFiter(member?.PK)}>
+                <Chip
+                  style={{ width: "100%", justifyContent: 'flex-start' }}
+                  label={member?.PK.split("#")[1]}
+                  avatar={
+                    <Avatar
+                      alt={member?.PK.split("#")[1]}
+                      src={`${s3URL}/${member?.imageId}`}
+                    />
+                  }
+                />
+              </MenuItem>)
+            }
+          </Menu>
+        </>}
       </Box>
       <Box>
         {/* body section-dashboard */}
@@ -404,9 +480,8 @@ const HomePage = () => {
                   style={{ fontSize: 18, fontWeight: 700 }}
                   align="left"
                 >
-                  {`Year to Date / ${
-                    month[currentDate.getMonth()]
-                  } ${new Date().getFullYear()} `}
+                  {`Year to Date / ${month[currentDate.getMonth()]
+                    } ${new Date().getFullYear()} `}
                 </Typography>
                 <Typography
                   style={{ fontSize: 14, fontWeight: 600 }}

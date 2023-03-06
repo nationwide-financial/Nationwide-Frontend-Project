@@ -24,7 +24,8 @@ import {
   AvatarGroup,
   Popover,
   Menu,
-  MenuItem
+  MenuItem,
+  CircularProgress
 } from "@mui/material";
 import { s3URL } from "../utils/config";
 
@@ -50,6 +51,7 @@ import { _fetchWorkflowStatuses } from "../services/loanWorkflowStatusServices.j
 import { _fetchAllTasks } from "../services/loanTaskServices.js";
 import { _authMSToken, _getUsersByOwner } from "../services/authServices"
 import { getCookies, setCookies, removeCookies, getCookie } from 'cookies-next';
+import { _fetchDashboardData } from "../services/dashboard";
 
 function NestedGrid({ task }) {
   const router = useRouter();
@@ -172,7 +174,8 @@ const HomePage = () => {
   const [mailConnect, setMailConnect] = useState("");
 
   const [teamFilterOpen, setTeamFilterOpen] = useState(null);
-  const [memberFilter, setMemberFiter] = useState();
+  const [memberFilter, setMemberFilter] = useState();
+  const [loading, setLoading] = useState(false);
 
 
   const currentDate = new Date();
@@ -246,13 +249,12 @@ const HomePage = () => {
   }
 
   const getLeadData = async (applicationByuserArr, contactArr) => {
-    console.log("applicationByuserArr", applicationByuserArr)
     let contacts = [];
     await applicationByuserArr.map((application) => {
       let contactTemp = contactArr?.filter(
         (contact) => contact?.PK == application?.contactId[0]
       );
-      if (contactTemp.length > 0) {
+      if (contactTemp?.length > 0) {
         contactTemp[0].application = application;
         contacts.push(...contactTemp);
       }
@@ -356,47 +358,32 @@ const HomePage = () => {
     //console.log("dueToday",dueToday)
   };
 
-  const getUsersByOwner = async () => {
-    try {
-      const response = await _getUsersByOwner();
-      if (response.status === 200) {
-        setTeam(response.data.users);
-      } else {
-        console.log("Error fetching team members ", response.status)
-      }
-    } catch (err) {
-      console.log(err);
-    }
-  }
+  // async function fetchAllData() {
+  //   const contactArr = await getContact();
+  //   //console.log("_fetchAllContacts", contactArr);
 
-  async function fetchAllData() {
-    getUsersByOwner();
-    const contactArr = await getContact();
-    const filteredContactArr = memberFilter ? contactArr.filter(con => con.createdBy === memberFilter) : contactArr;
-    console.log("Contact Arr ", contactArr, filteredContactArr)
-    //console.log("_fetchAllContacts", contactArr);
+  //   const applicationArr = await getApplication();
+  //   // console.log("_getApplications", applicationArr);
 
-    const applicationArr = await getApplication();
-    // console.log("_getApplications", applicationArr);
+  //   const applicationByuserArr = await getApplicationByuser();
+  //   //console.log("applicationByuserArr", applicationByuserArr);
 
-    const applicationByuserArr = await getApplicationByuser();
-    //console.log("applicationByuserArr", applicationByuserArr);
+  //   const workFlowStatusArr = await getWorkFlowStatus();
+  //   // console.log("_fetchWorkflowStatuses", workFlowStatusArr);
 
-    const workFlowStatusArr = await getWorkFlowStatus();
-    // console.log("_fetchWorkflowStatuses", workFlowStatusArr);
+  //   const workTaskArr = await getTasks();
 
-    const workTaskArr = await getTasks();
-    let myTask = await workTaskArr.sort((a, b) =>
-      a.createTime < b.createTime ? 1 : b.createTime < a.createTime ? -1 : 0
-    );
-    // console.log("_fetchAllTasks", myTask);
-    setTaskData([...myTask]);
+  //   let myTask = await workTaskArr.sort((a, b) =>
+  //     a.createTime < b.createTime ? 1 : b.createTime < a.createTime ? -1 : 0
+  //   );
+  //   // console.log("_fetchAllTasks", myTask);
+  //   setTaskData([...myTask]);
 
-    taskCalculations(workTaskArr);
-    loansStatusPresentage(workFlowStatusArr, applicationArr);
-    closedLoans(applicationArr, applicationByuserArr);
-    getLeadData(applicationByuserArr, contactArr);
-  }
+  //   taskCalculations(workTaskArr);
+  //   loansStatusPresentage(workFlowStatusArr, applicationArr);
+  //   closedLoans(applicationArr, applicationByuserArr);
+  //   getLeadData(applicationByuserArr, contactArr);
+  // }
 
   const handleTeamFilterOpen = (e) => {
     setTeamFilterOpen(e.currentTarget)
@@ -409,12 +396,59 @@ const HomePage = () => {
   const { code, client_info } = router.query
 
   useEffect(() => {
-    fetchAllData();
-  }, []);
+    fetchUsersByOwner();
+  }, [memberFilter]);
+
+  const fetchUsersByOwner = async () => {
+    try {
+      const response = await _getUsersByOwner();
+      if (response.status === 200) {
+        setTeam(response?.data?.users);
+        fetchDashboard(response?.data?.users);
+      } else {
+        console.log("Error fetching team members ", response.status)
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
+  const fetchDashboard = async (teamRes) => {
+    setLoading(true);
+    const teamFilter = [];
+    memberFilter ? teamFilter.push(memberFilter) : teamRes.forEach(member => teamFilter.push(member?.PK))
+
+    const body = {
+      team: teamFilter
+    }
+
+    const dashboardData = await _fetchDashboardData(body)
+    setLoading(false);
+    const { data } = dashboardData;
+//##########################################################
+
+    const contactArr = data?.contactsByRole;
+    const applicationArr = data?.allApplications;
+    const applicationByuserArr = data?.applicationsByUser;
+    const workFlowStatusArr = data?.workflowStatuses;
+    const workTaskArr = data?.tasks;
+
+    let myTask = await workTaskArr.sort((a, b) =>
+      a.createTime < b.createTime ? 1 : b.createTime < a.createTime ? -1 : 0
+    );
+    
+    setTaskData([...myTask]);
+    taskCalculations(workTaskArr);
+    loansStatusPresentage(workFlowStatusArr, applicationArr);
+    closedLoans(applicationArr, applicationByuserArr);
+    getLeadData(applicationByuserArr, contactArr);
+  }
+
 
   const openTeamFilter = Boolean(teamFilterOpen);
   const teamFilterId = openTeamFilter ? 'simple-popover' : undefined;
 
+  console.log("Selected ", memberFilter)
   return (
     <div style={{ padding: "10px 20px" }}>
       {mailConnect &&
@@ -427,7 +461,7 @@ const HomePage = () => {
       <Box mt={4} mb={4} display='flex' alignItems='center' justifyContent='space-between'>
         {/* header section-dashboard */}
         <Typography style={{ fontSize: 45, fontWeight: 700 }}>
-          Dashboard
+          Dashboard {loading && <CircularProgress />}
         </Typography>
         {team && team.length > 0 && <>
           <AvatarGroup length={team.length} max={6} onClick={e => handleTeamFilterOpen(e)}>
@@ -449,11 +483,11 @@ const HomePage = () => {
               },
             }}
           >
-            <MenuItem onClick={() => setMemberFiter(undefined)}>
-              <Chip label={"All"} avatar={<Avatar alt='' src="" />} style={{ width: '100%', justifyContent: 'flex-start'}}/>
+            <MenuItem onClick={() => setMemberFilter(undefined)} selected={memberFilter === undefined}>
+              <Chip label={"All"} avatar={<Avatar alt='' src="" />} style={{ width: '100%', justifyContent: 'flex-start' }} />
             </MenuItem>
             {
-              team.map((member, key) => <MenuItem key={key} onClick={() => setMemberFiter(member?.PK)}>
+              team.map((member, key) => <MenuItem key={key} selected={memberFilter === member?.PK} onClick={() => setMemberFilter(member?.PK)}>
                 <Chip
                   style={{ width: "100%", justifyContent: 'flex-start' }}
                   label={member?.PK.split("#")[1]}

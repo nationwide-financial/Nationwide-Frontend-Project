@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { Alert, Avatar, Backdrop, Box, Button, Chip, CircularProgress, FormControlLabel, Grid, IconButton, Typography, } from "@mui/material";
 import Paper from "@mui/material/Paper";
 import { styled } from "@mui/material/styles";
@@ -54,6 +54,7 @@ import { _getAllPlatformUserByAdmin, _getUser, _getUserByIdArray } from '../../s
 import { _listLabel } from '../../services/labelService'
 //import { _gatReason } from '../../services/rejectionOptionService'
 import { _fetchAllContacts } from '../../services/contactServices'
+import { _sendCustomEmail } from '../../services/mailService.js'
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 
@@ -136,7 +137,12 @@ const handleCloseLabelDropDown = () => {
 
   const [loadingTeamMemberAssign, setLoadingTeamMemberAssign] = useState(false)
   const [searchKey, setSearchKey] = useState("")
+  const [sendEmailData, setSendEmailData] = useState({})
 
+
+  const [openSendMail, setOpenSendMail] = useState(false);
+  const handleClickOpenSendMail = () => {setOpenSendMail(true)}
+  const handleCloseSendMail = () =>  {setOpenSendMail(false)}
 
   // const handleChangeReasonAuto = (event) => {
   //   setCheckedReasonAuto(event.target.checked);
@@ -209,6 +215,27 @@ const handleCloseLabelDropDown = () => {
       }
     })
     setApplicationData(filledData)
+  }
+
+  
+  const handelChangeSendEmail = useCallback(({ target }) => {
+    setSendEmailData((state) => ({ ...state, [target.name]: target.value }));
+  }, []);
+
+  const sendCustomEmail = async ( emailFrom, notificationType, members, subject, body ) => {
+    try{
+      let data = {
+        emailFrom:emailFrom,
+        notificationType:notificationType,
+        members:members,
+        subject:subject,
+        body:body
+      }
+      const response = await _sendCustomEmail(data)
+      console.log("_sendCustomEmail",response)
+    }catch(err){
+      console.log(err)
+    }
   }
 
   useEffect(() => {
@@ -397,7 +424,16 @@ const handleCloseLabelDropDown = () => {
         const updated = [...applications, applications[updatedIndex].status_ = newStatus];
         // setLoading(true);
         // if (newStatus.toLowerCase() == "closed") {
-        //   handleClickOpenRejectionPopup()
+          let selectedApplication =  applications?.filter((app) => app?.PK === applicationId )[0]
+          console.log("selectedApplication",selectedApplication)
+          let mailDetails ={
+            from: "support@lunnaloans.com",
+            to: selectedApplication?.members || [],
+            subject: "Application state changed",
+            body: "Application state changed"
+          }
+          setSendEmailData(mailDetails)
+          handleClickOpenSendMail()
         //   setApplicationIdForRejection(applicationId)
         //   setBodyDataIdForRejection(body)
         // } else {
@@ -547,22 +583,6 @@ const handleCloseLabelDropDown = () => {
     return { componentList: applicationList, total: total };
   }
 
-
-
- // const [openRejectionPopup, setOpenRejectionPopup] = useState(false);
-
-  // const handleClickOpenRejectionPopup = () => {
-  //   setOpenRejectionPopup(true);
-  // };
-
-  // const handleCloseRejectionPopup = () => {
-  //   setDays(0);
-  //   setCheckedReasonAuto(false);
-  //   setAppId('');
-  //   setOpenRejectionPopup(false);
-  // };
-
-
   const handleClickOpen = () => {
     setOpen(true);
   };
@@ -580,10 +600,10 @@ const handleCloseLabelDropDown = () => {
 
   const handleContinue = () => {
     if (coContact) {
-      router.push(`/contact/add/${product}/coEnabled`);
+      router.push(`/contact/addApplication/${product}/coEnabled`);
       // router.push(`/application/application-form?product=${product}&coEnable=${1}`);
     } else {
-      router.push(`/contact/add/${product}/coDisabled`);
+      router.push(`/contact/addApplication/${product}/coDisabled`);
     }
   };
 
@@ -1160,6 +1180,98 @@ const handleCloseLabelDropDown = () => {
       <div>
         <Grid container>
           <Grid item xs={12}>
+             <Dialog open={openSendMail}  >
+              <DialogTitle>Send Email</DialogTitle>
+              <DialogContent>
+                <Grid >
+                <FormControl>
+                    <label>
+                      From
+                    </label>
+                    <TextField
+                      style={{width:500}}
+                      fullWidth
+                      size="small"
+                      type="text"
+                      margin="normal"
+                      id="outlined-basic"
+                      variant="outlined"
+                      value={sendEmailData?.from ||""}
+                    />
+                  </FormControl>
+                </Grid>
+                <Grid>
+                  <FormControl>
+                    <label >
+                      To
+                    </label>
+                    <TextField
+                      style={{width:500}}
+                      fullWidth
+                      size="small"
+                      type="text"
+                      margin="normal"
+                      id="outlined-basic"
+                      variant="outlined"
+                      value={sendEmailData?.to || ""}
+                    />
+                  </FormControl>
+                </Grid>
+                  <Grid>
+                    <FormControl>
+                        <label >
+                          Subject
+                        </label>
+                        <TextField
+                          style={{width:500}}
+                          fullWidth
+                          size="small"
+                          type="text"
+                          name="subject"
+                          margin="normal"
+                          id="outlined-basic"
+                          variant="outlined"
+                          value={sendEmailData?.subject || ""}
+                          onChange={handelChangeSendEmail}
+                        />
+                    </FormControl>
+                </Grid>
+                <Grid>
+                  <FormControl>
+                    <label >
+                      Body
+                    </label>
+                    <TextField
+                      style={{width:500}}
+                      fullWidth
+                      size="small"
+                      type="text"
+                      margin="normal"
+                      id="outlined-basic"
+                      variant="outlined"
+                      name="body"
+                      value={sendEmailData?.body}
+                      multiline
+                      rows={4}
+                      onChange={handelChangeSendEmail}
+                    />
+                  </FormControl>
+                </Grid>
+
+              </DialogContent>
+              <DialogActions>
+                <Button
+                  variant="contained"
+                  style={{marginRight:16,marginBottom:20}}
+                  onClick={() => { 
+                    sendCustomEmail(sendEmailData?.from,"applicationStatus",sendEmailData?.to,sendEmailData?.subject,sendEmailData?.body) 
+                    handleCloseSendMail()
+                  }}
+                >
+                  Send Email
+                </Button>
+              </DialogActions>
+            </Dialog>
             {/* <Dialog open={openRejectionPopup}>
               <DialogTitle>Rejection</DialogTitle>
               <DialogContent>

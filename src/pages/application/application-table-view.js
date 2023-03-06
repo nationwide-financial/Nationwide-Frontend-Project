@@ -177,10 +177,10 @@ const handleCloseLabelDropDown = () => {
 
   const handleContinue = () => {
     if (coContact) {
-      router.push(`/contact/add/${product}/coEnabled`);
+      router.push(`/contact/addApplication/${product}/coEnabled`);
       // router.push(`/application/application-form?product=${product}&coEnable=${1}`);
     } else {
-      router.push(`/contact/add/${product}/coDisabled`);
+      router.push(`/contact/addApplication/${product}/coDisabled`);
     }
   };
 

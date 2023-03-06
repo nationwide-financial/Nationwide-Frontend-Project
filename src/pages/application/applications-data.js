@@ -1079,7 +1079,7 @@ function ApplicationDate() {
                   </Grid>
 
                   {/* col-2 */}
-
+{console.log("1081",contactData)}
                   <Grid item xs={4} px={2}>
                     <TableContainer style={{ backgroundColor: "transparent" }}>
                       <Typography fontWeight={700}>
@@ -1101,7 +1101,7 @@ function ApplicationDate() {
                               {"Email"}
                             </TableCell>
                             <TableCell align="left" p={1}>
-                              {contactData?.basicInformation?.email || ""}
+                              {contactData?.basicInformation?.emailAddress || ""}
                             </TableCell>
                           </TableRow>
                           <TableRow
@@ -1115,7 +1115,7 @@ function ApplicationDate() {
                               {"Phone"}
                             </TableCell>
                             <TableCell align="left" p={1}>
-                              {contactData?.basicInformation?.phone || ""}
+                              {contactData?.basicInformation?.primaryNumber || ""}
                             </TableCell>
                           </TableRow>
                           <TableRow
@@ -1159,7 +1159,7 @@ function ApplicationDate() {
                               {"Address"}
                             </TableCell>
                             <TableCell align="left" p={1}>
-                              {contactData?.basicInformation?.streetAddress ||
+                              {contactData?.basicInformation?.address1 ||
                                 ""}
                             </TableCell>
                           </TableRow>
@@ -1197,7 +1197,7 @@ function ApplicationDate() {
                                     {"Email"}
                                   </TableCell>
                                   <TableCell align="left" p={1}>
-                                    {row?.basicInformation?.email || ""}
+                                    {row?.basicInformation?.emailAddress || ""}
                                   </TableCell>
                                 </TableRow>
                                 <TableRow
@@ -1211,7 +1211,7 @@ function ApplicationDate() {
                                     {"Phone"}
                                   </TableCell>
                                   <TableCell align="left" p={1}>
-                                    {row?.basicInformation?.phone || ""}
+                                    {row?.basicInformation?.primaryNumber || ""}
                                   </TableCell>
                                 </TableRow>
                                 <TableRow
@@ -1253,7 +1253,7 @@ function ApplicationDate() {
                                     {"Address"}
                                   </TableCell>
                                   <TableCell align="left" p={1}>
-                                    {row?.basicInformation?.streetAddress || ""}
+                                    {row?.basicInformation?.address1 || ""}
                                   </TableCell>
                                 </TableRow>
                               </TableBody>
@@ -1276,9 +1276,9 @@ function ApplicationDate() {
                 >
                   <Tab label="Application Data" {...a11yProps(0)} />
                   <Tab label="Tasks " {...a11yProps(1)} />
-                  {/* <Tab label="Emails" {...a11yProps(2)} /> */}
-                  <Tab label="Notes" {...a11yProps(2)} />
-                  <Tab label="Application History" {...a11yProps(3)} />
+                  <Tab label="Emails" {...a11yProps(2)} />
+                  <Tab label="Notes" {...a11yProps(3)} />
+                  <Tab label="Application History" {...a11yProps(4)} />
                 </Tabs>
               </Box>
               <TabPanel value={value} index={0}>
@@ -1958,7 +1958,7 @@ function ApplicationDate() {
                   </TableContainer>
                 </Grid>
               </TabPanel>
-              {/* <TabPanel value={value} index={2}>
+              <TabPanel value={value} index={2}>
                 
                 {showContent ? (
                   <Box>
@@ -2302,9 +2302,9 @@ function ApplicationDate() {
                     </Grid>{" "}
                   </Box>
                 )}
-              </TabPanel> */}
+              </TabPanel>
               {/* Note-related-tab */}
-              <TabPanel value={value} index={2}>
+              <TabPanel value={value} index={3}>
                 {/* 1st-header-section */}
                 <Grid container p={0} mb={2}>
                   <Grid item xs={12} md={6}>
@@ -2537,7 +2537,7 @@ function ApplicationDate() {
                 </Grid>
               </TabPanel>
               {/* Application History -related-tab */}
-              <TabPanel value={value} index={3}>
+              <TabPanel value={value} index={4}>
                 {/* 1st-header-section */}
                 <Grid container p={0} mb={2}>
                   <Grid item xs={12} md={6}>

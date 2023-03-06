@@ -1,4 +1,4 @@
-import React, { useEffect, useContext } from "react";
+import React, { useEffect, useContext,useRef, useLayoutEffect  } from "react";
 import {
   Avatar,
   Box,
@@ -14,7 +14,7 @@ import {
 import { styled } from "@mui/material/styles";
 import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined";
 import AvatarGroup from "@mui/material/AvatarGroup";
-import { TuneOutlined } from "@mui/icons-material";
+import { Elderly, TuneOutlined } from "@mui/icons-material";
 import Switch from "@mui/material/Switch";
 import FormGroup from "@mui/material/FormGroup";
 import Stack from "@mui/material/Stack";
@@ -49,6 +49,7 @@ import TableHead from "@mui/material/TableHead";
 import Image from "next/image";
 import { Snackbar } from "@material-ui/core";
 import { Alert } from "@mui/material";
+import Select from '@mui/material/Select';
 
 import { useState } from "react";
 import { _fetchAllContacts, _deleteContact, _assignContact } from "../../services/contactServices";
@@ -57,6 +58,7 @@ import { _gatVariabels } from '../../services/variabelService.js';
 import { _getAllPlatformUserByAdmin, _getUser ,_getUserByIdArray} from '../../services/authServices'
 import { s3URL } from '../../utils/config'
 import { Context } from "../../context";
+import { _getContacts, _getContactBySearch } from "../../services/webService.js";
 
 const label = { inputProps: { "aria-label": "Switch demo" } };
 
@@ -198,6 +200,14 @@ const MenuProps = {
   const [assignedContact,setAssignedContact] = useState("")
   const [assignContactMsg, setAssignContactMsg] = useState();
   const [assignContactFormError, setAssignContactFormError] = useState("");
+  const [source, setSource] = useState("Application")
+  const [searchKey, setSearchKey] = useState('');
+  const [searchKeyWeb, setSearchKeyWeb] = useState('');
+  const seen = new Set();
+
+  const [page, setPage] = React.useState(0);
+  const [rowsPerPage, setRowsPerPage] = React.useState(5);
+  const [selected, setSelected] = React.useState();
 
   console.log("C DATA ", contactData)
   const fetchPlatformUsersAndLoginUser = async () =>{
@@ -224,10 +234,13 @@ const MenuProps = {
   const fetchData = async () => {
     setLoading(true);
     const response = await _fetchAllContacts();
+    const responseWeb = await fetchWebContacts()
+    
+    console.log("fetchWebContacts",responseWeb)
+    console.log("_fetchAllContacts",response)
     const resPlatformUsers = await _getAllPlatformUserByAdmin();
     setPlatfromUsers(resPlatformUsers?.data?.users)
     
-    console.log(response)
     // fetch users 
     let usersFilterFromContacts = [];
     await response?.data?.Items?.map((contact)=>{
@@ -243,7 +256,7 @@ const MenuProps = {
     setLoading(false);
     if (response?.status === 200) {
       let tableDt = await response?.data?.Items.sort((a, b) => (a.createTime < b.createTime) ? 1 : ((b.createTime < a.createTime) ? -1 : 0));
-      setContactData([...tableDt]);
+      setContactData([...tableDt,...responseWeb]);
     }
   }
 
@@ -292,11 +305,59 @@ const MenuProps = {
     }
     
   }
- 
+  
+  const fetchWebContacts = async()=>{
+    try{
+      const response = await _getContacts();
+      if(response?.status == 200){
+        let formatedData = await response?.data?.map((row) => ({
+          basicInformation:{
+          firstName: row?.first_name,
+          lastName: row?.last_name,
+          primaryNumber: row?.user_phone,
+          emailAddress: row?.user_email,
+          reservationCode:row?.contactid
+        }}))
+        return formatedData
+      }
+    }catch(err){
+      console.log(err)
+    }
+  }
+
+  const fetchWebContactsBySearch = async()=>{
+    try{
+      const response = await _getContactBySearch(searchKey);
+      console.log("_getContacts",response)
+      if(response?.status == 200){
+        let formatedData = await response?.data?.map((row) => ({
+          basicInformation:{
+          firstName: row?.first_name,
+          lastName: row?.last_name,
+          primaryNumber: row?.user_phone,
+          emailAddress: row?.user_email,
+          reservationCode:row?.contactid
+          
+        }}))
+        setContactData([...contactData,...formatedData])
+      }
+    }catch(err){
+      console.log(err)
+    }
+  }
+
+  const firstUpdate = useRef(true);
+  useLayoutEffect(() => {
+    if (firstUpdate.current) {
+      firstUpdate.current = false;
+      return;
+    }
+    fetchWebContactsBySearch()
+  },[searchKey]);
 
   useEffect(() => {
-    fetchData()
-    getVariables()
+      fetchData()
+      //getVariables()
   }, [trigger])
 
   const handleChange = (event, newValue) => {
@@ -335,10 +396,6 @@ const MenuProps = {
   };
 
   // table-related---
-  const [searchKey, setSearchKey] = useState('');
-  const [page, setPage] = React.useState(0);
-  const [rowsPerPage, setRowsPerPage] = React.useState(5);
-  const [selected, setSelected] = React.useState();
 
   // Avoid a layout jump when reaching the last page with empty rows.
   const emptyRows =
@@ -372,9 +429,6 @@ const MenuProps = {
 
   return (
     <div>
-      {loading ? (
-        <CircularProgress />
-      ) : (
         <Box p={3} style={{ marginTop: 40 }}>
           <Dialog open={selected?.length > 0} onClose={() => setSelected()}>
             <DialogTitle>Actions</DialogTitle>
@@ -526,75 +580,77 @@ const MenuProps = {
                   <Grid container>
                     <Stack direction="row">
                       {/* header-search-section */}
-
-                      <Grid container spacing={1} alignItems="flex-end">
-                        <Grid item>
-                          <SearchOutlinedIcon fontSize="medium" />
-                        </Grid>
-                        <TextField
-                          id="input-with-icon-textfield"
-                          label="Search"
-                          variant="standard"
-                          onChange={(e) => {
-                            setSearchKey(e.target.value);
-                          }}
-                        />
-                      </Grid>
+                      
+                          <Grid container spacing={1} alignItems="flex-end">
+                            <Grid item>
+                              <SearchOutlinedIcon fontSize="medium" />
+                            </Grid>
+                            <TextField
+                              value={searchKey}
+                              id="input-with-icon-textfield"
+                              label="Search"
+                              variant="standard"
+                              onChange={(e) => {
+                                setSearchKey(e.target.value);
+                              }}
+                            />
+                          </Grid>
 
                       {/* active-user-display-section */}
 
-                      <AvatarGroup total={users?.length} onClick={handleClickLabelDropDown}>
-                        {users &&
-                          users.map((user, key) => {
-                            return (
-                              <Avatar
-                                key={key}
-                                alt={user?.PK.split("#")[1]}
-                                src={`${s3URL}/${user?.imageId}`}
-                              />
-                            );
-                          })}
-                      </AvatarGroup>
-                      <div>
-                        <Menu
-                          id="long-menu"
-                          MenuListProps={{
-                            "aria-labelledby": "long-button",
-                          }}
-                          anchorEl={anchorElLabelDropDown}
-                          open={openLabelDropDown}
-                          onClose={handleCloseLabelDropDown}
-                          PaperProps={{
-                            style: {
-                              maxHeight: ITEM_HEIGHT * 4.5,
-                              width: "20ch",
-                            },
-                          }}
-                        >
-                          <MenuItem style={{borderRadius:0, width:"100%", backgroundColor: avatarFilterSelect == "all" ? "#e6e6e6":"white" }} onClick={()=>{setAvatarFilterSelect("all")}}>
-                            <Chip label={"All"} avatar={<Avatar alt='' src="" /> } />
-                          </MenuItem>
-                          {users && users.map((user, key) => {
-                            
-                            return (
-                              <MenuItem key={key} style={{backgroundColor: avatarFilterSelect == user?.PK.split("#")[1] ? "#e6e6e6":"white"}}>
-                                <Chip
-                                    onClick={()=>{
-                                      setAvatarFilterSelect(user?.PK.split("#")[1])}}
-                                    style={{ width:"100%"}}
-                                    label={user?.PK.split("#")[1]}
-                                    avatar={
-                                    <Avatar
-                                      alt={user?.PK.split("#")[1]}
-                                      src={`${s3URL}/${user?.imageId}`}
-                                    />
-                                    }
+                          <AvatarGroup total={users?.length} onClick={handleClickLabelDropDown}>
+                            {users &&
+                              users.map((user, key) => {
+                                return (
+                                  <Avatar
+                                    key={key}
+                                    alt={user?.PK.split("#")[1]}
+                                    src={`${s3URL}/${user?.imageId}`}
                                   />
+                                );
+                              })}
+                          </AvatarGroup>
+                        
+                          <div>
+                            <Menu
+                              id="long-menu"
+                              MenuListProps={{
+                                "aria-labelledby": "long-button",
+                              }}
+                              anchorEl={anchorElLabelDropDown}
+                              open={openLabelDropDown}
+                              onClose={handleCloseLabelDropDown}
+                              PaperProps={{
+                                style: {
+                                  maxHeight: ITEM_HEIGHT * 4.5,
+                                  width: "20ch",
+                                },
+                              }}
+                            >
+                              <MenuItem style={{borderRadius:0, width:"100%", backgroundColor: avatarFilterSelect == "all" ? "#e6e6e6":"white" }} onClick={()=>{setAvatarFilterSelect("all")}}>
+                                <Chip label={"All"} avatar={<Avatar alt='' src="" /> } />
                               </MenuItem>
-                            );
-                          })}
-                        </Menu>
-                      </div>
+                              {users && users.map((user, key) => {
+                                
+                                return (
+                                  <MenuItem key={key} style={{backgroundColor: avatarFilterSelect == user?.PK.split("#")[1] ? "#e6e6e6":"white"}}>
+                                    <Chip
+                                        onClick={()=>{
+                                          setAvatarFilterSelect(user?.PK.split("#")[1])}}
+                                        style={{ width:"100%"}}
+                                        label={user?.PK.split("#")[1]}
+                                        avatar={
+                                        <Avatar
+                                          alt={user?.PK.split("#")[1]}
+                                          src={`${s3URL}/${user?.imageId}`}
+                                        />
+                                        }
+                                      />
+                                  </MenuItem>
+                                );
+                              })}
+                            </Menu>
+                          </div>
                     </Stack>
                   </Grid>
                 </Grid>
@@ -650,7 +706,7 @@ const MenuProps = {
                             align="left"
                             style={{ fontSize: 14, fontWeight: 700 }}
                           >
-                            ID NUMBER
+                            RESERVATION CODE
                           </TableCell>
                           <TableCell
                             align="left"
@@ -680,71 +736,79 @@ const MenuProps = {
                       </TableHead>
                       <TableBody>
                         {console.log("contactData",contactData)}
-                        {contactData?.filter((data)=>{
+                        {contactData?.filter(el => {
+                          if(el?.basicInformation?.reservationCode){
+                            const duplicate = seen.has(el?.basicInformation?.reservationCode);
+                            seen.add(el?.basicInformation?.reservationCode);
+                            return !duplicate;
+                          }else{
+                            return el
+                          }
+                        })?.filter((data)=>{
                             if(avatarFilterSelect == "all") return data
-                            if((data?.createdBy?.split("#")[1] == setAvatarFilterSelect || data?.updatedBy?.split("#")[1] == avatarFilterSelect) ) return data;
+                            if((data?.createdBy?.split("#")[1] == avatarFilterSelect || data?.updatedBy?.split("#")[1] == avatarFilterSelect) ) return data;
                           })
                         ?.filter((data) => {
                             if (searchKey == "") {
                               return data;
                             } else {
-                              return data?.basicInformation?.email?.toLowerCase()?.includes(searchKey.toLocaleLowerCase())
+                              return data?.basicInformation?.reservationCode?.includes(searchKey)
+                              || data?.basicInformation?.emailAddress?.toLowerCase()?.includes(searchKey.toLocaleLowerCase())
                               || data?.basicInformation?.firstName?.toLowerCase()?.includes(searchKey.toLocaleLowerCase())
                               || data?.basicInformation?.lastName?.toLowerCase()?.includes(searchKey.toLocaleLowerCase())
-                              || data?.basicInformation?.phone?.toLowerCase()?.includes(searchKey.toLocaleLowerCase())
-                              || data?.basicInformation?.idNumber?.toLowerCase()?.includes(searchKey.toLocaleLowerCase())
-                              || moment(data?.updateTime).format("YYYY-MM-DD")?.includes(searchKey)
-                              || moment(data?.createTime).format("YYYY-MM-DD")?.includes(searchKey)
+                              || data?.basicInformation?.primaryNumber?.toLowerCase()?.includes(searchKey.toLocaleLowerCase())
+                          
                             }
                           })
                           .slice(
                             page * rowsPerPage,
                             page * rowsPerPage + rowsPerPage
                           )
-                          .map((row) => {
-                            const basicInfo = row.basicInformation;
+                          .map((row,key) => {
+                            const basicInfo = row?.basicInformation;
                             return (
                               <TableRow
                                 className="contact-list-row"
-                                key={row.name}
+                                key={key}
                                 onClick={() => handleClickContact(row.PK)}
                               >
                                 <TableCell component="th" scope="row">
-                                  {basicInfo && basicInfo.firstName +
+                                  {basicInfo?.firstName +
                                     " " +
-                                    basicInfo && basicInfo.lastName}
+                                    basicInfo?.lastName}
                                 </TableCell>
                                 <TableCell align="left">
-                                  {basicInfo && basicInfo.idNumber}
+                                  {basicInfo?.reservationCode}
                                 </TableCell>
                                 <TableCell align="left">
-                                  {basicInfo && basicInfo.phone}
+                                  {basicInfo?.primaryNumber}
                                 </TableCell>
                                 <TableCell align="left">
-                                  {basicInfo && basicInfo.email}
+                                  {basicInfo?.emailAddress}
                                 </TableCell>
                                 {/* {variableData && variableData.map((variable, key) => {
                                   return (<TableCell key={key} align="left">{basicInfo[variable?.systemName]}</TableCell>)
                                 })} */}
                                 <TableCell align="left">
-                                  <div style={{ display: 'inline-flex' }}>
+                                  {source != "Web" &&   <div style={{ display: 'inline-flex' }}>
                                     <div>
                                       <Avatar alt={row?.createdBy?.split("#")[1]} src={`${s3URL}/${users?.filter((user) => { return user?.PK == row?.createdBy })[0]?.imageId}`} />
                                     </div>
                                     <div style={{ alignSelf: 'center', marginLeft:5 }}>
                                       {moment(row.createTime).format("YYYY-MM-DD")}
                                     </div>
-                                  </div>
+                                  </div>}
+                                
                                 </TableCell>
                                 <TableCell align="left">
-                                  <div style={{ display: 'inline-flex' }}>
+                                {source != "Web" &&  <div style={{ display: 'inline-flex' }}>
                                     <div>
                                       <Avatar alt={row?.updatedBy?.split("#")[1]} src={`${s3URL}/${users?.filter((user) => { return user?.PK == row?.updatedBy })[0]?.imageId}`} />
                                     </div>
                                     <div style={{ alignSelf: 'center', marginLeft:5 }}>
                                       {moment(row.updateTime).format("YYYY-MM-DD")}
                                     </div>
-                                  </div>
+                                  </div>}
                                 </TableCell>
                               </TableRow>
                             );
@@ -833,7 +897,6 @@ const MenuProps = {
             </TabPanel>
           </Box>
         </Box>
-      )}
     </div>
   );
 }

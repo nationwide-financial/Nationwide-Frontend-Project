@@ -10,3 +10,5 @@ export const _fetchContactById = (id) => BackendClient.get(`${baseURL}/contact/$
 export const _updateContactById = (id, body) => BackendClient.put(`${baseURL}/contact/${id}`, body);
 export const _assignContact = (id, body) => BackendClient.put(`${baseURL}/contact/assign-contact/${id}`, body);
 
+export const _fetchContactsByUserRole = () => BackendClient.get(`${baseURL}/contactsByRole`);
+

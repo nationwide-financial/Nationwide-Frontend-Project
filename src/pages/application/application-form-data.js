@@ -142,9 +142,11 @@ function ApplicationFormData() {
       console.log(err);
     }
   };
+
   const handleContinue = (product, contact) => {
-    let string = cocontactId.join('S')
-    cocontactId.length > 0 ? router.push(`/application/application-details?product=${product}&contact=${contact}&cocontact=${string}`) : router.push(`/application/application-details?product=${product}&contact=${contact}`)
+    // let string = cocontactId.join('S')
+    // cocontactId.length > 0 ? router.push(`/application/application-details?product=${product}&contact=${contact}&cocontact=${string}`) : router.push(`/application/application-details?product=${product}&contact=${contact}`)
+    router.push(`/application/dashbord`)
 
   };
 
@@ -190,6 +192,16 @@ function ApplicationFormData() {
     }
   }
 
+  const getLoanType =async(id)=>{
+    try{
+      const res = await _gatSingleLoanType(id)
+      console.log("_gatSingleLoanType",res)
+      setLoanType(res?.data?.data?.Items[0])
+    }catch(err){
+      console.log(err)
+    }
+  }
+  
   useEffect(() => {
     async function getData() {
       if (!router.isReady) return;
@@ -198,14 +210,14 @@ function ApplicationFormData() {
       let contactString = query?.contact;
       let coContactString = query?.cocontact;
       setContactStr(contactString)
-      let ids = await contactString ? contactString.split("S") : [];
+      let ids = [contactString] || [];
       console.log("173",ids[0])
-      let cocontactIds = await coContactString ? coContactString.split("S") : [];
+      let cocontactIds = [coContactString] || [];
       setcontactId(ids)
       getContactData(ids[0])
       setcocontactId(cocontactIds)
       getContactData(ids)
-      setLoanType(query.product)
+      getLoanType(query.compaign)
     }
     getData()
   }, [router.isReady, router.query]);
@@ -278,6 +290,71 @@ function ApplicationFormData() {
               </Stack>
             </Grid>
             <Box sx={{ minWidth: 275 }}>
+            <Grid container spacing={2}>
+                  <Grid item xs={6}>
+                    <TableContainer style={{ backgroundColor: "transparent", marginTop:40 }}>
+                      <Table aria-label="simple table">
+                        <TableBody>
+                          <TableRow
+                            sx={{
+                              "&:last-child td, &:last-child th": { border: 0 },
+                            }}
+                          >
+                            <TableCell
+                              component="th"
+                              scope="row"
+                              style={{
+                                fontSize: 20,
+                                fontWeight: 400,
+                                color: "#393939",
+                              }}
+                            >
+                              {"Campaign"}
+                            </TableCell>
+                            <TableCell
+                              align="left"
+                              style={{
+                                fontSize: 20,
+                                fontWeight: 600,
+                                color: "#393939",
+                              }}
+                            >
+                            {loanType?.loanName || ""}
+                            </TableCell>
+                          </TableRow>
+
+                          <TableRow
+                            sx={{
+                              "&:last-child td, &:last-child th": { border: 0 },
+                            }}
+                          >
+                            <TableCell
+                              component="th"
+                              scope="row"
+                              style={{
+                                fontSize: 20,
+                                fontWeight: 400,
+                                color: "#393939",
+                              }}
+                            >
+                              {"Reservation/Offer Code"}
+                            </TableCell>
+                            <TableCell
+                              align="left"
+                              style={{
+                                fontSize: 20,
+                                fontWeight: 600,
+                                color: "#393939",
+                              }}
+                            >
+                              {""}
+                            </TableCell>
+                          </TableRow>
+                        </TableBody>
+                      </Table>
+                    </TableContainer>
+                  </Grid>
+                </Grid>
                 <Grid mt={4}>
                 <Typography
                   align="left"
@@ -366,7 +443,7 @@ function ApplicationFormData() {
                                     setEmail(e.target.value);
                                   }}
                                   style={{ margin: 0 }}
-                                />:contactData?.basicInformation?.email || ""}
+                                />:contactData?.basicInformation?.emailAddress || ""}
                               
                             </TableCell>
                           </TableRow>
@@ -446,7 +523,7 @@ function ApplicationFormData() {
                                     setStreetAddress(e.target.value);
                                   }}
                                   style={{ margin: 0 }}
-                                />: contactData?.basicInformation?.streetAddress || ""}
+                                />: contactData?.basicInformation?.address1 || ""}
                             </TableCell>
                           </TableRow>
                         </TableBody>
@@ -532,7 +609,7 @@ function ApplicationFormData() {
                                     setPhoneNumber(e.target.value);
                                   }}
                                   style={{ margin: 0 }}
-                                /> : contactData?.basicInformation?.phone || "" }
+                                /> : contactData?.basicInformation?.mobilePhoneNumber || "" }
                             </TableCell>
                           </TableRow>
                           <TableRow
@@ -605,7 +682,7 @@ function ApplicationFormData() {
                                     setPostalCode(e.target.value);
                                   }}
                                   style={{ margin: 0 }}
-                                /> : contactData?.basicInformation?.postalCode || "" }
+                                /> : contactData?.basicInformation?.Zip || "" }
                             </TableCell>
                           </TableRow>
                         </TableBody>

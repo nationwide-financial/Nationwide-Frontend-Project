@@ -133,6 +133,7 @@ const Email = () => {
                             </TableRow>
                         </TableHead>
                         <TableBody>
+                            {console.log("emaildatarows",emaildatarows)}
                             {emaildatarows?.map((row, i) => (
                                 <TableRow
                                     key={i}

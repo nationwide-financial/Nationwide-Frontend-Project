@@ -45,7 +45,7 @@ function ImportContacts() {
                                 const lastName = row[2];
                                 const middleInitial = row[3];
                                 const otherName = row[4];
-                                const email = typeof row[5] === 'object' ? row[5]?.text : row[5];
+                                const emailAddress = typeof row[5] === 'object' ? row[5]?.text : row[5];
                                 const homePhoneNumber = row[6];
                                 const mobilePhoneNumber = row[7];
                                 const work = row[8];
@@ -80,7 +80,7 @@ function ImportContacts() {
                                     row2: lastName,
                                     row3: middleInitial,
                                     row4: otherName,
-                                    row5: email,
+                                    row5: emailAddress,
                                     row6: homePhoneNumber,
                                     row7: mobilePhoneNumber,
                                     row8: work,

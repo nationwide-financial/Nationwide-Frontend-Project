@@ -7,7 +7,7 @@ const appHeaders = [
     { label: 'Last Name', field: 'lastName' },
     { label: 'Middle Intial', field: 'middleInitial' },
     { label: 'Other Name', field: 'otherName' },
-    { label: 'Email', field: 'email' },
+    { label: 'Email', field: 'emailAddress' },
     { label: 'Home Phone', field: 'homePhoneNumber' },
     { label: 'Mobile Phone', field: 'mobilePhoneNumber' },
     { label: 'Work Phone', field: 'work' },

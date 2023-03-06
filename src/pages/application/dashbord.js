@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { Alert, Avatar, Backdrop, Box, Button, Chip, CircularProgress, FormControlLabel, Grid, IconButton, Typography, } from "@mui/material";
 import Paper from "@mui/material/Paper";
 import { styled } from "@mui/material/styles";
@@ -19,6 +19,12 @@ import SyncAltOutlinedIcon from "@mui/icons-material/SyncAltOutlined";
 import DashboardOutlinedIcon from "@mui/icons-material/DashboardOutlined";
 import ViewCompactOutlinedIcon from "@mui/icons-material/ViewCompactOutlined";
 import SyncOutlinedIcon from "@mui/icons-material/SyncOutlined";
+import Menu from "@mui/material/Menu";
+import styles from '../../components/searchBox/searchBox.module.scss'
+import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
+import TextField from '@mui/material/TextField';
+
+//import styles from './searchBox.module.scss'
 // import Card from "@mui/material/Card";
 // import CardActions from "@mui/material/CardActions";
 // import CardContent from "@mui/material/CardContent";
@@ -44,10 +50,11 @@ import { Snackbar } from "@material-ui/core";
 // import TextField from '@mui/material/TextField';
 // import { Autocomplete } from "@mui/material";
 // import MoreVertIcon from '@mui/icons-material/MoreVert';
-import { _getAllPlatformUserByAdmin, _getUser } from '../../services/authServices'
+import { _getAllPlatformUserByAdmin, _getUser, _getUserByIdArray } from '../../services/authServices'
 import { _listLabel } from '../../services/labelService'
 //import { _gatReason } from '../../services/rejectionOptionService'
 import { _fetchAllContacts } from '../../services/contactServices'
+import { _sendCustomEmail } from '../../services/mailService.js'
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 
@@ -86,6 +93,16 @@ function BootstrapDialogTitle(props) {
 }
 
 function LoanApplication() {
+  const [anchorElLabelDropDown, setAnchorElLabelDropDown] =
+  React.useState(null);
+const openLabelDropDown = Boolean(anchorElLabelDropDown);
+const handleClickLabelDropDown = (event) => {
+  setAnchorElLabelDropDown(event.currentTarget);
+};
+const handleCloseLabelDropDown = () => {
+  setAnchorElLabelDropDown(null);
+};
+
   const router = useRouter();
   const [open, setOpen] = React.useState(false);
   const [loanTypeData, setLoanTypeData] = useState([]);
@@ -103,6 +120,8 @@ function LoanApplication() {
   // const [selectedRejectionObj, setSelectedRejectionObj] = useState({})
   // const [reasonsLoading, setReasonsLoading] = useState(false);
   const [applicationData, setApplicationData] = useState([]);
+  const [applicationDataTempForFilter, setApplicationDataTempForFilter] = useState([])
+  const [avatarFilterSelect, setAvatarFilterSelect] =useState("all");
 
   const [appId, setAppId] = useState('');
   // const [days, setDays] = useState(0);
@@ -110,15 +129,20 @@ function LoanApplication() {
   // const [checkedReasonAuto, setCheckedReasonAuto] = useState(false);
   const [show, setShow] = useState('hidden')
 
-  const [applicationIdForRejection, setApplicationIdForRejection] = useState();
-  const [bodyDataIdForRejection, setBodyDataIdForRejection] = useState();
+  // const [applicationIdForRejection, setApplicationIdForRejection] = useState();
+  // const [bodyDataIdForRejection, setBodyDataIdForRejection] = useState();
 
   const [teamMembersData, setTeamMembersData] = useState([]);
   const [applicationDataForMemberSelection, setApplicationDataForMemberSelection] = useState({});
 
   const [loadingTeamMemberAssign, setLoadingTeamMemberAssign] = useState(false)
+  const [searchKey, setSearchKey] = useState("")
+  const [sendEmailData, setSendEmailData] = useState({})
 
 
+  const [openSendMail, setOpenSendMail] = useState(false);
+  const handleClickOpenSendMail = () => {setOpenSendMail(true)}
+  const handleCloseSendMail = () =>  {setOpenSendMail(false)}
 
   // const handleChangeReasonAuto = (event) => {
   //   setCheckedReasonAuto(event.target.checked);
@@ -169,6 +193,54 @@ function LoanApplication() {
     }
   };
 
+  const filterApplications = () =>{
+    let filledData = applicationDataTempForFilter?.filter((data) => {
+      if (avatarFilterSelect == "all") return data
+      let members = [];
+      data?.teamArr?.map((member) => {
+        members.push(member?.PK?.split("#")[1])
+      })
+      if (members?.includes(avatarFilterSelect)) return data;
+    })
+  ?.filter((data) => {
+      if (searchKey == "") {
+        return data;
+      } else {
+        return data?.contact?.basicInformation?.firstName?.toLowerCase()?.includes(searchKey.toLocaleLowerCase())
+        || data?.contact?.basicInformation?.lastName?.toLowerCase()?.includes(searchKey.toLocaleLowerCase())
+        || `${data?.contact?.basicInformation?.lastName} ${data?.contact?.basicInformation?.lastName}`?.toLowerCase()?.includes(searchKey.toLocaleLowerCase())
+        || data?.application?.PK?.split("_")[1]?.toLowerCase()?.includes(searchKey.toLocaleLowerCase())
+        || data?.application?.applicationBasicInfo?.loan_amount?.toLowerCase()?.includes(searchKey.toLocaleLowerCase())
+        || moment(data?.application?.createTime).format('YYYY-MM-DD')?.toLowerCase()?.includes(searchKey.toLocaleLowerCase())
+      }
+    })
+    setApplicationData(filledData)
+  }
+
+  
+  const handelChangeSendEmail = useCallback(({ target }) => {
+    setSendEmailData((state) => ({ ...state, [target.name]: target.value }));
+  }, []);
+
+  const sendCustomEmail = async ( emailFrom, notificationType, members, subject, body ) => {
+    try{
+      let data = {
+        emailFrom:emailFrom,
+        notificationType:notificationType,
+        members:members,
+        subject:subject,
+        body:body
+      }
+      const response = await _sendCustomEmail(data)
+      console.log("_sendCustomEmail",response)
+    }catch(err){
+      console.log(err)
+    }
+  }
+
+  useEffect(() => {
+    filterApplications()
+  }, [avatarFilterSelect,searchKey]);
 
   useEffect(() => {
     getWorkflowStatus();
@@ -214,21 +286,13 @@ function LoanApplication() {
   const getApplications = async () => {
     try {
       const responseLabel = await _listLabel();
-      const res = await _getAllPlatformUserByAdmin();
-      const resLoginUser = await _getUser()
-      // console.log("resLoginUser",resLoginUser?.data)
-      // console.log("responsePlatformUser",res)
       const resContact = await _fetchAllContacts();
-      // console.log("responseAllContacts",resContact)
-      setPlatfromUsers(res?.data?.users)
       const response = await _getApplications();
       if (response?.status === 200) {
         setApplications(response.data.data.Items.length > 0 && response.data.data.Items);
         let tempApplications = response.data.data.Items;
-        let tempUsers = [...res?.data?.users, resLoginUser?.data];
         let userIds = [];
         let teamMembers = [];
-        setTeamMembersData([...tempUsers])
 
         await tempApplications.map((tempApplications) => {
           if (tempApplications?.members) {
@@ -236,12 +300,11 @@ function LoanApplication() {
           }
         })
         let removedduplicatesUsers = [...new Set(userIds)];
-        await removedduplicatesUsers.map(async (id) => {
-          let tempU = await tempUsers.filter((user) => user?.PK == 'USER#' + id)
-          teamMembers.push(...tempU)
-        })
-        setTeamMembersArr([...teamMembers])
-
+        let body = { users:removedduplicatesUsers }
+        const responseUsers = await _getUserByIdArray(body)
+        setTeamMembersArr(responseUsers?.data?.users || [])
+        setTeamMembersData(responseUsers?.data?.users || [])
+        teamMembers = responseUsers?.data?.users
         let tableDataArry = [];
         await tempApplications.map((application) => {
           let object = {}
@@ -268,6 +331,7 @@ function LoanApplication() {
           tableDataArry.push(object)
         })
         setApplicationData([...tableDataArry])
+        setApplicationDataTempForFilter([...tableDataArry])
         console.log("tableDataArry", tableDataArry)
       }
     } catch (err) {
@@ -360,7 +424,16 @@ function LoanApplication() {
         const updated = [...applications, applications[updatedIndex].status_ = newStatus];
         // setLoading(true);
         // if (newStatus.toLowerCase() == "closed") {
-        //   handleClickOpenRejectionPopup()
+          let selectedApplication =  applications?.filter((app) => app?.PK === applicationId )[0]
+          console.log("selectedApplication",selectedApplication)
+          let mailDetails ={
+            from: "support@lunnaloans.com",
+            to: selectedApplication?.members || [],
+            subject: "Application state changed",
+            body: "Application state changed"
+          }
+          setSendEmailData(mailDetails)
+          handleClickOpenSendMail()
         //   setApplicationIdForRejection(applicationId)
         //   setBodyDataIdForRejection(body)
         // } else {
@@ -402,7 +475,7 @@ function LoanApplication() {
             <Typography variant="h6" sx={{ fontWeight: 400, color: '#a1a1a1' }}>{componentList.length}</Typography>
           </Stack>
 
-          <Typography variant="h6" sx={{ fontWeight: 400 }}>$ {total}</Typography>
+          <Typography variant="h6" sx={{ fontWeight: 400 }}>$ {total?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}</Typography>
           <Droppable droppableId={status.name} key={status.name} type="status">
             {(provided, snapshot) => (
               <div {...provided.droppableProps} ref={provided.innerRef} style={{ ...getListStyle(snapshot.isDraggingOver) }}>
@@ -474,8 +547,7 @@ function LoanApplication() {
                           <Typography variant="h6" sx={{ fontWeight: 600 }}>
                             $
                             {
-                              application?.application?.applicationBasicInfo
-                                ?.loan_amount
+                              application?.application?.applicationBasicInfo?.loan_amount?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
                             }
                           </Typography>
                         </Grid>
@@ -511,22 +583,6 @@ function LoanApplication() {
     return { componentList: applicationList, total: total };
   }
 
-
-
- // const [openRejectionPopup, setOpenRejectionPopup] = useState(false);
-
-  // const handleClickOpenRejectionPopup = () => {
-  //   setOpenRejectionPopup(true);
-  // };
-
-  // const handleCloseRejectionPopup = () => {
-  //   setDays(0);
-  //   setCheckedReasonAuto(false);
-  //   setAppId('');
-  //   setOpenRejectionPopup(false);
-  // };
-
-
   const handleClickOpen = () => {
     setOpen(true);
   };
@@ -544,10 +600,10 @@ function LoanApplication() {
 
   const handleContinue = () => {
     if (coContact) {
-      router.push(`/contact/add/${product}/coEnabled`);
+      router.push(`/contact/addApplication/${product}/coEnabled`);
       // router.push(`/application/application-form?product=${product}&coEnable=${1}`);
     } else {
-      router.push(`/contact/add/${product}/coDisabled`);
+      router.push(`/contact/addApplication/${product}/coDisabled`);
     }
   };
 
@@ -831,11 +887,14 @@ function LoanApplication() {
         <Grid container mt={2}>
           {/* header-search-section */}
           <Grid item xs={12} md={4} pr={2}>
-            <SearchBox />
+            <div className={styles.search}>
+                <SearchOutlinedIcon className={styles.icon} fontSize='medium'/>
+                <TextField onChange={(e)=> setSearchKey(e.target.value)}  className={styles.input} id="input-with-icon-textfield" label="Search" variant="standard"  />
+            </div>
           </Grid>
           {/* active-user-display-section */}
           <Grid item xs={12} md={2} pl={2}>
-            <AvatarGroup total={teamMembersArr.length}>
+            <AvatarGroup total={teamMembersArr.length} onClick={handleClickLabelDropDown}>
               {teamMembersArr &&
                 teamMembersArr.map((user, key) => {
                   return (
@@ -847,6 +906,47 @@ function LoanApplication() {
                   );
                 })}
             </AvatarGroup>
+            <div>
+              <Menu
+                id="long-menu"
+                MenuListProps={{
+                  "aria-labelledby": "long-button",
+                }}
+                anchorEl={anchorElLabelDropDown}
+                open={openLabelDropDown}
+                onClose={handleCloseLabelDropDown}
+                PaperProps={{
+                  style: {
+                    maxHeight: ITEM_HEIGHT * 4.5,
+                    width: "20ch",
+                  },
+                }}
+              >
+                <MenuItem style={{borderRadius:0, width:"100%", backgroundColor: avatarFilterSelect == "all" ? "#e6e6e6":"white" }} onClick={()=>{setAvatarFilterSelect("all")}}>
+                  <Chip label={"All"} avatar={<Avatar alt='' src="" /> } />
+                </MenuItem>
+                {teamMembersArr && teamMembersArr.map((user, key) => {
+                  
+                  return (
+                    <MenuItem key={key} style={{backgroundColor: avatarFilterSelect == user?.PK.split("#")[1] ? "#e6e6e6":"white"}}>
+                      <Chip
+                          onClick={()=>{
+                            setAvatarFilterSelect(user?.PK.split("#")[1])
+                          }}
+                          style={{ width:"100%"}}
+                          label={user?.PK.split("#")[1]}
+                          avatar={
+                          <Avatar
+                            alt={user?.PK.split("#")[1]}
+                            src={`${s3URL}/${user?.imageId}`}
+                          />
+                          }
+                        />
+                    </MenuItem>
+                  );
+                })}
+              </Menu>
+            </div>
           </Grid>
           {/* other-icon-set */}
           <Grid item xs={12} md={6} align="right">
@@ -1080,6 +1180,98 @@ function LoanApplication() {
       <div>
         <Grid container>
           <Grid item xs={12}>
+             <Dialog open={openSendMail}  >
+              <DialogTitle>Send Email</DialogTitle>
+              <DialogContent>
+                <Grid >
+                <FormControl>
+                    <label>
+                      From
+                    </label>
+                    <TextField
+                      style={{width:500}}
+                      fullWidth
+                      size="small"
+                      type="text"
+                      margin="normal"
+                      id="outlined-basic"
+                      variant="outlined"
+                      value={sendEmailData?.from ||""}
+                    />
+                  </FormControl>
+                </Grid>
+                <Grid>
+                  <FormControl>
+                    <label >
+                      To
+                    </label>
+                    <TextField
+                      style={{width:500}}
+                      fullWidth
+                      size="small"
+                      type="text"
+                      margin="normal"
+                      id="outlined-basic"
+                      variant="outlined"
+                      value={sendEmailData?.to || ""}
+                    />
+                  </FormControl>
+                </Grid>
+                  <Grid>
+                    <FormControl>
+                        <label >
+                          Subject
+                        </label>
+                        <TextField
+                          style={{width:500}}
+                          fullWidth
+                          size="small"
+                          type="text"
+                          name="subject"
+                          margin="normal"
+                          id="outlined-basic"
+                          variant="outlined"
+                          value={sendEmailData?.subject || ""}
+                          onChange={handelChangeSendEmail}
+                        />
+                    </FormControl>
+                </Grid>
+                <Grid>
+                  <FormControl>
+                    <label >
+                      Body
+                    </label>
+                    <TextField
+                      style={{width:500}}
+                      fullWidth
+                      size="small"
+                      type="text"
+                      margin="normal"
+                      id="outlined-basic"
+                      variant="outlined"
+                      name="body"
+                      value={sendEmailData?.body}
+                      multiline
+                      rows={4}
+                      onChange={handelChangeSendEmail}
+                    />
+                  </FormControl>
+                </Grid>
+
+              </DialogContent>
+              <DialogActions>
+                <Button
+                  variant="contained"
+                  style={{marginRight:16,marginBottom:20}}
+                  onClick={() => { 
+                    sendCustomEmail(sendEmailData?.from,"applicationStatus",sendEmailData?.to,sendEmailData?.subject,sendEmailData?.body) 
+                    handleCloseSendMail()
+                  }}
+                >
+                  Send Email
+                </Button>
+              </DialogActions>
+            </Dialog>
             {/* <Dialog open={openRejectionPopup}>
               <DialogTitle>Rejection</DialogTitle>
               <DialogContent>

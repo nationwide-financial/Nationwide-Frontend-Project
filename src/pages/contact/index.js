@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useContext,useRef, useLayoutEffect  } from "react";
 import {
   Avatar,
   Box,
@@ -14,7 +14,7 @@ import {
 import { styled } from "@mui/material/styles";
 import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined";
 import AvatarGroup from "@mui/material/AvatarGroup";
-import { TuneOutlined } from "@mui/icons-material";
+import { Elderly, TuneOutlined } from "@mui/icons-material";
 import Switch from "@mui/material/Switch";
 import FormGroup from "@mui/material/FormGroup";
 import Stack from "@mui/material/Stack";
@@ -29,6 +29,10 @@ import PropTypes from "prop-types";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 import moment from "moment";
+import Menu from "@mui/material/Menu";
+import MenuItem from "@mui/material/MenuItem";
+import Chip from "@mui/material/Chip";
+import { Autocomplete } from "@mui/material";
 
 import { useTheme } from "@mui/material/styles";
 import Table from "@mui/material/Table";
@@ -43,12 +47,18 @@ import KeyboardArrowRight from "@mui/icons-material/KeyboardArrowRight";
 import LastPageIcon from "@mui/icons-material/LastPage";
 import TableHead from "@mui/material/TableHead";
 import Image from "next/image";
+import { Snackbar } from "@material-ui/core";
+import { Alert } from "@mui/material";
+import Select from '@mui/material/Select';
+
 import { useState } from "react";
-import { _fetchAllContacts, _deleteContact } from "../../services/contactServices";
+import { _fetchAllContacts, _deleteContact, _assignContact } from "../../services/contactServices";
 import Link from "next/link";
 import { _gatVariabels } from '../../services/variabelService.js';
 import { _getAllPlatformUserByAdmin, _getUser ,_getUserByIdArray} from '../../services/authServices'
 import { s3URL } from '../../utils/config'
+import { Context } from "../../context";
+import { _getContacts, _getContactBySearch } from "../../services/webService.js";
 
 const label = { inputProps: { "aria-label": "Switch demo" } };
 
@@ -156,47 +166,100 @@ function a11yProps(index) {
 }
 
 function Contact() {
+const { state, dispatch} = useContext(Context);
+const profile = state?.user || {}
+console.log("169",profile)
+const [anchorElLabelDropDown, setAnchorElLabelDropDown] = useState(null);
+const openLabelDropDown = Boolean(anchorElLabelDropDown);
+const handleClickLabelDropDown = (event) => {
+  setAnchorElLabelDropDown(event.currentTarget);
+};
+const handleCloseLabelDropDown = () => {
+  setAnchorElLabelDropDown(null);
+};
+const ITEM_HEIGHT = 48;
+const ITEM_PADDING_TOP = 8;
+const MenuProps = {
+  PaperProps: {
+    style: {
+      maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+      width: 250,
+    },
+  },
+};
   const [contactData, setContactData] = useState([]);
-  const [value, setValue] = React.useState(0);
+  const [value, setValue] = useState(0);
   const [loading, setLoading] = useState(false);
   const [trigger, setTrigger] = useState(0);
   const [users, setUsers] = useState([]);
-  
-const fetchPlatformUsersAndLoginUser = async () =>{
-  try{
-    const loginUser = await _getUser();
-    const platformUsers = await _getAllPlatformUserByAdmin();
-    let users = [loginUser?.data,...platformUsers?.data?.users];
-    setUsers(users)
-  }catch(err){
-    console.log(err)
+  const [platfromUsers, setPlatfromUsers] = useState([]);
+  const [variableData, setVariableData] = useState([]);
+  const [avatarFilterSelect, setAvatarFilterSelect] =useState("all");
+  const [openAssignContact, setOpenAssignContact] = useState(false);
+  const [assignedUser,setAssignedUser] = useState("")
+  const [assignedContact,setAssignedContact] = useState("")
+  const [assignContactMsg, setAssignContactMsg] = useState();
+  const [assignContactFormError, setAssignContactFormError] = useState("");
+  const [source, setSource] = useState("Application")
+  const [searchKey, setSearchKey] = useState('');
+  const [searchKeyWeb, setSearchKeyWeb] = useState('');
+  const seen = new Set();
+
+  const [page, setPage] = React.useState(0);
+  const [rowsPerPage, setRowsPerPage] = React.useState(5);
+  const [selected, setSelected] = React.useState();
+
+  console.log("C DATA ", contactData)
+  const fetchPlatformUsersAndLoginUser = async () =>{
+    try{
+      const loginUser = await _getUser();
+      const platformUsers = await _getAllPlatformUserByAdmin();
+      let users = [loginUser?.data,...platformUsers?.data?.users];
+      setUsers(users)
+    }catch(err){
+      console.log(err)
+    }
   }
-}
+  const handleClickOpenAssignContact = () => {
+    setOpenAssignContact(true);
+  };
+   const handleCloseAssignContact = () => {
+    setOpenAssignContact("")
+    setAssignedUser("")
+    setAssignedContact("")
+    setAssignContactFormError("")
+    setOpenAssignContact(false);
+  };
 
   const fetchData = async () => {
     setLoading(true);
     const response = await _fetchAllContacts();
-
+    const responseWeb = await fetchWebContacts()
     
+    console.log("fetchWebContacts",responseWeb)
+    console.log("_fetchAllContacts",response)
+    const resPlatformUsers = await _getAllPlatformUserByAdmin();
+    setPlatfromUsers(resPlatformUsers?.data?.users)
+    
+    // fetch users 
     let usersFilterFromContacts = [];
     await response?.data?.Items?.map((contact)=>{
       usersFilterFromContacts.push(contact?.createdBy?.split("#")[1] || "")
       usersFilterFromContacts.push(contact?.updatedBy?.split("#")[1]  || "")
     })
-    let uniqueUsersFilterFromContacts = [...new Set(usersFilterFromContacts)]?.filter((user)=>user !="")
-    // let body = {
-    //   users:uniqueUsersFilterFromContacts
-    // }
-    // const responseUsers = await _getUserByIdArray(body)
-    console.log("uniqueUsersFilterFromContacts",uniqueUsersFilterFromContacts)
-    console.log("_fetchAllContacts",response)
+    let uniqueUsersFilterFromContacts = [...new Set(usersFilterFromContacts)]?.filter((user) => user !="" && user != null)
+
+    let body = { users:uniqueUsersFilterFromContacts }
+    const responseUsers = await _getUserByIdArray(body)
+    setUsers(responseUsers?.data?.users)
+
     setLoading(false);
     if (response?.status === 200) {
       let tableDt = await response?.data?.Items.sort((a, b) => (a.createTime < b.createTime) ? 1 : ((b.createTime < a.createTime) ? -1 : 0));
-      setContactData([...tableDt]);
+      setContactData([...tableDt,...responseWeb]);
     }
   }
-  const [variableData, setVariableData] = useState([]);
+
   const getVariables = async () => {
     try {
       const res = await _gatVariabels();
@@ -208,11 +271,93 @@ const fetchPlatformUsersAndLoginUser = async () =>{
       console.log(err)
     }
   }
+  const assignContact = async () => {
+    try{
+      if(assignedUser && assignedUser != "" && assignedContact && assignedContact !=""){
+        setAssignContactFormError("")
+        let contactId = `CONTACT_${assignedContact?.split("|")[1]}`
+        let userId = `USER#${assignedUser?.split("|")[0]}`
+        let connect = await contactData?.filter((contact) => contact?.PK == contactId) 
+        if(!connect[0]?.assignTo?.includes(userId)){
+          setAssignContactFormError("")
+          let body ={
+            assignTo:[...connect[0]?.assignTo,userId]
+          }
+          const response = await _assignContact(contactId,body);
+          if(response?.status == 200){
+            fetchData()
+            handleCloseAssignContact()
+            setAssignContactMsg({ severity: 'success', message: `Contact is assigned to ${assignedUser?.split("|")[0]}` })
+          }else{
+            fetchData()
+            setAssignContactMsg({ severity: 'error', message: 'Contact is assignment failed' })
+          }
+        }else{
+          setAssignContactFormError("You have already assigned this user!")
+        }
+
+      }else{
+        setAssignContactFormError("Please select a user and contact!")
+      }
+     
+    }catch(err){
+      console.log(err)
+    }
+    
+  }
+  
+  const fetchWebContacts = async()=>{
+    try{
+      const response = await _getContacts();
+      if(response?.status == 200){
+        let formatedData = await response?.data?.map((row) => ({
+          basicInformation:{
+          firstName: row?.first_name,
+          lastName: row?.last_name,
+          primaryNumber: row?.user_phone,
+          emailAddress: row?.user_email,
+          reservationCode:row?.contactid
+        }}))
+        return formatedData
+      }
+    }catch(err){
+      console.log(err)
+    }
+  }
+
+  const fetchWebContactsBySearch = async()=>{
+    try{
+      const response = await _getContactBySearch(searchKey);
+      console.log("_getContacts",response)
+      if(response?.status == 200){
+        let formatedData = await response?.data?.map((row) => ({
+          basicInformation:{
+          firstName: row?.first_name,
+          lastName: row?.last_name,
+          primaryNumber: row?.user_phone,
+          emailAddress: row?.user_email,
+          reservationCode:row?.contactid
+          
+        }}))
+        setContactData([...contactData,...formatedData])
+      }
+    }catch(err){
+      console.log(err)
+    }
+  }
+
+  const firstUpdate = useRef(true);
+  useLayoutEffect(() => {
+    if (firstUpdate.current) {
+      firstUpdate.current = false;
+      return;
+    }
+    fetchWebContactsBySearch()
+  },[searchKey]);
 
   useEffect(() => {
-    fetchPlatformUsersAndLoginUser()
-    fetchData()
-    getVariables()
+      fetchData()
+      //getVariables()
   }, [trigger])
 
   const handleChange = (event, newValue) => {
@@ -251,10 +396,6 @@ const fetchPlatformUsersAndLoginUser = async () =>{
   };
 
   // table-related---
-  const [searchKey, setSearchKey] = useState('');
-  const [page, setPage] = React.useState(0);
-  const [rowsPerPage, setRowsPerPage] = React.useState(5);
-  const [selected, setSelected] = React.useState();
 
   // Avoid a layout jump when reaching the last page with empty rows.
   const emptyRows =
@@ -285,13 +426,9 @@ const fetchPlatformUsersAndLoginUser = async () =>{
     setSelected(id);
   }
 
-  console.log("Selected ", selected)
 
   return (
     <div>
-      {loading ? (
-        <CircularProgress />
-      ) : (
         <Box p={3} style={{ marginTop: 40 }}>
           <Dialog open={selected?.length > 0} onClose={() => setSelected()}>
             <DialogTitle>Actions</DialogTitle>
@@ -315,18 +452,18 @@ const fetchPlatformUsersAndLoginUser = async () =>{
           </Dialog>
           {/* 1st-header-section */}
           <Grid container mb={5}>
-            <Grid item xs={12} md={6}>
+            <Grid item xs={12} md={4}>
               <h1 className="page_header">Contacts</h1>
             </Grid>
 
-            <Grid item xs={12} md={6}>
+            <Grid item xs={12} md={8}>
               <Box sx={{ textAlign: "right" }}>
                 <Link href={"/contact/import"}>
                   <Button variant="contained" sx={{ padding: "10px 40px" }}>
                     Upload List
                   </Button>
                 </Link>
-                <Button
+               <Button
                   variant="contained"
                   sx={{ padding: "10px 40px" }}
                   style={{ marginLeft: 20 }}
@@ -334,6 +471,89 @@ const fetchPlatformUsersAndLoginUser = async () =>{
                 >
                   Add Contacts
                 </Button>
+               
+                
+                {(profile?.role == "OWNER" || profile?.role ==  "ADMIN") &&  <Button
+                  variant="contained"
+                  sx={{ padding: "10px 40px" }}
+                  style={{ marginLeft: 20 }}
+                  onClick={handleClickOpenAssignContact}
+                >
+                  Assign Contact
+                </Button>}
+                <Dialog open={openAssignContact} onClose={handleCloseAssignContact} fullWidth m={4}>
+                <DialogTitle>
+                  <Typography
+                    variant="h6"
+                    style={{
+                      fontSize: 21,
+                      fontWeight: 700,
+                      fontStyle: "normal",
+                    }}
+                  >
+                    Assign Connect
+                  </Typography>
+                </DialogTitle>
+                <DialogContent>
+                  <Stack direction="column" spacing={2}>
+      
+                    <FormControl>
+                      <label style={{ marginBottom: 6 }}>Select User</label>
+                      <Autocomplete
+                        value={assignedUser}
+                        renderInput={(params) => (
+                          <TextField {...params} size="small" label="User" />
+                        )}
+                        onChange={(e, val) => { 
+                          setAssignedUser(val)
+                         }}
+                        options={platfromUsers?.map((user) => {
+                          let s = `${user?.PK?.split("#")[1]}|${(user?.info?.firstName|| user?.info?.lastName) ? user?.info?.firstName+" "+user?.info?.lastName:"No user name"} `;
+                          return s;
+                        })}
+                      ></Autocomplete>
+                    </FormControl>
+                    <FormControl>
+                      <label style={{ marginBottom: 6 }}>Select Contact</label>
+                      <Autocomplete
+                        value={assignedContact}
+                        renderInput={(params) => (
+                          <TextField {...params} size="small" label="Contact" />
+                        )}
+                        onChange={(e, val) => { 
+                          setAssignedContact(val)
+                         }}
+                        options={contactData?.map((contact) => {
+                          let s = `${contact?.basicInformation?.firstName} ${contact?.basicInformation?.lastName}|${contact?.PK?.split("_")[1]}`;
+                          return s ;
+                        })}
+                      ></Autocomplete>
+                    </FormControl>
+                    <p style={{color:"red"}}>{assignContactFormError}</p>
+                    <FormControl style={{display:"flex", justifyContent:"flex-end", alignItems:'flex-end'}}>
+                      <Button
+                        onClick={assignContact}
+                        variant="contained"
+                        sx={{ maxWidth: 220, marginTop: 2, marginBottom: 2 }}
+                      >
+                        Assign Contact
+                      </Button>
+                    </FormControl>
+                  </Stack>
+                </DialogContent>
+              </Dialog>
+
+              <Snackbar
+                anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+                open={assignContactMsg}
+                autoHideDuration={3000}
+                onClose={() => setAssignContactMsg()}
+              >
+                <Alert variant="filled" severity={assignContactMsg?.severity}>
+                  {assignContactMsg?.message}
+                </Alert>
+              </Snackbar>
+              
               </Box>
             </Grid>
           </Grid>
@@ -360,35 +580,77 @@ const fetchPlatformUsersAndLoginUser = async () =>{
                   <Grid container>
                     <Stack direction="row">
                       {/* header-search-section */}
-
-                      <Grid container spacing={1} alignItems="flex-end">
-                        <Grid item>
-                          <SearchOutlinedIcon fontSize="medium" />
-                        </Grid>
-                        <TextField
-                          id="input-with-icon-textfield"
-                          label="Search"
-                          variant="standard"
-                          onChange={(e) => {
-                            setSearchKey(e.target.value);
-                          }}
-                        />
-                      </Grid>
+                      
+                          <Grid container spacing={1} alignItems="flex-end">
+                            <Grid item>
+                              <SearchOutlinedIcon fontSize="medium" />
+                            </Grid>
+                            <TextField
+                              value={searchKey}
+                              id="input-with-icon-textfield"
+                              label="Search"
+                              variant="standard"
+                              onChange={(e) => {
+                                setSearchKey(e.target.value);
+                              }}
+                            />
+                          </Grid>
 
                       {/* active-user-display-section */}
 
-                      <AvatarGroup total={users.length}>
-                        {users &&
-                          users.map((user, key) => {
-                            return (
-                              <Avatar
-                                key={key}
-                                alt={user?.PK.split("#")[1]}
-                                src={`${s3URL}/${user?.imageId}`}
-                              />
-                            );
-                          })}
-                      </AvatarGroup>
+                          <AvatarGroup total={users?.length} onClick={handleClickLabelDropDown}>
+                            {users &&
+                              users.map((user, key) => {
+                                return (
+                                  <Avatar
+                                    key={key}
+                                    alt={user?.PK.split("#")[1]}
+                                    src={`${s3URL}/${user?.imageId}`}
+                                  />
+                                );
+                              })}
+                          </AvatarGroup>
+                        
+                          <div>
+                            <Menu
+                              id="long-menu"
+                              MenuListProps={{
+                                "aria-labelledby": "long-button",
+                              }}
+                              anchorEl={anchorElLabelDropDown}
+                              open={openLabelDropDown}
+                              onClose={handleCloseLabelDropDown}
+                              PaperProps={{
+                                style: {
+                                  maxHeight: ITEM_HEIGHT * 4.5,
+                                  width: "20ch",
+                                },
+                              }}
+                            >
+                              <MenuItem style={{borderRadius:0, width:"100%", backgroundColor: avatarFilterSelect == "all" ? "#e6e6e6":"white" }} onClick={()=>{setAvatarFilterSelect("all")}}>
+                                <Chip label={"All"} avatar={<Avatar alt='' src="" /> } />
+                              </MenuItem>
+                              {users && users.map((user, key) => {
+                                
+                                return (
+                                  <MenuItem key={key} style={{backgroundColor: avatarFilterSelect == user?.PK.split("#")[1] ? "#e6e6e6":"white"}}>
+                                    <Chip
+                                        onClick={()=>{
+                                          setAvatarFilterSelect(user?.PK.split("#")[1])}}
+                                        style={{ width:"100%"}}
+                                        label={user?.PK.split("#")[1]}
+                                        avatar={
+                                        <Avatar
+                                          alt={user?.PK.split("#")[1]}
+                                          src={`${s3URL}/${user?.imageId}`}
+                                        />
+                                        }
+                                      />
+                                  </MenuItem>
+                                );
+                              })}
+                            </Menu>
+                          </div>
                     </Stack>
                   </Grid>
                 </Grid>
@@ -444,7 +706,7 @@ const fetchPlatformUsersAndLoginUser = async () =>{
                             align="left"
                             style={{ fontSize: 14, fontWeight: 700 }}
                           >
-                            ID NUMBER
+                            RESERVATION CODE
                           </TableCell>
                           <TableCell
                             align="left"
@@ -473,68 +735,80 @@ const fetchPlatformUsersAndLoginUser = async () =>{
                         </TableRow>
                       </TableHead>
                       <TableBody>
-                        {contactData
-                          ?.filter((data) => {
+                        {console.log("contactData",contactData)}
+                        {contactData?.filter(el => {
+                          if(el?.basicInformation?.reservationCode){
+                            const duplicate = seen.has(el?.basicInformation?.reservationCode);
+                            seen.add(el?.basicInformation?.reservationCode);
+                            return !duplicate;
+                          }else{
+                            return el
+                          }
+                        })?.filter((data)=>{
+                            if(avatarFilterSelect == "all") return data
+                            if((data?.createdBy?.split("#")[1] == avatarFilterSelect || data?.updatedBy?.split("#")[1] == avatarFilterSelect) ) return data;
+                          })
+                        ?.filter((data) => {
                             if (searchKey == "") {
                               return data;
                             } else {
-                              return data?.basicInformation?.email?.toLowerCase()?.includes(searchKey.toLocaleLowerCase())
+                              return data?.basicInformation?.reservationCode?.includes(searchKey)
+                              || data?.basicInformation?.emailAddress?.toLowerCase()?.includes(searchKey.toLocaleLowerCase())
                               || data?.basicInformation?.firstName?.toLowerCase()?.includes(searchKey.toLocaleLowerCase())
                               || data?.basicInformation?.lastName?.toLowerCase()?.includes(searchKey.toLocaleLowerCase())
-                              || data?.basicInformation?.phone?.toLowerCase()?.includes(searchKey.toLocaleLowerCase())
-                              || data?.basicInformation?.idNumber?.toLowerCase()?.includes(searchKey.toLocaleLowerCase())
-                              || moment(data?.updateTime).format("YYYY-MM-DD")?.includes(searchKey)
-                              || moment(data?.createTime).format("YYYY-MM-DD")?.includes(searchKey)
+                              || data?.basicInformation?.primaryNumber?.toLowerCase()?.includes(searchKey.toLocaleLowerCase())
+                          
                             }
                           })
                           .slice(
                             page * rowsPerPage,
                             page * rowsPerPage + rowsPerPage
                           )
-                          .map((row) => {
-                            const basicInfo = row.basicInformation;
+                          .map((row,key) => {
+                            const basicInfo = row?.basicInformation;
                             return (
                               <TableRow
                                 className="contact-list-row"
-                                key={row.name}
+                                key={key}
                                 onClick={() => handleClickContact(row.PK)}
                               >
                                 <TableCell component="th" scope="row">
-                                  {basicInfo.firstName +
+                                  {basicInfo?.firstName +
                                     " " +
-                                    basicInfo.lastName}
+                                    basicInfo?.lastName}
                                 </TableCell>
                                 <TableCell align="left">
-                                  {basicInfo.idNumber}
+                                  {basicInfo?.reservationCode}
                                 </TableCell>
                                 <TableCell align="left">
-                                  {basicInfo.phone}
+                                  {basicInfo?.primaryNumber}
                                 </TableCell>
                                 <TableCell align="left">
-                                  {basicInfo.email}
+                                  {basicInfo?.emailAddress}
                                 </TableCell>
                                 {/* {variableData && variableData.map((variable, key) => {
                                   return (<TableCell key={key} align="left">{basicInfo[variable?.systemName]}</TableCell>)
                                 })} */}
                                 <TableCell align="left">
-                                  <div style={{ display: 'inline-flex' }}>
+                                  {source != "Web" &&   <div style={{ display: 'inline-flex' }}>
                                     <div>
                                       <Avatar alt={row?.createdBy?.split("#")[1]} src={`${s3URL}/${users?.filter((user) => { return user?.PK == row?.createdBy })[0]?.imageId}`} />
                                     </div>
                                     <div style={{ alignSelf: 'center', marginLeft:5 }}>
                                       {moment(row.createTime).format("YYYY-MM-DD")}
                                     </div>
-                                  </div>
+                                  </div>}
+                                
                                 </TableCell>
                                 <TableCell align="left">
-                                  <div style={{ display: 'inline-flex' }}>
+                                {source != "Web" &&  <div style={{ display: 'inline-flex' }}>
                                     <div>
                                       <Avatar alt={row?.updatedBy?.split("#")[1]} src={`${s3URL}/${users?.filter((user) => { return user?.PK == row?.updatedBy })[0]?.imageId}`} />
                                     </div>
                                     <div style={{ alignSelf: 'center', marginLeft:5 }}>
                                       {moment(row.updateTime).format("YYYY-MM-DD")}
                                     </div>
-                                  </div>
+                                  </div>}
                                 </TableCell>
                               </TableRow>
                             );
@@ -623,7 +897,6 @@ const fetchPlatformUsersAndLoginUser = async () =>{
             </TabPanel>
           </Box>
         </Box>
-      )}
     </div>
   );
 }

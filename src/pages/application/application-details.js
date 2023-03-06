@@ -24,6 +24,7 @@ function ApplicationDetails() {
   const [variable, setVariable] = useState([]);
   const [aditionalInfo, setAditionalInfo] = useState({});
   const [amount, setAmount] = useState('');
+  const [offerCode, setOfferCode] = useState('');
   const [product, setProduct] = useState('');
   const [contactIds, setContactIds] = useState([]);
   const [cocontactIds, setCoContactIds] = useState([]);
@@ -87,26 +88,33 @@ function ApplicationDetails() {
         members: addmember || [],
         applicationBasicInfo:{
           loan_amount : amount,
-          referralSource: referralSource 
+          referralSource: referralSource,
+          //offerCode:offerCode, 
         },
         aditionalInfo:{...aditionalInfo}
 
       }
       //console.log("body",body)
       const res = await _addApplication(body)
-      let history = {
-        action: "Application Created",
-        description: `The application for ${constactFname} ${contactLname} was created`,
-        applicationId: res?.data?.applicationId
+      console.log("res?.status == 400",res)
+      if(res?.status == 200){
+        let history = {
+          action: "Application Created",
+          description: `The application for ${constactFname} ${contactLname} was created`,
+          applicationId: res?.data?.applicationId
+        }
+        const resHistory = await _addHistory(history)
+       
+        if (res?.status == 200 && resHistory?.status == 200 && contactDetails?.status == 200) {
+          router.push("/application/dashbord");
+        } else {
+          setError('some thing worng!')
+        }
+      }else {
+        if(res?.response?.status == 400){
+          setError(`${res?.response?.data?.message}`)
+        }
       }
-      const resHistory = await _addHistory(history)
-     
-      if (res?.status == 200 && resHistory?.status == 200 && contactDetails?.status == 200) {
-        router.push("/application/application-table-view");
-      } else {
-        setError('some thing worng!')
-      }
-      console.log("_addApplication", res)
     }
   };
 
@@ -286,7 +294,42 @@ function ApplicationDetails() {
                         </Box>
                       </FormControl>
                     </Grid>
-                    
+                    {/* <Grid item xs={6}>
+                      <FormControl
+                        style={{ display: "flex", justifyContent: "center" }}
+                      >
+                        <label>
+                          {" "}
+                          <Typography
+                            align="left"
+                            variant="h6"
+                            style={{
+                              fontSize: 17,
+                              fontWeight: 700,
+                              fontStyle: "normal",
+                            }}
+                          >
+                            Offer code {" "}
+                           
+                          </Typography>
+                        </label>
+                        <Box sx={{ maxWidth: "100%" }}>
+                          <TextField
+                            fullWidth
+                            autoFocus
+                            size="small"
+                            type="text"
+                            margin="normal"
+                            id="outlined-basic"
+                            variant="outlined"
+                            value={offerCode}
+                            onChange={(e)=>{
+                              setOfferCode(e.target.value)
+                            }}
+                          />
+                        </Box>
+                      </FormControl>
+                    </Grid> */}
                   </Grid>
                   <Grid container spacing={2}>
                   {variable && variable.map((variable, key)=>{

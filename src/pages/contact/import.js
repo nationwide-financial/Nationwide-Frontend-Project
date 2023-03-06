@@ -5,6 +5,7 @@ import { useState } from "react";
 import { _addBulkContacts } from '../../services/contactServices';
 import { useRouter } from "next/router";
 import ImportHealth from "../../components/ContactImportHealth/importHealth";
+import ImportMapping from "../../components/ContactImportHealth/importMapping";
 
 const ExcelJs = require('exceljs');
 
@@ -15,7 +16,9 @@ function ImportContacts() {
     const [file, setFile] = useState(null);
     const [loading, setLoading] = useState(false);
     const [showHealth, setShowHealth] = useState(false);
+    const [showMapping, setShowMapping] = useState(false);
     const [healthData, setHealthData] = useState({ validCount: 0, invalidCount: 0 });
+    const [fileData, setFileData] = useState([]);
     const [error, setError] = useState()
     const handleChange = (file) => {
         setFile(file);
@@ -23,11 +26,10 @@ function ImportContacts() {
 
     const onClickSubmit = async () => {
         const workbook = new ExcelJs.Workbook();
-        const validatedData = [];
-        const invalidData = [];
+        const data = [];
 
         if (file) {
-            setLoading(true);
+            // setLoading(true);
             const fileName = file.name.split('.');
             const fileType = fileName[fileName.length - 1];
             switch (fileType) {
@@ -38,49 +40,76 @@ function ImportContacts() {
 
                     values.forEach((row, key) => {
                         if (row.length !== 0) {
-                            if (key !== 1 && key !== 2) {
+                            if (key !== 1) {
                                 const firstName = row[1];
                                 const lastName = row[2];
-                                const email = typeof row[3] === 'object' ? row[3]?.text : row[3];
-                                const phone = typeof row[4] === 'object' ? row[4]?.result : row[4];
-                                const idNumber = row[5];
-                                const dob = row[6];
-                                const streetAddress = row[7];
-                                const city = row[8];
-                                const state = row[9];
-                                const postalCode = row[10];
-                                const country = row[11];
-                                const companyName = row[12];
-                                const jobTitle = row[13];
-                                console.log("PHONE ROW ", row[3])
-                                console.log("text ", firstName, lastName, email, phone, idNumber, dob, streetAddress, city
-                                    , state, postalCode, country, companyName, jobTitle, row[4])
+                                const middleInitial = row[3];
+                                const otherName = row[4];
+                                const email = typeof row[5] === 'object' ? row[5]?.text : row[5];
+                                const homePhoneNumber = row[6];
+                                const mobilePhoneNumber = row[7];
+                                const work = row[8];
+                                const fax = row[9];
+                                const address1 = row[10];
+                                const address2 = row[11];
+                                const cityOrState = row[12];
+                                const Zip = row[13];
+                                const country = row[14];
+                                const eligibilityStatus = row[15];
+                                const primaryLanguage = row[16];
+                                const preferredMethod = row[17];
+                                const primaryNumber = row[18];
+                                const bestTimeToCall = row[19];
+                                const timeZone = row[20];
+                                const creditScore = row[21];
+                                const date = row[22];
+                                const creditReportType = row[23];
+                                const dob = row[24];
+                                const ssn = row[25];
+                                const dl = row[26];
+                                const state = row[27];
+                                const employer = row[28];
+                                const occ = row[29];
+                                const empLengthY = row[30];
+                                const empLengthM = row[31];
+                                const mortgageBalance = row[32];
+                                const homeValue = row[33];
 
-                                if (firstName && lastName && email && phone && idNumber && dob && streetAddress && city
-                                    && state && postalCode && country && companyName && jobTitle) {
-                                    validatedData.push({
-                                        basicInformation: {
-                                            firstName: firstName,
-                                            lastName: lastName,
-                                            email: email,
-                                            phone: phone,
-                                            idNumber: idNumber,
-                                            dob: dob,
-                                            streetAddress: streetAddress,
-                                            city: city,
-                                            state: state,
-                                            postalCode: postalCode,
-                                            country: country
-                                        },
-                                        jobInformation: {
-                                            companyName: companyName,
-                                            jobTitle: jobTitle
-                                        }
-                                    })
-                                } else {
-                                    invalidData.push(key);
-                                    return;
-                                }
+                                data.push({
+                                    row1: firstName,
+                                    row2: lastName,
+                                    row3: middleInitial,
+                                    row4: otherName,
+                                    row5: email,
+                                    row6: homePhoneNumber,
+                                    row7: mobilePhoneNumber,
+                                    row8: work,
+                                    row9: fax,
+                                    row10: address1,
+                                    row11: address2,
+                                    row12: cityOrState,
+                                    row13: Zip,
+                                    row14: country,
+                                    row15: eligibilityStatus,
+                                    row16: primaryLanguage,
+                                    row17: preferredMethod,
+                                    row18: primaryNumber,
+                                    row19: bestTimeToCall,
+                                    row20: timeZone,
+                                    row21: creditScore,
+                                    row22: date,
+                                    row23: creditReportType,
+                                    row24: dob,
+                                    row25: ssn,
+                                    row26: dl,
+                                    row27: state,
+                                    row28: employer,
+                                    row29: occ,
+                                    row30: empLengthY,
+                                    row31: empLengthM,
+                                    row32: mortgageBalance,
+                                    row33: homeValue
+                                })
                             }
                         }
                     })
@@ -91,18 +120,19 @@ function ImportContacts() {
                 }
             }
         }
-        console.log("Valid Data ", validatedData)
-        const response = await _addBulkContacts({ contacts: validatedData });
+        setFileData(data);
+        setShowMapping(true);
+        // const response = await _addBulkContacts({ contacts: validatedData });
 
-        setLoading(false);
-        if (response?.status === 201) {
-            setHealthData({ validCount: validatedData.length, invalidCount: invalidData.length })
-            setShowHealth(true);
-        } else {
-            setHealthData({ validCount: validatedData.length, invalidCount: invalidData.length })
-            setShowHealth(true);
-            setError(response?.response.data['message']);
-        }
+        // setLoading(false);
+        // if (response?.status === 201) {
+        //     setHealthData({ validCount: validatedData.length, invalidCount: invalidData.length })
+        //     setShowHealth(true);
+        // } else {
+        //     setHealthData({ validCount: validatedData.length, invalidCount: invalidData.length })
+        //     setShowHealth(true);
+        //     setError(response?.response.data['message']);
+        // }
     }
 
     const onPressBack = () => {
@@ -110,9 +140,32 @@ function ImportContacts() {
         setShowHealth(false)
     }
 
+    const onClickBackToMapping = () => {
+        setFileData([]);
+        setShowMapping(false);
+    }
+    
+    const handleClickImport = async(formattedData) => {
+        console.log("FORMATTED ", formattedData)
+        const response = await _addBulkContacts({ contacts: formattedData });
+        console.log("res ", response)
+        setLoading(false);
+        if (response?.status === 201) {
+            setHealthData({ validCount: response.validatedData && response.validatedData, invalidCount: response.invalidData && response.invalidData})
+            setShowMapping(false);
+            setShowHealth(true);
+        } else {
+            setHealthData({ validCount: response.validatedData && response.validatedData, invalidCount: response.invalidData && response.invalidData })
+            setShowMapping(false);
+            setShowHealth(true);
+            setError(response?.response.data['message']);
+        }
+    }
+
     return (
         <>
-            {loading ? <CircularProgress /> : showHealth ? <ImportHealth data={healthData} onGoBack={onPressBack} /> : <Grid container spacing={2} m={2}>
+            {loading ? <CircularProgress /> : showMapping ? <ImportMapping data={fileData} onPressBack={onClickBackToMapping} onPressImport={handleClickImport} /> : 
+            showHealth ? <ImportHealth data={healthData} onGoBack={onPressBack} /> : <Grid container spacing={2} m={2}>
                 <Grid item xs={12} mt={2}>
                     <h1>Upload List</h1>
                 </Grid>

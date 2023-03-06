@@ -13,7 +13,6 @@ class BackendClient {
     };
 
     getRequestHeader = excludeAccessToken => {
-        console.log(getCookie('token'));
         axios.defaults.withCredentials = true;
         let header = {
             'Accept': '*/*',

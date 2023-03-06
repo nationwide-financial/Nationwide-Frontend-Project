@@ -16,7 +16,8 @@ export const _updateNoficationPreference = (body) => BackendClient.put(`${baseUR
 export const _editUserDetails = (id, body) => BackendClient.put(`${baseURL}/user/${id}/editUserDetails`, body);
 export const _getAllUserData = () => BackendClient.get(`${baseURL}/users/getAllUserData`);
 export const _getUserById = (id) => BackendClient.get(`${baseURL}/user/getUser/${id}`);
-export const _getUserByIdArray = (body) => BackendClient.get(`${baseURL}/user/getUserByIdArray`,body);
+export const _getUserByIdArray = (body) => BackendClient.post(`${baseURL}/user/getUserByIdArray`,body);
+export const _getUsersByOwner = () => BackendClient.get(`${baseURL}/users/getUsersByOwner`)
 
 
 export const _upoadProfilePic = async(profileImg) => {

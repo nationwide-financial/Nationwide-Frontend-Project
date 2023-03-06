@@ -10,6 +10,8 @@ import Chip from "@mui/material/Chip";
 import AvatarGroup from "@mui/material/AvatarGroup";
 import { s3URL } from '../../utils/config'
 import { MobileDatePicker } from '@mui/x-date-pickers';
+import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
+
 
 const defaultTask = {
     description: '',
@@ -150,13 +152,14 @@ const ApplicationTaskPopup = ({users, open, onClose, applicationId, team, applic
                     </div>
                     <FormControl>
                         <label style={{ marginBottom: 6 }}>Due Date</label>
-                        <MobileDatePicker
-                            inputFormat="MM/DD/YYYY"
+                        <DateTimePicker
+                            //inputFormat="MM/DD/YYYY"
                             value={taskData.dueDate}
                             onChange={(event) => handleUpdate('dueDate', event)}
                             renderInput={(params) => <TextField size="small" fullWidth margin="normal" {...params} error={false} />}
                         />
                         {/* <TextField value={taskData.dueDate} onChange={(e) => handleUpdate('dueDate', e.target.value)} size="small" /> */}
+
                     </FormControl>
                     <FormControl>
                         <Stack direction='row' spacing={2} alignItems="center">

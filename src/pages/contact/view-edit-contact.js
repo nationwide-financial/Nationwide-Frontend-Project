@@ -1113,7 +1113,7 @@ const handleChangeRowsPerPage = (event) => {
                                   {row?.status_ || ""}
                                 </TableCell>
                                 <TableCell align="left">
-                                $ {row?.applicationBasicInfo?.loan_amount || ""}
+                                $ {row?.applicationBasicInfo?.loan_amount?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") || ""}
                                 </TableCell>
                               </TableRow>
                             );

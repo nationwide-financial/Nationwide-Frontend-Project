@@ -5,26 +5,46 @@ import { useState } from "react";
 const appHeaders = [
     { label: 'First Name', field: 'firstName' },
     { label: 'Last Name', field: 'lastName' },
+    { label: 'Middle Intial', field: 'middleInitial' },
+    { label: 'Other Name', field: 'otherName' },
     { label: 'Email', field: 'email' },
-    { label: 'Phone', field: 'phone' },
-    { label: 'ID Number', field: 'idNumber' },
-    { label: 'Date of Birth', field: 'dob' },
-    { label: 'Street Address', field: 'streetAddress' },
-    { label: 'City', field: 'city' },
-    { label: 'Province', field: 'state' },
-    { label: 'Postal Code', field: 'postalCode' },
+    { label: 'Home Phone', field: 'homePhoneNumber' },
+    { label: 'Mobile Phone', field: 'mobilePhoneNumber' },
+    { label: 'Work Phone', field: 'work' },
+    { label: 'Fax', field: 'fax' },
+    { label: 'Address 1', field: 'address1' },
+    { label: 'Address 2', field: 'address2' },
+    { label: 'City or State', field: 'cityOrState' },
+    { label: 'Zip', field: 'Zip' },
     { label: 'Country', field: 'country' },
-    { label: 'Company Name', field: 'companyName' },
-    { label: 'Job Title', field: 'jobTitle' }
+    { label: 'Eligibility Status', field: 'eligibilityStatus' },
+    { label: 'Primary Language', field: 'primaryLanguage' },
+    { label: 'Preferred Method', field: 'preferredMethod' },
+    { label: 'Primary Number', field: 'primaryNumber' },
+    { label: 'Best Time To Call', field: 'bestTimeToCall' },
+    { label: 'Time Zone', field: 'timeZone' },
+    { label: 'Credit Score', field: 'creditScore' },
+    { label: 'Date', field: 'date' },
+    { label: 'Credit Report Type', field: 'creditReportType' },
+    { label: 'DOB', field: 'dob' },
+    { label: 'SSN', field: 'ssn' },
+    { label: 'DL', field: 'dl' },
+    { label: 'State', field: 'state' },
+    { label: 'Employer', field: 'employer' },
+    { label: 'OCC', field: 'occ' },
+    { label: 'EMP Length Y', field: 'empLengthY' },
+    { label: 'EMP Length M', field: 'empLengthM' },
+    { label: 'Mortage Balance', field: 'mortgageBalance' },
+    { label: 'Home Value', field: 'homeValue' }
 ]
 
 function ImportMapping({ data, onPressBack, onPressImport }) {
     const [appHeaderState, setAppHeaderState] = useState([]);
     const [error, setError] = useState();
-    console.log("App State ", appHeaderState);
+    console.log("App State ", appHeaderState, appHeaderState[32]);
 
     const renderTableHead = () => {
-        const tableHead = [<TableCell key="1" sx={{ minWidth: 150 }}><b>APP HEADERS</b></TableCell>];
+        const tableHead = [<TableCell key="hd1" sx={{ minWidth: 150 }}><b>APP HEADERS</b></TableCell>];
         let i = 0;
         appHeaders.forEach((item, key) => {
             tableHead.push(
@@ -55,10 +75,11 @@ function ImportMapping({ data, onPressBack, onPressImport }) {
 
     }
     const renderFileHeaders = () => {
-        const fileHeaders = [<TableCell key="2" sx={{ minWidth: 150 }}><b>Your Headers</b></TableCell>];
+        const fileHeaders = [<TableCell key="hd2" sx={{ minWidth: 150 }}><b>Your Headers</b></TableCell>];
         data && data[0] && data.length > 0 && Object.entries(data[0]).forEach(([key, item]) => {
+            console.log("Data ", key, item)
             fileHeaders.push(
-                <TableCell key={key}>
+                <TableCell key={"k"+key}>
                     {item}
                 </TableCell>
             )
@@ -71,14 +92,14 @@ function ImportMapping({ data, onPressBack, onPressImport }) {
         data && data[0] && data.length > 0 && Object.entries(data).forEach(([key, item]) => {
             if (key != 0) {
                 tableData.push(
-                    <TableRow key={key}>
+                    <TableRow key={"dt"+key}>
                         <TableCell><b>Your Data</b></TableCell>
                         <TableCell>{item.row1}</TableCell>
                         <TableCell>{item.row2}</TableCell>
                         <TableCell>{item.row3}</TableCell>
                         <TableCell>{item.row4}</TableCell>
                         <TableCell>{item.row5}</TableCell>
-                        <TableCell>{item.row6 && moment(item.row6).format('DD-MM-YYYY')}</TableCell>
+                        <TableCell>{item.row6}</TableCell>
                         <TableCell>{item.row7}</TableCell>
                         <TableCell>{item.row8}</TableCell>
                         <TableCell>{item.row9}</TableCell>
@@ -86,6 +107,28 @@ function ImportMapping({ data, onPressBack, onPressImport }) {
                         <TableCell>{item.row11}</TableCell>
                         <TableCell>{item.row12}</TableCell>
                         <TableCell>{item.row13}</TableCell>
+                        <TableCell>{item.row14}</TableCell>
+                        <TableCell>{item.row15}</TableCell>
+                        <TableCell>{item.row16}</TableCell>
+                        <TableCell>{item.row17}</TableCell>
+                        <TableCell>{item.row18}</TableCell>
+                        <TableCell>{item.row19}</TableCell>
+                        <TableCell>{item.row20}</TableCell>
+                        <TableCell>{item.row21}</TableCell>
+                        <TableCell>{item.row22}</TableCell>
+                        <TableCell>{item.row23}</TableCell>
+                        <TableCell>{item.row24}</TableCell>
+                        <TableCell>{item.row25}</TableCell>
+                        <TableCell>{item.row26}</TableCell>
+                        <TableCell>{item.row27}</TableCell>
+                        <TableCell>{item.row28}</TableCell>
+                        <TableCell>{item.row29}</TableCell>
+                        <TableCell>{item.row30}</TableCell>
+                        <TableCell>{item.row31}</TableCell>
+                        <TableCell>{item.row32}</TableCell>
+                        <TableCell>{item.row33}</TableCell>
+                        <TableCell>{item.row34}</TableCell>
+                        <TableCell>{item.row35}</TableCell>
                     </TableRow>
                 )
             }
@@ -96,7 +139,7 @@ function ImportMapping({ data, onPressBack, onPressImport }) {
     const onImport = () => {
         const formattedObject = [];
         console.log(appHeaderState)
-        if (appHeaderState.length !== 13 || appHeaderState.includes(undefined)) {
+        if (appHeaderState.length !== 33 || appHeaderState.includes(undefined)) {
             setError("All the headers are mandatory")
         } else {
             setError(undefined);
@@ -115,11 +158,28 @@ function ImportMapping({ data, onPressBack, onPressImport }) {
                             [appHeaderState[7].field]: contact.row8,
                             [appHeaderState[8].field]: contact.row9,
                             [appHeaderState[9].field]: contact.row10,
-                            [appHeaderState[10].field]: contact.row11
-                        },
-                        jobInformation: {
-                            [appHeaderState[11].field]: contact.row12,
-                            [appHeaderState[12].field]: contact.row13
+                            [appHeaderState[11].field]: contact.row11,
+                            [appHeaderState[12].field]: contact.row12,
+                            [appHeaderState[13].field]: contact.row13,
+                            [appHeaderState[14].field]: contact.row14,
+                            [appHeaderState[15].field]: contact.row15,
+                            [appHeaderState[16].field]: contact.row16,
+                            [appHeaderState[17].field]: contact.row17,
+                            [appHeaderState[18].field]: contact.row18,
+                            [appHeaderState[19].field]: contact.row19,
+                            [appHeaderState[20].field]: contact.row20,
+                            [appHeaderState[21].field]: contact.row21,
+                            [appHeaderState[22].field]: contact.row22,
+                            [appHeaderState[23].field]: contact.row23,
+                            [appHeaderState[24].field]: contact.row24,
+                            [appHeaderState[25].field]: contact.row25,
+                            [appHeaderState[26].field]: contact.row26,
+                            [appHeaderState[27].field]: contact.row27,
+                            [appHeaderState[28].field]: contact.row28,
+                            [appHeaderState[29].field]: contact.row29,
+                            [appHeaderState[30].field]: contact.row30,
+                            [appHeaderState[31].field]: contact.row31,
+                            [appHeaderState[32].field]: contact.row32
                         }
                     })
                 }

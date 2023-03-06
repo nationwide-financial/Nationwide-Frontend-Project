@@ -43,32 +43,72 @@ function ImportContacts() {
                             if (key !== 1) {
                                 const firstName = row[1];
                                 const lastName = row[2];
-                                const email = typeof row[3] === 'object' ? row[3]?.text : row[3];
-                                const phone = typeof row[4] === 'object' ? row[4]?.result : row[4];
-                                const idNumber = row[5];
-                                const dob = row[6];
-                                const streetAddress = row[7];
-                                const city = row[8];
-                                const state = row[9];
-                                const postalCode = row[10];
-                                const country = row[11];
-                                const companyName = row[12];
-                                const jobTitle = row[13];
+                                const middleInitial = row[3];
+                                const otherName = row[4];
+                                const email = typeof row[5] === 'object' ? row[5]?.text : row[5];
+                                const homePhoneNumber = row[6];
+                                const mobilePhoneNumber = row[7];
+                                const work = row[8];
+                                const fax = row[9];
+                                const address1 = row[10];
+                                const address2 = row[11];
+                                const cityOrState = row[12];
+                                const Zip = row[13];
+                                const country = row[14];
+                                const eligibilityStatus = row[15];
+                                const primaryLanguage = row[16];
+                                const preferredMethod = row[17];
+                                const primaryNumber = row[18];
+                                const bestTimeToCall = row[19];
+                                const timeZone = row[20];
+                                const creditScore = row[21];
+                                const date = row[22];
+                                const creditReportType = row[23];
+                                const dob = row[24];
+                                const ssn = row[25];
+                                const dl = row[26];
+                                const state = row[27];
+                                const employer = row[28];
+                                const occ = row[29];
+                                const empLengthY = row[30];
+                                const empLengthM = row[31];
+                                const mortgageBalance = row[32];
+                                const homeValue = row[33];
 
                                 data.push({
                                     row1: firstName,
                                     row2: lastName,
-                                    row3: email,
-                                    row4: phone,
-                                    row5: idNumber,
-                                    row6: dob,
-                                    row7: streetAddress,
-                                    row8: city,
-                                    row9: state,
-                                    row10: postalCode,
-                                    row11: country,
-                                    row12: companyName,
-                                    row13: jobTitle
+                                    row3: middleInitial,
+                                    row4: otherName,
+                                    row5: email,
+                                    row6: homePhoneNumber,
+                                    row7: mobilePhoneNumber,
+                                    row8: work,
+                                    row9: fax,
+                                    row10: address1,
+                                    row11: address2,
+                                    row12: cityOrState,
+                                    row13: Zip,
+                                    row14: country,
+                                    row15: eligibilityStatus,
+                                    row16: primaryLanguage,
+                                    row17: preferredMethod,
+                                    row18: primaryNumber,
+                                    row19: bestTimeToCall,
+                                    row20: timeZone,
+                                    row21: creditScore,
+                                    row22: date,
+                                    row23: creditReportType,
+                                    row24: dob,
+                                    row25: ssn,
+                                    row26: dl,
+                                    row27: state,
+                                    row28: employer,
+                                    row29: occ,
+                                    row30: empLengthY,
+                                    row31: empLengthM,
+                                    row32: mortgageBalance,
+                                    row33: homeValue
                                 })
                             }
                         }
@@ -106,6 +146,7 @@ function ImportContacts() {
     }
     
     const handleClickImport = async(formattedData) => {
+        console.log("FORMATTED ", formattedData)
         const response = await _addBulkContacts({ contacts: formattedData });
         console.log("res ", response)
         setLoading(false);

@@ -62,7 +62,7 @@ import { _listLabel, _getSingleLabel } from "../../services/labelService.js";
 import { _addTask, _fetchTaskByapplicationId } from "../../services/loanTaskServices.js";
 import { _fetchWorkflowStatuses } from "../../services/loanWorkflowStatusServices.js";
 import ApplicationTaskPopup from "../../components/ApplicationTaskPopup/index.js";
-import { getCookie, removeCookie } from 'cookies-next';
+import { getCookie ,setCookie,deleteCookie } from 'cookies-next';
 import { _getAllPlatformUserByAdmin } from '../../services/authServices'
 import { getDate } from '../../utils/utils'
 
@@ -272,24 +272,44 @@ function ApplicationDate() {
     setAnchorEl(null);
   };
 
-  const [value, setValue] = React.useState(0);
+  const [value, setValue] = useState(0);
   const [showAll, setShowAll] = useState(false);
   const [showContent, setShowContent] = useState(false);
+  const [open, setOpen] = useState(false);
+  const router = useRouter();
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
   };
-
+  console.log("router.asPath",router.asPath)
   const handleEditDetails = async () => {
     // setShowContent(true)
     // setShowContent(!showContent);
     const res = await _authMS();
+    const query = router.query;
+    let tabid = query.tab;
+    const urlPath = tabid ? router.asPath : `${router.asPath}&tab=2`;
+    setCookie("applicationurl",urlPath, {
+      path: "/",
+      maxAge: 3600, // Expires after 1hr
+      sameSite: true,
+    })
     // const res: { url: string } = await ky.get('/api/auth/twitter/generate-auth-link').json()
     window.location.href = res?.data?.url
   };
 
-  const [open, setOpen] = useState(false);
-  const router = useRouter();
+
+  useEffect(()=>{
+    const query = router.query;
+    let tabid = query.tab;
+    console.log("tabId",tabid)
+    //const applicationUrl = getCookie('applicationurl')
+    if(tabid) {
+      setValue(Number(tabid))
+      
+    }
+    
+  },[])
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -791,7 +811,6 @@ function ApplicationDate() {
 
   useEffect(() => {
     async function getData() {
-
       const accessToken = getCookie('accessToken');
       console.log(accessToken, "accessToken")
       if (accessToken) {

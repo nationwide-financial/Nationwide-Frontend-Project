@@ -38,7 +38,7 @@ const appHeaders = [
     { label: 'Home Value', field: 'homeValue' }
 ]
 
-function ImportMapping({ data, onPressBack, onPressImport }) {
+function ImportMapping({ data, onPressBack, onPressImport,setListData }) {
     const [appHeaderState, setAppHeaderState] = useState([]);
     const [error, setError] = useState();
     console.log("App State ", appHeaderState, appHeaderState[32]);
@@ -184,6 +184,7 @@ function ImportMapping({ data, onPressBack, onPressImport }) {
                     })
                 }
             })
+            setListData(formattedObject)
             onPressImport(formattedObject);
         }
     }

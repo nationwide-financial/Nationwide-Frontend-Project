@@ -19,6 +19,7 @@ function ImportContacts() {
     const [showMapping, setShowMapping] = useState(false);
     const [healthData, setHealthData] = useState({ validCount: 0, invalidCount: 0 });
     const [fileData, setFileData] = useState([]);
+    const [listData,setListData] = useState([]);
     const [error, setError] = useState()
     const handleChange = (file) => {
         setFile(file);
@@ -164,8 +165,8 @@ function ImportContacts() {
 
     return (
         <>
-            {loading ? <CircularProgress /> : showMapping ? <ImportMapping data={fileData} onPressBack={onClickBackToMapping} onPressImport={handleClickImport} /> : 
-            showHealth ? <ImportHealth data={healthData} onGoBack={onPressBack} /> : <Grid container spacing={2} m={2}>
+            {loading ? <CircularProgress /> : showMapping ? <ImportMapping setListData={setListData} data={fileData} onPressBack={onClickBackToMapping} onPressImport={handleClickImport} /> : 
+            showHealth ? <ImportHealth listData={listData} data={healthData} onGoBack={onPressBack} /> : <Grid container spacing={2} m={2}>
                 <Grid item xs={12} mt={2}>
                     <h1>Upload List</h1>
                 </Grid>

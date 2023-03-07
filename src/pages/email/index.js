@@ -15,7 +15,7 @@ import TableRow from "@mui/material/TableRow";
 import Stack from "@mui/material/Stack";
 import { useRouter } from "next/router";
 import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined";
-import { getCookie, deleteCookie } from 'cookies-next';
+import { getCookie, deleteCookie, setCookie } from 'cookies-next';
 import {_authMS, _authMSToken} from '../../services/authServices'
 
 const Email = () => {
@@ -33,39 +33,62 @@ const Email = () => {
     };
     const {code, client_info} = router.query
 
+    const getMails =(token)=>{
+        
+            fetch('https://graph.microsoft.com/v1.0/me/messages', {
+                method: 'GET',
+                headers: {
+                Authorization: `Bearer ${token}`
+                },
+            })
+            .then(response => response.json())
+            .then((res) => {
+                console.log(res,  "sssss");
+                console.log(res?.value, "dddd", res?.error?.code);
+                if (res?.error?.code === "InvalidAuthenticationToken") {
+                    deleteCookie('accessToken');
+                } else {
+                    setShowContent(true);
+                    setEmaildatarows(res?.value || []);
+                }
+            
+            })
+                .catch((error) => {
+                console.error(error);
+            });
+        
+    }
+
     useEffect(() => {
+        const applicationUrl =  getCookie('applicationurl');
+        if(applicationUrl){
+            router.push(applicationUrl);
+            setTimeout(() => {
+                deleteCookie('applicationurl');
+            }, 10000);
+        }
 
         const accessToken =  getCookie('accessToken');
-        if (accessToken) setShowContent(true);
+        if (accessToken){
+            getMails(accessToken);
+        } 
 
         code && _authMSToken(code)
         .then((res) => {
+            if(!accessToken && res.data.token){
+                setCookie("accessToken",res.data.token, {
+                    path: "/",
+                    maxAge: 3600, // Expires after 1hr
+                    sameSite: true,
+                })
+            }
             router.push("/email");
             
             console.log(accessToken, "accessToken", res.data.token);
             if (accessToken || res.data.token) {
-                fetch('https://graph.microsoft.com/v1.0/me/messages', {
-                    method: 'GET',
-                    headers: {
-                    Authorization: `Bearer ${accessToken || res.data.token}`
-                    },
-                })
-                .then(response => response.json())
-                .then((res) => {
-                    console.log(res,  "sssss");
-                    console.log(res?.value, "dddd", res?.error?.code);
-                    if (res?.error?.code === "InvalidAuthenticationToken") {
-                        deleteCookie('accessToken');
-                    } else {
-                        setShowContent(true);
-                        setEmaildatarows(res?.value || []);
-                    }
-                
-                })
-                    .catch((error) => {
-                    console.error(error);
-                });
-        }
+                getMails(accessToken || res.data.token)
+            }
+     
         })
         .catch((error) => {
             console.error(error);

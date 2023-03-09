@@ -119,8 +119,6 @@ function AddNewContact() {
 
       if (!applicationMainData?.loanAmount || applicationMainData?.loanAmount == "" || applicationMainData?.loanAmount == null ) {
         setError('Amount can not be empty !')
-      }else if(!applicationMainData?.ref || applicationMainData?.ref == "" || applicationMainData?.ref == null ){
-        setError('reference source can not be empty !')
       }else{
         const auto_member = await _getAutoAssignMember();
         const activeMember = auto_member?.data?.activeMember
@@ -162,7 +160,7 @@ function AddNewContact() {
           console.log("resHistory",resHistory)
           if(res?.status == 200 && resHistory?.status == 200){
             setError('')
-            router.push(`/application/application-form-data?cocontact=${cocontactIds[0]}&contact=${contactIds[0]}&compaign=${applicationProductId}`);
+            router.push(`/application/application-form-data?cocontact=${cocontactIds[0]}&contact=${contactIds[0]}&compaign=${applicationProductId}&applicationId=${res?.data?.applicationId}`);
           }
         }else if(res?.response?.status == 400){
           setError(`${res?.response?.data?.message}`)

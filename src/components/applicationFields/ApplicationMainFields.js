@@ -16,10 +16,6 @@ function ApplicationMainFields({setData}) {
         setApplicationMain({ ...applicationMain, loanAmount: event.target.value });
           break;
         }
-        case "ref": {
-        setApplicationMain({ ...applicationMain, ref: event.target.value});
-          break;
-        }
         default: {
         setApplicationMain({ ...applicationMain });
           break;
@@ -60,37 +56,6 @@ function ApplicationMainFields({setData}) {
                 fullWidth
                 onChange = {(event) => handleChange("loanAmount", event)}
                 value = {applicationMain?.loanAmount}
-                size="small"
-                margin="normal"
-                id="outlined-basic"
-                variant="outlined"
-              />
-            </Grid>
-          </Grid>
-        </Grid>
-        <Grid item xs={12}>
-          <Grid container>
-            <Grid item xs={3} style={{ margin: "auto 10px" }}>
-              <label>
-                {" "}
-                <Typography
-                  align="left"
-                  variant="h6"
-                  style={{
-                    fontSize: 17,
-                    fontWeight: 700,
-                    fontStyle: "normal",
-                  }}
-                >
-                  Referral Source <span style={{ color: "red" }}>*</span>
-                </Typography>
-              </label>
-            </Grid>
-            <Grid item xs={8} style={{ margin: "auto 10px" }}>
-              <TextField
-                fullWidth
-                onChange={(event) => handleChange("ref", event)}
-                value={applicationMain?.ref}
                 size="small"
                 margin="normal"
                 id="outlined-basic"

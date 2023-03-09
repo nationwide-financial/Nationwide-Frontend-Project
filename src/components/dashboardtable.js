@@ -102,7 +102,7 @@ export default function CollapsibleTable({rows=[]}) {
                 <TableCell component='th' scope='row' style={{fontSize:11, fontWeight:500 ,padding:0,margin:0}}>
                   {row?.basicInformation?.firstName || ""} { " "}{row?.basicInformation?.lastName || ""}
                 </TableCell>
-                <TableCell align='right'  style={{fontSize:11, fontWeight:500 ,padding:0,margin:0}}>{row?.application?.applicationBasicInfo?.loan_amount || ""} </TableCell>
+                <TableCell align='right'  style={{fontSize:11, fontWeight:500 ,padding:0,margin:0}}>{row?.application?.applicationBasicInfo?.loan_amount?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") || ""} </TableCell>
                 <TableCell align='right'  style={{fontSize:11, fontWeight:500 ,padding:0,margin:0}}>{row?.application?.status_ || ""}</TableCell>
               </TableRow>
               <TableRow>

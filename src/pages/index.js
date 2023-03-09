@@ -425,9 +425,10 @@ const HomePage = () => {
     const dashboardData = await _fetchDashboardData(body)
     setLoading(false);
     const { data } = dashboardData;
+    console.log("data",data)
 //##########################################################
 
-    const contactArr = data?.contactsByRole;
+    const contactArr = data?.contacts;
     const applicationArr = data?.allApplications;
     const applicationByuserArr = data?.applicationsByUser;
     const workFlowStatusArr = data?.workflowStatuses;
@@ -550,7 +551,7 @@ const HomePage = () => {
                   </Typography>
                 </Stack>
                 <Typography align="center" fontSize={60} fontWeight={600}>
-                  ${ytdTotalCloseAmount}
+                  ${ytdTotalCloseAmount?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
                 </Typography>
                 <Grid
                   style={{
@@ -691,7 +692,7 @@ const HomePage = () => {
                         style={{ fontSize: 36, fontWeight: 700 }}
                         align="center"
                       >
-                        ${ytdTotalCloseAmountForUser}
+                        ${ytdTotalCloseAmountForUser?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
                       </Typography>
                       <Typography
                         style={{

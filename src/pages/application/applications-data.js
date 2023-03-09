@@ -272,7 +272,7 @@ function ApplicationDate() {
     setAnchorEl(null);
   };
 
-  const [value, setValue] = useState(0);
+  const [value, setValue] = useState(3);
   const [showAll, setShowAll] = useState(false);
   const [showContent, setShowContent] = useState(false);
   const [open, setOpen] = useState(false);
@@ -354,6 +354,9 @@ function ApplicationDate() {
   const [note, setNote] = useState("");
   const [formError, setformError] = useState("");
   const [emaildatarows, setEmaildatarows] = useState([]);
+  const [emailFiterOptions,setEmailFiterOptions] = useState(["support@lunnaloans.com"]);
+  let emailFiterOptionsArr = []
+  
 
   const addApplicationNotes = async (id) => {
     try {
@@ -472,7 +475,10 @@ function ApplicationDate() {
       const res = await _getApplicationById(id);
       setApplicationData(res?.data?.data?.Items[0]);
       setTeamMembers(res?.data?.data?.Items[0]?.members);
-
+      console.log("res?.data?.data?.Items[0]?.members",res?.data?.data?.Items[0]?.members)
+      //let emailMembers = res?.data?.data?.Items[0]?.members
+      //setEmailFiterOptions([...emailFiterOptions,...emailMembers])
+      console.log("480",emailFiterOptions)
       let appDt = res?.data?.data?.Items[0]?.applicationData;
       setAppDtStandardIncome(appDt?.financialDetails?.standardIncome);
       setAppDtJobTitle(appDt?.financialDetails?.jobTitle);
@@ -501,13 +507,19 @@ function ApplicationDate() {
         res?.data?.data?.Items[0].contactId[0]
       );
       setContactData(resContact?.data?.Item);
+      //console.log("resContact?.data?.Item",resContact?.data?.Item?.basicInformation?.emailAddress)
+      setEmailFiterOptions([...emailFiterOptions,resContact?.data?.Item?.basicInformation?.emailAddress])
+      console.log("511",emailFiterOptions)
       let coContactTemp = [];
       for (let i = 0; i < res?.data?.data?.Items[0].coContact.length; i++) {
         const resCoContact = await _fetchSingleContacts(
           res?.data?.data?.Items[0].coContact[i]
         );
         await coContactTemp.push(resCoContact?.data?.Item);
+      //  console.log("resCoContact?.data?.Item?.basicInformation?.emailAddress",resCoContact?.data?.Item?.basicInformation?.emailAddress)
+       // if(resCoContact?.status == 200) setEmailFiterOptions([...emailFiterOptions,resCoContact?.data?.Item?.basicInformation?.emailAddress])
       }
+
       console.log("coContactTemp*****", coContactTemp);
       setCocontactData([...coContactTemp]);
       let labelIds = res?.data?.data?.Items[0].appLabel;
@@ -1085,12 +1097,7 @@ function ApplicationDate() {
                               },
                             }}
                           >
-                            {/* <TableCell component="th" scope="row">
-                              {"Intermediary"}
-                            </TableCell>
-                            <TableCell align="left" p={1}>
-                              {""}
-                            </TableCell> */}
+                            
                           </TableRow>
                         </TableBody>
                       </Table>
@@ -2041,7 +2048,10 @@ function ApplicationDate() {
                                 </TableRow>
                               </TableHead>
                               <TableBody>
-                                {emaildatarows?.map((row, i) => (
+                                {console.log("[...new Set(emailFiterOptions)]",[...new Set([...emailFiterOptions,...teamMembers || []])])}
+                                {emaildatarows?.filter((data)=>{
+                                  if([...new Set([...emailFiterOptions,...teamMembers || []])]?.includes(data.sender.emailAddress.address)) return data;
+                                })?.map((row, i) => (
                                   <TableRow
                                     key={i}
                                     sx={{
@@ -2451,27 +2461,6 @@ function ApplicationDate() {
                             variant="standard"
                           />
                         </Grid>
-
-                        {/* active-user-display-section */}
-
-                        {/* <AvatarGroup total={9}>
-                          <Avatar
-                            alt="Remy Sharp"
-                            src="/static/images/avatar/1.jpg"
-                          />
-                          <Avatar
-                            alt="Travis Howard"
-                            src="/static/images/avatar/2.jpg"
-                          />
-                          <Avatar
-                            alt="Agnes Walker"
-                            src="/static/images/avatar/4.jpg"
-                          />
-                          <Avatar
-                            alt="Trevor Henderson"
-                            src="/static/images/avatar/5.jpg"
-                          />
-                        </AvatarGroup> */}
                         <AvatarGroup max={4} total={noteListRemoveCreatorDuplicates?.length}>
                           {noteListRemoveCreatorDuplicates && noteListRemoveCreatorDuplicates?.map((note, key) => {
                             let user = users.filter((user) => { return user?.PK == note?.creator })[0];
@@ -2582,27 +2571,6 @@ function ApplicationDate() {
                             variant="standard"
                           />
                         </Grid>
-
-                        {/* active-user-display-section */}
-
-                        {/* <AvatarGroup total={9}>
-                          <Avatar
-                            alt="Remy Sharp"
-                            src="/static/images/avatar/1.jpg"
-                          />
-                          <Avatar
-                            alt="Travis Howard"
-                            src="/static/images/avatar/2.jpg"
-                          />
-                          <Avatar
-                            alt="Agnes Walker"
-                            src="/static/images/avatar/4.jpg"
-                          />
-                          <Avatar
-                            alt="Trevor Henderson"
-                            src="/static/images/avatar/5.jpg"
-                          />
-                        </AvatarGroup> */}
                         <AvatarGroup max={4} total={historyListRemoveCreatorDuplicates?.length}>
                           {historyListRemoveCreatorDuplicates && historyListRemoveCreatorDuplicates?.map((history, key) => {
                             let user = users.filter((user) => { return user?.PK == history?.changedby })[0]

@@ -7,7 +7,6 @@ function ApplicantFields({addApplicationFlag, setContactData, contactList, setSe
     const [contact, setContact] =useState({})
     const [error, setError] =useState("")
     const languages = ["English","Spanish","Russian","French"]
-    const preferredMethods =["method 1","method 2"]
     const bestTimes = [
       "6.00 AM - 7.00 AM",
       "7.00 AM - 8.00 AM",
@@ -22,6 +21,8 @@ function ApplicantFields({addApplicationFlag, setContactData, contactList, setSe
     ]
     const timeZones = ["timeZones","timeZones","timeZones"]
     const creditReportTypes = ["type 01","type 02"]
+    const maritalStatusData=["Married","Single"]
+    const employmentStatusData =["self employed","part time","full time"]
 
     useEffect(() => {
       setContactData(contact)
@@ -84,24 +85,8 @@ function ApplicantFields({addApplicationFlag, setContactData, contactList, setSe
           setContact({ ...contact, Zip: event.target.value });
           break;
         }
-		    case "country": {
-          setContact({ ...contact, country: event.target.value });
-          break;
-        }
-        case "eligibilityStatus": {
-          setContact({ ...contact, eligibilityStatus: event.target.value });
-          break;
-        }
         case "primaryLanguage": {
           setContact({ ...contact, primaryLanguage: event });
-          break;
-        }
-        case "preferredMethod": {
-          setContact({ ...contact, preferredMethod: event });
-          break;
-        }
-        case "primaryNumber": {
-          setContact({ ...contact, primaryNumber: event });
           break;
         }
         case "bestTimeToCall": {
@@ -162,6 +147,26 @@ function ApplicantFields({addApplicationFlag, setContactData, contactList, setSe
         }
         case "homeValue": {
           setContact({ ...contact, homeValue: event.target.value });
+          break;
+        }
+        case "maritalStatus": {
+          setContact({ ...contact, maritalStatus: event });
+          break;
+        }
+        case "state_": {
+          setContact({ ...contact, state_: event.target.value });
+          break;
+        }
+        case "employmentStatus": {
+          setContact({ ...contact, employmentStatus: event });
+          break;
+        }
+        case "mortgagePayment": {
+          setContact({ ...contact, mortgagePayment: event.target.value });
+          break;
+        }
+        case "doYouRentOrOwn": {
+          setContact({ ...contact, doYouRentOrOwn: event.target.value });
           break;
         }
         default: {
@@ -229,7 +234,7 @@ function ApplicantFields({addApplicationFlag, setContactData, contactList, setSe
                             {option?.basicInformation?.emailAddress}
                           </p>
                           <p style={{ color: "#9B9B9B" }}>
-                            {option?.basicInformation?.primaryNumber}
+                            {option?.basicInformation?.mobilePhoneNumber}
                           </p>
                         </Stack>
                       </li>
@@ -418,6 +423,46 @@ function ApplicantFields({addApplicationFlag, setContactData, contactList, setSe
         </Grid>
         <Grid item xs={12}>
           <Grid container>
+            <Grid item xs={3} style={{ margin: "auto 10px" }}>
+              <label>
+                {" "}
+                <Typography
+                  align="left"
+                  variant="h6"
+                  style={{
+                    fontSize: 17,
+                    fontWeight: 700,
+                    fontStyle: "normal",
+                  }}
+                >
+                  Best Time To Call
+                </Typography>
+              </label>
+            </Grid>
+            {/* <TextField fullWidth error={basicInfo.phone !== "" && !validatePhoneNumber(basicInfo.phone)} onChange={(event) => handleChange('phone', event)} size="small" margin="normal" id="outlined-basic" variant="outlined" value={basicInfo?.phone} /> */}
+            <Grid item xs={8} style={{ margin: "auto 10px" }}>
+              <div>
+                <Autocomplete
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      size="small"
+                      label="Select Best Time To Call"
+                    />
+                  )}
+                  value={contact?.bestTimeToCall}
+                  onChange={(e, val) => {
+                    handleChange("bestTimeToCall", val)
+                    return val;
+                  }}
+                  options={bestTimes?.map((time) => time )}
+                ></Autocomplete>
+              </div>
+            </Grid>
+          </Grid>
+        </Grid>
+        <Grid item xs={12}>
+          <Grid container>
             {/* <Stack direction="row"> */}
             <Grid item xs={3} style={{ margin: "auto 10px" }}>
               <label>
@@ -546,8 +591,7 @@ function ApplicantFields({addApplicationFlag, setContactData, contactList, setSe
                 </Typography>
               </label>
             </Grid>
-
-            <Grid item xs={5} pl={1}>
+            <Grid item xs={3} pl={1}>
               <TextField
                 fullWidth
                 onChange={(event) => handleChange("cityOrState", event)}
@@ -558,7 +602,18 @@ function ApplicantFields({addApplicationFlag, setContactData, contactList, setSe
                 variant="outlined"
               />
             </Grid>
-            <Grid item xs={3} style={{ margin: "auto 10px" }}>
+            <Grid item xs={3} pl={1}>
+              <TextField
+                fullWidth
+                onChange={(event) => handleChange("state_", event)}
+                value={contact?.state_}
+                size="small"
+                margin="normal"
+                id="outlined-basic"
+                variant="outlined"
+              />
+            </Grid>
+            <Grid item xs={2} style={{ margin: "auto 10px" }}>
               <TextField
                 fullWidth
                 onChange={(event) => handleChange("Zip", event)}
@@ -572,71 +627,6 @@ function ApplicantFields({addApplicationFlag, setContactData, contactList, setSe
             {/* </Stack> */}
           </Grid>
         </Grid>
-        <Grid item xs={12}>
-          <Grid container>
-            <Grid item xs={3} style={{ margin: "auto 10px" }}>
-              <label>
-                {" "}
-                <Typography
-                  align="left"
-                  variant="h6"
-                  style={{
-                    fontSize: 17,
-                    fontWeight: 700,
-                    fontStyle: "normal",
-                  }}
-                >
-                  Country
-                </Typography>
-              </label>
-            </Grid>
-            {/* <TextField fullWidth error={basicInfo.phone !== "" && !validatePhoneNumber(basicInfo.phone)} onChange={(event) => handleChange('phone', event)} size="small" margin="normal" id="outlined-basic" variant="outlined" value={basicInfo?.phone} /> */}
-            <Grid item xs={8} style={{ margin: "auto 10px" }}>
-              <TextField
-                fullWidth
-                onChange={(event) => handleChange("country", event)}
-                value={contact?.country}
-                size="small"
-                margin="normal"
-                id="outlined-basic"
-                variant="outlined"
-              />
-            </Grid>
-          </Grid>
-        </Grid>
-        <Grid item xs={12}>
-          <Grid container>
-            <Grid item xs={3} style={{ margin: "auto 10px" }}>
-              <label>
-                {" "}
-                <Typography
-                  align="left"
-                  variant="h6"
-                  style={{
-                    fontSize: 17,
-                    fontWeight: 700,
-                    fontStyle: "normal",
-                  }}
-                >
-                  Eligibility Status
-                </Typography>
-              </label>
-            </Grid>
-            {/* <TextField fullWidth error={basicInfo.phone !== "" && !validatePhoneNumber(basicInfo.phone)} onChange={(event) => handleChange('phone', event)} size="small" margin="normal" id="outlined-basic" variant="outlined" value={basicInfo?.phone} /> */}
-            <Grid item xs={8} style={{ margin: "auto 10px" }}>
-              <TextField
-                fullWidth
-                onChange={(event) => handleChange("eligibilityStatus", event)}
-                value={contact?.eligibilityStatus}
-                size="small"
-                margin="normal"
-                id="outlined-basic"
-                variant="outlined"
-              />
-            </Grid>
-          </Grid>
-        </Grid>
-
         <Grid item xs={12} style={{ marginTop: 40 }}>
           <Grid container>
             <Grid item xs={3} style={{ margin: "auto 10px" }}>
@@ -678,7 +668,7 @@ function ApplicantFields({addApplicationFlag, setContactData, contactList, setSe
             </Grid>
           </Grid>
         </Grid>
-        <Grid item xs={12}>
+        <Grid item xs={12} >
           <Grid container>
             <Grid item xs={3} style={{ margin: "auto 10px" }}>
               <label>
@@ -692,7 +682,7 @@ function ApplicantFields({addApplicationFlag, setContactData, contactList, setSe
                     fontStyle: "normal",
                   }}
                 >
-                  Preferred Method
+                 Marital Status
                 </Typography>
               </label>
             </Grid>
@@ -700,25 +690,26 @@ function ApplicantFields({addApplicationFlag, setContactData, contactList, setSe
             <Grid item xs={8} style={{ margin: "auto 10px" }}>
               <div>
                 <Autocomplete
-                 
+                  
                   renderInput={(params) => (
                     <TextField
+                      value={contact?.maritalStatus}
                       {...params}
                       size="small"
-                      label=" Preferred Method"
+                      label="Select Marital Status"
                     />
                   )}
-                  value={contact?.preferredMethod}
                   onChange={(e, val) => {
-                    handleChange("preferredMethod", val)
+                    handleChange("maritalStatus", val)
                     return val;
                   }}
-                  options={preferredMethods?.map((method) => method )}
+                  options={maritalStatusData?.map((State) => State )}
                 ></Autocomplete>
               </div>
             </Grid>
           </Grid>
         </Grid>
+
         <Grid item xs={12}>
           <Grid container>
             <Grid item xs={3} style={{ margin: "auto 10px" }}>
@@ -733,65 +724,21 @@ function ApplicantFields({addApplicationFlag, setContactData, contactList, setSe
                     fontStyle: "normal",
                   }}
                 >
-                  Primary Number
+                Do You Rent Or Own
                 </Typography>
               </label>
             </Grid>
             {/* <TextField fullWidth error={basicInfo.phone !== "" && !validatePhoneNumber(basicInfo.phone)} onChange={(event) => handleChange('phone', event)} size="small" margin="normal" id="outlined-basic" variant="outlined" value={basicInfo?.phone} /> */}
             <Grid item xs={8} style={{ margin: "auto 10px" }}>
-              <div>
-                <Autocomplete
-                  value={contact?.primaryNumber}
-                  renderInput={(params) => (
-                    <TextField {...params} size="small" label="Select" />
-                  )}
-                  onChange={(e, val) => {
-                    handleChange("primaryNumber", val)
-                    return val;
-                  }}
-                  options={[contact?.homePhoneNumber || "",contact?.mobilePhoneNumber || ""]?.map((phone) => phone)}
-                ></Autocomplete>
-              </div>
-            </Grid>
-          </Grid>
-        </Grid>
-        <Grid item xs={12}>
-          <Grid container>
-            <Grid item xs={3} style={{ margin: "auto 10px" }}>
-              <label>
-                {" "}
-                <Typography
-                  align="left"
-                  variant="h6"
-                  style={{
-                    fontSize: 17,
-                    fontWeight: 700,
-                    fontStyle: "normal",
-                  }}
-                >
-                  Best Time To Call
-                </Typography>
-              </label>
-            </Grid>
-            {/* <TextField fullWidth error={basicInfo.phone !== "" && !validatePhoneNumber(basicInfo.phone)} onChange={(event) => handleChange('phone', event)} size="small" margin="normal" id="outlined-basic" variant="outlined" value={basicInfo?.phone} /> */}
-            <Grid item xs={8} style={{ margin: "auto 10px" }}>
-              <div>
-                <Autocomplete
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      size="small"
-                      label="Select Best Time To Call"
-                    />
-                  )}
-                  value={contact?.bestTimeToCall}
-                  onChange={(e, val) => {
-                    handleChange("bestTimeToCall", val)
-                    return val;
-                  }}
-                  options={bestTimes?.map((time) => time )}
-                ></Autocomplete>
-              </div>
+              <TextField
+                fullWidth
+                onChange={(event) => handleChange("doYouRentOrOwn", event)}
+                value={contact?.doYouRentOrOwn}
+                size="small"
+                margin="normal"
+                id="outlined-basic"
+                variant="outlined"
+              />
             </Grid>
           </Grid>
         </Grid>
@@ -1051,7 +998,42 @@ function ApplicantFields({addApplicationFlag, setContactData, contactList, setSe
             {/* </Stack> */}
           </Grid>
         </Grid>
-
+        <Grid item xs={12}>
+          <Grid container>
+            <Grid item xs={3} style={{ margin: "auto 10px" }}>
+              <label>
+                {" "}
+                <Typography
+                  align="left"
+                  variant="h6"
+                  style={{
+                    fontSize: 17,
+                    fontWeight: 700,
+                    fontStyle: "normal",
+                  }}
+                >
+                   Employment status
+                </Typography>
+              </label>
+            </Grid>
+            {/* <TextField fullWidth error={basicInfo.phone !== "" && !validatePhoneNumber(basicInfo.phone)} onChange={(event) => handleChange('phone', event)} size="small" margin="normal" id="outlined-basic" variant="outlined" value={basicInfo?.phone} /> */}
+            <Grid item xs={8} style={{ margin: "auto 10px" }}>
+              <div>
+                <Autocomplete
+                  value={contact?.employmentStatus}
+                  renderInput={(params) => (
+                    <TextField {...params} size="small" label="Select" />
+                  )}
+                  onChange={(e, val) => {
+                    handleChange("employmentStatus", val)
+                    return val;
+                  }}
+                  options={employmentStatusData?.map((type) => type )}
+                ></Autocomplete>
+              </div>
+            </Grid>
+          </Grid>
+        </Grid>
         <Grid item xs={12}>
           <Grid container>
             {/* <Stack direction="row"> */}
@@ -1096,7 +1078,37 @@ function ApplicantFields({addApplicationFlag, setContactData, contactList, setSe
             {/* </Stack> */}
           </Grid>
         </Grid>
-
+        <Grid item xs={12}>
+          <Grid container>
+            <Grid item xs={3} style={{ margin: "auto 10px" }}>
+              <label>
+                {" "}
+                <Typography
+                  align="left"
+                  variant="h6"
+                  style={{
+                    fontSize: 17,
+                    fontWeight: 700,
+                    fontStyle: "normal",
+                  }}
+                >
+                  Mortgage payment
+                </Typography>
+              </label>
+            </Grid>
+            <Grid item xs={8} style={{ margin: "auto 10px" }}>
+              <TextField
+                fullWidth
+                onChange={(event) => handleChange("mortgagePayment", event)}
+                value={contact?.mortgagePayment}                
+                size="small"
+                margin="normal"
+                id="outlined-basic"
+                variant="outlined"
+              />
+            </Grid>
+          </Grid>
+        </Grid>
         <Grid item xs={12}>
           <Grid container>
             <Grid item xs={3} style={{ margin: "auto 10px" }}>
@@ -1115,7 +1127,7 @@ function ApplicantFields({addApplicationFlag, setContactData, contactList, setSe
                 </Typography>
               </label>
             </Grid>
-            <Grid item xs={8} style={{ margin: "auto 10px" }}>
+            <Grid item xs={4} style={{ margin: "auto 10px" }}>
               <TextField
                 fullWidth
                 onChange={(event) => handleChange("mortgageBalance", event)}

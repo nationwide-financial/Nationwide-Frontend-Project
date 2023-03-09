@@ -55,6 +55,7 @@ function ApplicationFormData() {
  const [submitErr, setSubmitErr] = useState("");
   const [switchEditMode, setSwitchEditMode] = useState(false);
   const [contactData, setContactData] = useState({});
+  const [applicationId,setApplicationId] = useState("");
 
   const [phoneNumber, setPhoneNumber] = useState("");
   const [firstName, setFirstName] = useState("");
@@ -146,7 +147,7 @@ function ApplicationFormData() {
   const handleContinue = (product, contact) => {
     // let string = cocontactId.join('S')
     // cocontactId.length > 0 ? router.push(`/application/application-details?product=${product}&contact=${contact}&cocontact=${string}`) : router.push(`/application/application-details?product=${product}&contact=${contact}`)
-    router.push(`/application/dashbord`)
+   if(applicationId) router.push(`/application/applications-data?applicationId=${applicationId}`)
 
   };
 
@@ -157,7 +158,6 @@ function ApplicationFormData() {
         console.log("320_fetchContactById",res)
         if (res?.data?.Item && res.status == 200) {
           setContactData(res?.data?.Item);
-
           setPhoneNumber(res?.data?.Item?.basicInformation?.phone);
           setFirstName(res?.data?.Item?.basicInformation?.firstName);
           setLastName(res?.data?.Item?.basicInformation?.lastName);
@@ -209,6 +209,8 @@ function ApplicationFormData() {
       const query = router.query;
       let contactString = query?.contact;
       let coContactString = query?.cocontact;
+      let applicationId = query?.applicationId;
+      if(applicationId) setApplicationId(applicationId)
       setContactStr(contactString)
       let ids = [contactString] || [];
       console.log("173",ids[0])
@@ -368,6 +370,33 @@ function ApplicationFormData() {
                     <TableContainer style={{ backgroundColor: "transparent" }}>
                       <Table aria-label="simple table">
                         <TableBody>
+                         <TableRow sx={{"&:last-child td, &:last-child th": { border: 0 },  }} >
+                            <TableCell component="th" scope="row" style={{fontSize: 20, fontWeight: 400, color: "#393939", }} >
+                              {"First Name"}
+                            </TableCell>
+                            <TableCell
+                              align="left"
+                              style={{
+                                fontSize: 20,
+                                fontWeight: 600,
+                                color: "#393939",
+                              }}
+                            >
+                              {switchEditMode ?  <TextField
+                                  fullWidth
+                                  size="small"
+                                  margin="normal"
+                                  id="outlined-basic"
+                                  variant="outlined"
+                                  placeholder="Text"
+                                  value={lastName}
+                                  onChange={(e) => {
+                                    setLastName(e.target.value);
+                                  }}
+                                  style={{ margin: 0 }}
+                                /> : contactData?.basicInformation?.firstName || ""}
+                            </TableCell>
+                          </TableRow>
                           <TableRow
                             sx={{
                               "&:last-child td, &:last-child th": { border: 0 },
@@ -382,7 +411,121 @@ function ApplicationFormData() {
                                 color: "#393939",
                               }}
                             >
-                              {"First Name"}
+                              {"Last Name"}
+                            </TableCell>
+                            <TableCell
+                              align="left"
+                              style={{
+                                fontSize: 20,
+                                fontWeight: 600,
+                                color: "#393939",
+                              }}
+                            >
+                              {switchEditMode ? <TextField
+                                  fullWidth
+                                  size="small"
+                                  margin="normal"
+                                  id="outlined-basic"
+                                  variant="outlined"
+                                  placeholder="Text"
+                                  value={phoneNumber}
+                                  onChange={(e) => {
+                                    setPhoneNumber(e.target.value);
+                                  }}
+                                  style={{ margin: 0 }}
+                                /> : contactData?.basicInformation?.lastName || "" }
+                            </TableCell>
+                          </TableRow>
+                          <TableRow
+                            sx={{
+                              "&:last-child td, &:last-child th": { border: 0 },
+                            }}
+                          >
+                            <TableCell
+                              component="th"
+                              scope="row"
+                              style={{
+                                fontSize: 20,
+                                fontWeight: 400,
+                                color: "#393939",
+                              }}
+                            >
+                              {"Middle Initial"}
+                            </TableCell>
+                            <TableCell
+                              align="left"
+                              style={{
+                                fontSize: 20,
+                                fontWeight: 600,
+                                color: "#393939",
+                              }}
+                            >
+                              {/* {switchEditMode ? <MobileDatePicker
+                                inputFormat="MM/DD/YYYY"
+                                value={dob}
+                                onChange={(event) => {console.log(event) 
+                                  setDob(event)}}
+                                renderInput={(params) => <TextField size="small" fullWidth margin="normal" {...params} error={false} />}
+                              />:getDate(contactData?.basicInformation?.dob)  || "" } */}
+                              {contactData?.basicInformation?.middleInitial}
+                            </TableCell>
+                          </TableRow>
+
+                          <TableRow
+                            sx={{
+                              "&:last-child td, &:last-child th": { border: 0 },
+                            }}
+                          >
+                            <TableCell
+                              component="th"
+                              scope="row"
+                              style={{
+                                fontSize: 20,
+                                fontWeight: 400,
+                                color: "#393939",
+                              }}
+                            >
+                              {"Other Names"}
+                            </TableCell>
+                            <TableCell
+                              align="left"
+                              style={{
+                                fontSize: 20,
+                                fontWeight: 600,
+                                color: "#393939",
+                              }}
+                            >
+                              {switchEditMode ? <TextField
+                                  fullWidth
+                                  size="small"
+                                  margin="normal"
+                                  id="outlined-basic"
+                                  variant="outlined"
+                                  placeholder="Text"
+                                  value={postalCode}
+                                  onChange={(e) => {
+                                    setPostalCode(e.target.value);
+                                  }}
+                                  style={{ margin: 0 }}
+                                /> : contactData?.basicInformation?.otherName || "" }
+                            </TableCell>
+                          </TableRow>
+                       
+                          <TableRow
+                            sx={{
+                              "&:last-child td, &:last-child th": { border: 0 },
+                            }}
+                          >
+                            <TableCell
+                              component="th"
+                              scope="row"
+                              style={{
+                                fontSize: 20,
+                                fontWeight: 400,
+                                color: "#393939",
+                              }}
+                            >
+                              {"Email Address"}
                             </TableCell>
                             <TableCell
                               align="left"
@@ -404,7 +547,7 @@ function ApplicationFormData() {
                                     setFirstName(e.target.value);
                                   }}
                                   style={{ margin: 0 }}
-                                />:contactData?.basicInformation?.firstName || "" }
+                                />:contactData?.basicInformation?.emailAddress || "" }
                             </TableCell>
                           </TableRow>    
                           <TableRow
@@ -421,7 +564,7 @@ function ApplicationFormData() {
                                 color: "#393939",
                               }}
                             >
-                              {"Email"}
+                              {"Home / Mobile"}
                             </TableCell>
                             <TableCell
                               align="left"
@@ -431,7 +574,7 @@ function ApplicationFormData() {
                                 color: "#393939",
                               }}
                             >
-                              {switchEditMode ?<TextField
+                              {/* {switchEditMode ?<TextField
                                   fullWidth
                                   size="small"
                                   margin="normal"
@@ -443,12 +586,12 @@ function ApplicationFormData() {
                                     setEmail(e.target.value);
                                   }}
                                   style={{ margin: 0 }}
-                                />:contactData?.basicInformation?.emailAddress || ""}
-                              
+                                />:contactData?.basicInformation?.emailAddress || ""} */}
+                              {contactData?.basicInformation?.homePhoneNumber} /  {contactData?.basicInformation?.mobilePhoneNumber} 
                             </TableCell>
                           </TableRow>
 
-                          <TableRow
+                          {/* <TableRow
                             sx={{
                               "&:last-child td, &:last-child th": { border: 0 },
                             }}
@@ -486,44 +629,67 @@ function ApplicationFormData() {
                                   style={{ margin: 0 }}
                                 /> : contactData?.basicInformation?.idNumber || ""}
                             </TableCell>
-                          </TableRow>
-                          <TableRow
-                            sx={{
-                              "&:last-child td, &:last-child th": { border: 0 },
-                            }}
-                          >
-                            <TableCell
-                              component="th"
-                              scope="row"
-                              style={{
-                                fontSize: 20,
-                                fontWeight: 400,
-                                color: "#393939",
-                              }}
-                            >
-                              {"Street Address"}
+                          </TableRow> */}
+                          <TableRow sx={{ "&:last-child td, &:last-child th": { border: 0 }, }} >
+                            <TableCell component="th" scope="row" style={{fontSize: 20, fontWeight: 400, color: "#393939", }} >
+                              {"Best Time To Call"}
                             </TableCell>
-                            <TableCell
-                              align="left"
-                              style={{
-                                fontSize: 20,
-                                fontWeight: 600,
-                                color: "#393939",
-                              }}
-                            >
-                              {switchEditMode ?<TextField
-                                  fullWidth
-                                  size="small"
-                                  margin="normal"
-                                  id="outlined-basic"
-                                  variant="outlined"
-                                  placeholder="Text"
-                                  value={streetAddress}
-                                  onChange={(e) => {
-                                    setStreetAddress(e.target.value);
-                                  }}
-                                  style={{ margin: 0 }}
-                                />: contactData?.basicInformation?.address1 || ""}
+                            <TableCell align="left"style={{ fontSize: 20, fontWeight: 600, color: "#393939", }} >
+                                {contactData?.basicInformation?.bestTimeToCall}
+                            </TableCell>
+                          </TableRow>
+
+                          <TableRow sx={{ "&:last-child td, &:last-child th": { border: 0 }, }} >
+                            <TableCell component="th" scope="row" style={{fontSize: 20, fontWeight: 400, color: "#393939", }} >
+                              {"Work / Fax"}
+                            </TableCell>
+                            <TableCell align="left"style={{ fontSize: 20, fontWeight: 600, color: "#393939", }} >
+                                {contactData?.basicInformation?.work} / {contactData?.basicInformation?.fax} 
+                            </TableCell>
+                          </TableRow>
+
+                          <TableRow sx={{ "&:last-child td, &:last-child th": { border: 0 }, }} >
+                            <TableCell component="th" scope="row" style={{fontSize: 20, fontWeight: 400, color: "#393939", }} >
+                              {"Address 1"}
+                            </TableCell>
+                            <TableCell align="left"style={{ fontSize: 20, fontWeight: 600, color: "#393939", }} >
+                               {contactData?.basicInformation?.address1} 
+                            </TableCell>
+                          </TableRow>
+
+                          <TableRow sx={{ "&:last-child td, &:last-child th": { border: 0 }, }} >
+                            <TableCell component="th" scope="row" style={{fontSize: 20, fontWeight: 400, color: "#393939", }} >
+                              {"Address 2"}
+                            </TableCell>
+                            <TableCell align="left"style={{ fontSize: 20, fontWeight: 600, color: "#393939", }} >
+                                {contactData?.basicInformation?.address2} 
+                            </TableCell>
+                          </TableRow>
+
+                          <TableRow sx={{ "&:last-child td, &:last-child th": { border: 0 }, }} >
+                            <TableCell component="th" scope="row" style={{fontSize: 20, fontWeight: 400, color: "#393939", }} >
+                              {"City, State, Zip"}
+                            </TableCell>
+                            <TableCell align="left"style={{ fontSize: 20, fontWeight: 600, color: "#393939", }} >
+                                {contactData?.basicInformation?.cityOrState} / {contactData?.basicInformation?.state_} / {contactData?.basicInformation?.Zip} 
+                            </TableCell>
+                          </TableRow>
+
+                          <TableRow sx={{ "&:last-child td, &:last-child th": { border: 0 }, }} >
+                            <TableCell component="th" scope="row" style={{fontSize: 20, fontWeight: 400, color: "#393939", }} >
+                              {"Primary Language"}
+                            </TableCell>
+                            <TableCell align="left"style={{ fontSize: 20, fontWeight: 600, color: "#393939", }} >
+                              {contactData?.basicInformation?.primaryLanguage} 
+                            </TableCell>
+                          </TableRow>
+                          
+                          <TableRow sx={{ "&:last-child td, &:last-child th": { border: 0 }, }} >
+                            <TableCell component="th" scope="row" style={{fontSize: 20, fontWeight: 400, color: "#393939", }} >
+                              {"DL# / State"}
+                            </TableCell>
+                            <TableCell align="left"style={{ fontSize: 20, fontWeight: 600, color: "#393939", }} >
+                              {contactData?.basicInformation?.dl} /{contactData?.basicInformation?.state} 
                             </TableCell>
                           </TableRow>
                         </TableBody>
@@ -534,155 +700,111 @@ function ApplicationFormData() {
                     <TableContainer style={{ backgroundColor: "transparent" }}>
                       <Table aria-label="simple table">
                         <TableBody>
-                         <TableRow
-                            sx={{
-                              "&:last-child td, &:last-child th": { border: 0 },
-                            }}
-                          >
-                            <TableCell
-                              component="th"
-                              scope="row"
-                              style={{
-                                fontSize: 20,
-                                fontWeight: 400,
-                                color: "#393939",
-                              }}
-                            >
-                              {"Last Name"}
+                          <TableRow sx={{ "&:last-child td, &:last-child th": { border: 0 }, }} >
+                            <TableCell component="th" scope="row" style={{fontSize: 20, fontWeight: 400, color: "#393939", }} >
+                              {"Employer / Occ"}
                             </TableCell>
-                            <TableCell
-                              align="left"
-                              style={{
-                                fontSize: 20,
-                                fontWeight: 600,
-                                color: "#393939",
-                              }}
-                            >
-                              {switchEditMode ?  <TextField
-                                  fullWidth
-                                  size="small"
-                                  margin="normal"
-                                  id="outlined-basic"
-                                  variant="outlined"
-                                  placeholder="Text"
-                                  value={lastName}
-                                  onChange={(e) => {
-                                    setLastName(e.target.value);
-                                  }}
-                                  style={{ margin: 0 }}
-                                /> : contactData?.basicInformation?.lastName || ""}
-                            </TableCell>
-                          </TableRow>
-                          <TableRow
-                            sx={{
-                              "&:last-child td, &:last-child th": { border: 0 },
-                            }}
-                          >
-                            <TableCell
-                              component="th"
-                              scope="row"
-                              style={{
-                                fontSize: 20,
-                                fontWeight: 400,
-                                color: "#393939",
-                              }}
-                            >
-                              {"Phone"}
-                            </TableCell>
-                            <TableCell
-                              align="left"
-                              style={{
-                                fontSize: 20,
-                                fontWeight: 600,
-                                color: "#393939",
-                              }}
-                            >
-                              {switchEditMode ? <TextField
-                                  fullWidth
-                                  size="small"
-                                  margin="normal"
-                                  id="outlined-basic"
-                                  variant="outlined"
-                                  placeholder="Text"
-                                  value={phoneNumber}
-                                  onChange={(e) => {
-                                    setPhoneNumber(e.target.value);
-                                  }}
-                                  style={{ margin: 0 }}
-                                /> : contactData?.basicInformation?.mobilePhoneNumber || "" }
-                            </TableCell>
-                          </TableRow>
-                          <TableRow
-                            sx={{
-                              "&:last-child td, &:last-child th": { border: 0 },
-                            }}
-                          >
-                            <TableCell
-                              component="th"
-                              scope="row"
-                              style={{
-                                fontSize: 20,
-                                fontWeight: 400,
-                                color: "#393939",
-                              }}
-                            >
-                              {"Date Of Birth"}
-                            </TableCell>
-                            <TableCell
-                              align="left"
-                              style={{
-                                fontSize: 20,
-                                fontWeight: 600,
-                                color: "#393939",
-                              }}
-                            >
-                              {switchEditMode ? <MobileDatePicker
-                                inputFormat="MM/DD/YYYY"
-                                value={dob}
-                                onChange={(event) => {console.log(event) 
-                                  setDob(event)}}
-                                renderInput={(params) => <TextField size="small" fullWidth margin="normal" {...params} error={false} />}
-                              />:getDate(contactData?.basicInformation?.dob)  || "" }
+                            <TableCell align="left"style={{ fontSize: 20, fontWeight: 600, color: "#393939", }} >
+                              {contactData?.basicInformation?.employer} /  {contactData?.basicInformation?.occ} 
                             </TableCell>
                           </TableRow>
 
-                          <TableRow
-                            sx={{
-                              "&:last-child td, &:last-child th": { border: 0 },
-                            }}
-                          >
-                            <TableCell
-                              component="th"
-                              scope="row"
-                              style={{
-                                fontSize: 20,
-                                fontWeight: 400,
-                                color: "#393939",
-                              }}
-                            >
-                              {"Postal Code"}
+                          <TableRow sx={{ "&:last-child td, &:last-child th": { border: 0 }, }} >
+                            <TableCell component="th" scope="row" style={{fontSize: 20, fontWeight: 400, color: "#393939", }} >
+                              {"Employment status"}
                             </TableCell>
-                            <TableCell
-                              align="left"
-                              style={{
-                                fontSize: 20,
-                                fontWeight: 600,
-                                color: "#393939",
-                              }}
-                            >
-                              {switchEditMode ? <TextField
-                                  fullWidth
-                                  size="small"
-                                  margin="normal"
-                                  id="outlined-basic"
-                                  variant="outlined"
-                                  placeholder="Text"
-                                  value={postalCode}
-                                  onChange={(e) => {
-                                    setPostalCode(e.target.value);
-                                  }}
-                                  style={{ margin: 0 }}
-                                /> : contactData?.basicInformation?.Zip || "" }
+                            <TableCell align="left"style={{ fontSize: 20, fontWeight: 600, color: "#393939", }} >
+                              {contactData?.basicInformation?.employmentStatus} 
+                            </TableCell>
+                          </TableRow>
+
+                          <TableRow sx={{ "&:last-child td, &:last-child th": { border: 0 }, }} >
+                            <TableCell component="th" scope="row" style={{fontSize: 20, fontWeight: 400, color: "#393939", }} >
+                              {"Emp Length Y/M"}
+                            </TableCell>
+                            <TableCell align="left"style={{ fontSize: 20, fontWeight: 600, color: "#393939", }} >
+                              {contactData?.basicInformation?.empLengthY} / {contactData?.basicInformation?.empLengthM} 
+                            </TableCell>
+                          </TableRow>
+
+                          <TableRow sx={{ "&:last-child td, &:last-child th": { border: 0 }, }} >
+                            <TableCell component="th" scope="row" style={{fontSize: 20, fontWeight: 400, color: "#393939", }} >
+                              {"Mortgage payment"}
+                            </TableCell>
+                            <TableCell align="left"style={{ fontSize: 20, fontWeight: 600, color: "#393939", }} >
+                              {contactData?.basicInformation?.mortgagePayment} 
+                            </TableCell>
+                          </TableRow>
+
+                          <TableRow sx={{ "&:last-child td, &:last-child th": { border: 0 }, }} >
+                            <TableCell component="th" scope="row" style={{fontSize: 20, fontWeight: 400, color: "#393939", }} >
+                              {"Martgage Balance"}
+                            </TableCell>
+                            <TableCell align="left"style={{ fontSize: 20, fontWeight: 600, color: "#393939", }} >
+                              {contactData?.basicInformation?.mortgageBalance} 
+                            </TableCell>
+                          </TableRow>
+
+                          <TableRow sx={{ "&:last-child td, &:last-child th": { border: 0 }, }} >
+                            <TableCell component="th" scope="row" style={{fontSize: 20, fontWeight: 400, color: "#393939", }} >
+                              {"Home Value"}
+                            </TableCell>
+                            <TableCell align="left"style={{ fontSize: 20, fontWeight: 600, color: "#393939", }} >
+                              {contactData?.basicInformation?.homeValue} 
+                            </TableCell>
+                          </TableRow>
+                          
+                          <TableRow sx={{ "&:last-child td, &:last-child th": { border: 0 }, }} >
+                            <TableCell component="th" scope="row" style={{fontSize: 20, fontWeight: 400, color: "#393939", }} >
+                              {"Marital Status"}
+                            </TableCell>
+                            <TableCell align="left"style={{ fontSize: 20, fontWeight: 600, color: "#393939", }} >
+                              {contactData?.basicInformation?.maritalStatus} 
+                            </TableCell>
+                          </TableRow>
+
+                          <TableRow sx={{ "&:last-child td, &:last-child th": { border: 0 }, }} >
+                            <TableCell component="th" scope="row" style={{fontSize: 20, fontWeight: 400, color: "#393939", }} >
+                              {"Do You Rent Or Own"}
+                            </TableCell>
+                            <TableCell align="left"style={{ fontSize: 20, fontWeight: 600, color: "#393939", }} >
+                              {contactData?.basicInformation?.doYouRentOrOwn} 
+                            </TableCell>
+                          </TableRow>
+
+                          <TableRow sx={{ "&:last-child td, &:last-child th": { border: 0 }, }} >
+                            <TableCell component="th" scope="row" style={{fontSize: 20, fontWeight: 400, color: "#393939", }} >
+                              {"Time Zone"}
+                            </TableCell>
+                            <TableCell align="left"style={{ fontSize: 20, fontWeight: 600, color: "#393939", }} >
+                              {contactData?.basicInformation?.timeZone} 
+                            </TableCell>
+                          </TableRow>
+
+                          <TableRow sx={{ "&:last-child td, &:last-child th": { border: 0 }, }} >
+                            <TableCell component="th" scope="row" style={{fontSize: 20, fontWeight: 400, color: "#393939", }} >
+                              {"Credit Score / Date"}
+                            </TableCell>
+                            <TableCell align="left"style={{ fontSize: 20, fontWeight: 600, color: "#393939", }} >
+                              {contactData?.basicInformation?.creditScore} / {contactData?.basicInformation?.date} 
+                            </TableCell>
+                          </TableRow>
+
+                          <TableRow sx={{ "&:last-child td, &:last-child th": { border: 0 }, }} >
+                            <TableCell component="th" scope="row" style={{fontSize: 20, fontWeight: 400, color: "#393939", }} >
+                              {"Credit Report Type"}
+                            </TableCell>
+                            <TableCell align="left"style={{ fontSize: 20, fontWeight: 600, color: "#393939", }} >
+                              {contactData?.basicInformation?.creditReportType} 
+                            </TableCell>
+                          </TableRow>
+
+                          <TableRow sx={{ "&:last-child td, &:last-child th": { border: 0 }, }} >
+                            <TableCell component="th" scope="row" style={{fontSize: 20, fontWeight: 400, color: "#393939", }} >
+                              {"DOB / SSN"}
+                            </TableCell>
+                            <TableCell align="left"style={{ fontSize: 20, fontWeight: 600, color: "#393939", }} >
+                              {contactData?.basicInformation?.dob} / {contactData?.basicInformation?.ssn}
                             </TableCell>
                           </TableRow>
                         </TableBody>
@@ -690,15 +812,15 @@ function ApplicationFormData() {
                     </TableContainer>
                   </Grid>
                 </Grid>
-                <Grid mt={4}>
+                {/* <Grid mt={4}>
                 <Typography
                   align="left"
                   style={{ fontSize: 20, fontWeight: 700 }}
                 >
                   Financial Information
                 </Typography>
-                </Grid>
-                <Grid container spacing={2}>
+                </Grid> */}
+                {/* <Grid container spacing={2}>
                   <Grid item xs={6}>
                     <TableContainer style={{ backgroundColor: "transparent" }}>
                       <Table aria-label="simple table">
@@ -796,17 +918,17 @@ function ApplicationFormData() {
                     </TableContainer>
                   </Grid>
                   <Grid mt={6}></Grid>
-                </Grid>
+                </Grid> */}
 
-                <Grid mt={4}>
+                {/* <Grid mt={4}>
                 <Typography
                   align="left"
                   style={{ fontSize: 20, fontWeight: 700 }}
                 >
                  Additional Information
                 </Typography>
-                </Grid>
-                <Grid container spacing={2}>
+                </Grid> */}
+                {/* <Grid container spacing={2}>
                   <Grid item xs={6}>
                     <TableContainer style={{ backgroundColor: "transparent" }}>
                       <Table aria-label="simple table">
@@ -853,7 +975,7 @@ function ApplicationFormData() {
                     </TableContainer>
                   </Grid>
                   <Grid mt={6}></Grid>
-                </Grid>
+                </Grid> */}
               </Box>
 
                 <Grid mt={6}>

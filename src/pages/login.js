@@ -98,10 +98,10 @@ const Login = () => {
                 <CardContent>
                   <div>
                     <Image
-                      src="/images/image_logo_1.png"
+                      src="/images/lunna-loans-logo.png"
                       alt="Picture of the logo"
                       width={200}
-                      height={80}
+                      height={40}
                     />
                   </div>
                 </CardContent>

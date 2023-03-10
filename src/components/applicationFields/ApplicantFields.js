@@ -21,7 +21,7 @@ function ApplicantFields({addApplicationFlag, setContactData, contactList, setSe
     ]
     const timeZones = ["timeZones","timeZones","timeZones"]
     const creditReportTypes = ["type 01","type 02"]
-    const maritalStatusData=["Married","Single"]
+    const maritalStatusData=["Divorced", "Separated", "Widowed","Never Married"]
     const employmentStatusData =["self employed","part time","full time"]
 
     useEffect(() => {
@@ -1096,7 +1096,7 @@ function ApplicantFields({addApplicationFlag, setContactData, contactList, setSe
                 </Typography>
               </label>
             </Grid>
-            <Grid item xs={8} style={{ margin: "auto 10px" }}>
+            <Grid item xs={4} style={{ margin: "auto 10px" }}>
               <TextField
                 fullWidth
                 onChange={(event) => handleChange("mortgagePayment", event)}

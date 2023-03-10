@@ -16,26 +16,27 @@ const appHeaders = [
     { label: 'Address 2', field: 'address2' },
     { label: 'City or State', field: 'cityOrState' },
     { label: 'Zip', field: 'Zip' },
-    { label: 'Country', field: 'country' },
-    { label: 'Eligibility Status', field: 'eligibilityStatus' },
-    { label: 'Primary Language', field: 'primaryLanguage' },
-    { label: 'Preferred Method', field: 'preferredMethod' },
-    { label: 'Primary Number', field: 'primaryNumber' },
-    { label: 'Best Time To Call', field: 'bestTimeToCall' },
+    { label: 'primary Language', field: 'primaryLanguage' },
+    { label: 'Marital Status', field: 'maritalStatus' },
+    { label: 'Do You Rent Or Own', field: 'doYouRentOrOwn' },
     { label: 'Time Zone', field: 'timeZone' },
     { label: 'Credit Score', field: 'creditScore' },
-    { label: 'Date', field: 'date' },
-    { label: 'Credit Report Type', field: 'creditReportType' },
-    { label: 'DOB', field: 'dob' },
-    { label: 'SSN', field: 'ssn' },
-    { label: 'DL', field: 'dl' },
-    { label: 'State', field: 'state' },
-    { label: 'Employer', field: 'employer' },
-    { label: 'OCC', field: 'occ' },
-    { label: 'EMP Length Y', field: 'empLengthY' },
-    { label: 'EMP Length M', field: 'empLengthM' },
-    { label: 'Mortage Balance', field: 'mortgageBalance' },
-    { label: 'Home Value', field: 'homeValue' }
+    { label: 'date', field: 'date' },
+    { label: 'dob', field: 'dob' },
+    { label: 'ssn', field: 'ssn' },
+    { label: 'dl', field: 'dl' },
+    { label: 'state', field: 'state' },
+    { label: 'employer', field: 'employer' },
+    { label: 'occ', field: 'occ' },
+    { label: 'employment Status', field: 'employmentStatus' },
+    { label: 'emp Length Y', field: 'empLengthY' },
+    { label: 'emp Length M', field: 'empLengthM' },
+    { label: 'mortgage Payment', field: 'mortgagePayment' },
+    { label: 'mortgage Balance', field: 'mortgageBalance' },
+    { label: 'home Value', field: 'homeValue' },
+    { label: 'best Time To Call', field: 'bestTimeToCall' },
+    { label: 'credit Report Type', field: 'creditReportType' },
+    { label: 'state', field: 'state_' }
 ]
 
 function ImportMapping({ data, onPressBack, onPressImport,setListData }) {
@@ -139,7 +140,7 @@ function ImportMapping({ data, onPressBack, onPressImport,setListData }) {
     const onImport = () => {
         const formattedObject = [];
         console.log(appHeaderState)
-        if (appHeaderState.length !== 33 || appHeaderState.includes(undefined)) {
+        if (appHeaderState.length !== 34 || appHeaderState.includes(undefined)) {
             setError("All the headers are mandatory")
         } else {
             setError(undefined);
@@ -179,7 +180,9 @@ function ImportMapping({ data, onPressBack, onPressImport,setListData }) {
                             [appHeaderState[29].field]: contact.row29,
                             [appHeaderState[30].field]: contact.row30,
                             [appHeaderState[31].field]: contact.row31,
-                            [appHeaderState[32].field]: contact.row32
+                            [appHeaderState[32].field]: contact.row32,
+                            [appHeaderState[33].field]: contact.row33,
+                            [appHeaderState[34].field]: contact.row34,
                         }
                     })
                 }

@@ -42,39 +42,42 @@ function ImportContacts() {
                     values.forEach((row, key) => {
                         if (row.length !== 0) {
                             if (key !== 1) {
-                                const firstName = row[1];
-                                const lastName = row[2];
-                                const middleInitial = row[3];
-                                const otherName = row[4];
+                                const firstName =  typeof row[1] === 'object' ? row[1]?.text : row[1];
+                                const lastName = typeof row[2] === 'object' ? row[2]?.text : row[2];
+                                const middleInitial = typeof row[3] === 'object' ? row[3]?.text : row[3];
+                                const otherName = typeof row[4] === 'object' ? row[4]?.text : row[4];
                                 const emailAddress = typeof row[5] === 'object' ? row[5]?.text : row[5];
-                                const homePhoneNumber = row[6];
-                                const mobilePhoneNumber = row[7];
-                                const work = row[8];
-                                const fax = row[9];
-                                const address1 = row[10];
-                                const address2 = row[11];
-                                const cityOrState = row[12];
-                                const Zip = row[13];
-                                const country = row[14];
-                                const eligibilityStatus = row[15];
-                                const primaryLanguage = row[16];
-                                const preferredMethod = row[17];
-                                const primaryNumber = row[18];
-                                const bestTimeToCall = row[19];
-                                const timeZone = row[20];
-                                const creditScore = row[21];
-                                const date = row[22];
-                                const creditReportType = row[23];
-                                const dob = row[24];
-                                const ssn = row[25];
-                                const dl = row[26];
-                                const state = row[27];
-                                const employer = row[28];
-                                const occ = row[29];
-                                const empLengthY = row[30];
-                                const empLengthM = row[31];
-                                const mortgageBalance = row[32];
-                                const homeValue = row[33];
+                                const homePhoneNumber = typeof row[6] === 'object' ? row[6]?.text : row[6];
+                                const mobilePhoneNumber = typeof row[7] === 'object' ? row[7]?.text : row[7];
+                                const work = typeof row[8] === 'object' ? row[8]?.text : row[8];
+                                const fax = typeof row[9] === 'object' ? row[9]?.text : row[9];
+                                const address1 = typeof row[10] === 'object' ? row[10]?.text : row[10];
+                                const address2 = typeof row[11] === 'object' ? row[11]?.text : row[11];
+                                const cityOrState = typeof row[12] === 'object' ? row[12]?.text : row[12];
+                                const Zip = typeof row[13] === 'object' ? row[13]?.text : row[13];
+                                const primaryLanguage = typeof row[14] === 'object' ? row[14]?.text : row[14];
+                                const maritalStatus = typeof row[15] === 'object' ? row[15]?.text : row[15];
+                                const doYouRentOrOwn = typeof row[16] === 'object' ? row[16]?.text : row[16];
+                                const timeZone = typeof row[17] === 'object' ? row[17]?.text : row[17];
+                                const creditScore = typeof row[18] === 'object' ? row[18]?.text : row[18];
+                                const date = typeof row[19] === 'object' ? row[19]?.text : row[19];
+                                const dob = typeof row[20] === 'object' ? row[20]?.text : row[20];
+                                const ssn = typeof row[21] === 'object' ? row[21]?.text : row[21];
+                                const dl = typeof row[22] === 'object' ? row[22]?.text : row[22];
+                                const state = typeof row[23] === 'object' ? row[23]?.text : row[23];
+                                const employer = typeof row[24] === 'object' ? row[24]?.text : row[24];
+                                const occ = typeof row[25] === 'object' ? row[25]?.text : row[25];
+                                const employmentStatus = typeof row[26] === 'object' ? row[26]?.text : row[26];
+                                const empLengthY = typeof row[27] === 'object' ? row[27]?.text : row[27];
+                                const empLengthM = typeof row[28] === 'object' ? row[28]?.text : row[28];
+                                const mortgagePayment = typeof row[29] === 'object' ? row[29]?.text : row[29];
+                                const mortgageBalance = typeof row[30] === 'object' ? row[30]?.text : row[30];
+                                const homeValue = typeof row[31] === 'object' ? row[31]?.text : row[31];
+                                const bestTimeToCall = typeof row[32] === 'object' ? row[32]?.text : row[32];
+                                const creditReportType = typeof row[33] === 'object' ? row[33]?.text : row[33];
+                                const state_ = typeof row[34] === 'object' ? row[34]?.text : row[34];
+
+
 
                                 data.push({
                                     row1: firstName,
@@ -90,26 +93,27 @@ function ImportContacts() {
                                     row11: address2,
                                     row12: cityOrState,
                                     row13: Zip,
-                                    row14: country,
-                                    row15: eligibilityStatus,
-                                    row16: primaryLanguage,
-                                    row17: preferredMethod,
-                                    row18: primaryNumber,
-                                    row19: bestTimeToCall,
-                                    row20: timeZone,
-                                    row21: creditScore,
-                                    row22: date,
-                                    row23: creditReportType,
-                                    row24: dob,
-                                    row25: ssn,
-                                    row26: dl,
-                                    row27: state,
-                                    row28: employer,
-                                    row29: occ,
-                                    row30: empLengthY,
-                                    row31: empLengthM,
-                                    row32: mortgageBalance,
-                                    row33: homeValue
+                                    row14: primaryLanguage,
+                                    row15: maritalStatus,
+                                    row16: doYouRentOrOwn,
+                                    row17: timeZone,
+                                    row18: creditScore,
+                                    row19: date,
+                                    row20: dob,
+                                    row21: ssn,
+                                    row22: dl,
+                                    row23: state,
+                                    row24: employer,
+                                    row25: occ,
+                                    row26: employmentStatus,
+                                    row27: empLengthY,
+                                    row28: empLengthM,
+                                    row29: mortgagePayment,
+                                    row30: mortgageBalance,
+                                    row31: homeValue,
+                                    row32: bestTimeToCall,
+                                    row33: creditReportType,
+                                    row34: state_
                                 })
                             }
                         }
@@ -147,7 +151,6 @@ function ImportContacts() {
     }
     
     const handleClickImport = async(formattedData) => {
-        console.log("FORMATTED ", formattedData)
         const response = await _addBulkContacts({ contacts: formattedData });
         console.log("res ", response)
         setLoading(false);
@@ -163,6 +166,7 @@ function ImportContacts() {
         }
     }
 
+    console.log("DAta ", fileData)
     return (
         <>
             {loading ? <CircularProgress /> : showMapping ? <ImportMapping setListData={setListData} data={fileData} onPressBack={onClickBackToMapping} onPressImport={handleClickImport} /> : 

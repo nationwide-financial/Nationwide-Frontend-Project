@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { Box, Button, Grid, Typography } from "@mui/material";
+import { Box, Button, Grid, Typography, Autocomplete } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import Paper from "@mui/material/Paper";
 import Table from "@mui/material/Table";
@@ -54,8 +54,10 @@ function ApplicationFormData() {
  // application edit 
  const [submitErr, setSubmitErr] = useState("");
   const [switchEditMode, setSwitchEditMode] = useState(false);
-  const [contactData, setContactData] = useState({});
+  const [contact, setContact] = useState({});
+  const [contactEdit, setContactEdit] = useState({});
   const [applicationId,setApplicationId] = useState("");
+  console.log("contactEdit",contactEdit)
 
   const [phoneNumber, setPhoneNumber] = useState("");
   const [firstName, setFirstName] = useState("");
@@ -72,63 +74,29 @@ function ApplicationFormData() {
   const [jobTitle, setJobTitle] = useState("");
   const [additionalInfomations, setAdditionalInfomations] = useState({})
 
-  const onChangeHandler = useCallback(
-    ({ target }) => {
-      setAdditionalInfomations((state) => ({ ...state, [target.name]: target.value }));
-    }, []
-  );
+  const languages = ["English","Spanish","Russian","French"]
+  const bestTimes = [
+    "6.00 AM - 7.00 AM",
+    "7.00 AM - 8.00 AM",
+    "8.00 AM - 9.00 AM",
+    "9.00 AM - 10.00 AM",
+    "11.00 AM - 12.00 AM",
+    "12.00 AM - 1.00 PM",
+    "2.00 PM - 3.00 PM",
+    "3.00 PM - 4.00 PM",
+    "6.00 PM - 5.00 PM",
+    "5.00 PM - 6.00 PM",
+  ]
+  const timeZones = ["timeZones","timeZones","timeZones"]
+  const creditReportTypes = ["type 01","type 02"]
+  const maritalStatusData=["Divorced", "Separated", "Widowed","Never Married"]
+  const employmentStatusData =["self employed","part time","full time"]
+  
   const handelSubmitContact = async (id) => {
+    console.log("96",id)
     try {
-      if (!firstName || firstName == "" || firstName == null) {
-        setSubmitErr("first name can not be empty !");
-      } else if (!lastName || lastName == "" || lastName == null) {
-        setSubmitErr("last name can not be empty !");
-      } else if (!email || email == "" || email == null) {
-        setSubmitErr("email can not be empty !");
-      } else if (!dob || dob == "" || dob == null) {
-        setSubmitErr("date of birth can not be empty !");
-      } else if (!idNumber || idNumber == "" || idNumber == null) {
-        setSubmitErr("ID number can not be empty !");
-      } else if (!city || city == "" || city == null) {
-        setSubmitErr("city can not be empty !");
-      } else if ( !streetAddress || streetAddress == "" || streetAddress == null) {
-        setSubmitErr("street address can not be empty !");
-      } else if (!postalCode || postalCode == "" || postalCode == null) {
-        setSubmitErr("postal code can not be empty !");
-      } else if (!province || province == "" || province == null) {
-        setSubmitErr("province code can not be empty !");
-      } 
-      // else if (!country || country == "" || country == null) {
-      //   setSubmitErr("country code can not be empty !");
-      // } 
-      else if (!phoneNumber || phoneNumber == "" || phoneNumber == null) {
-        setSubmitErr("phone number code can not be empty !");
-      } else if (!companyName || companyName == "" || companyName == null) {
-        setSubmitErr("Company Name code can not be empty !");
-      } else if (!jobTitle || jobTitle == "" || jobTitle == null) {
-        setSubmitErr("job Title code can not be empty !");
-      } else {
-        setSubmitErr("");
-        console.log("inside");
         let body = {
-          basicInformation: {
-            firstName: firstName,
-            lastName: lastName,
-            email: email,
-            phone: phoneNumber,
-            idNumber: idNumber,
-            dob: dob,
-            streetAddress: streetAddress,
-            city: city,
-            state: province,
-            postalCode: postalCode,
-           // country: country,
-          },
-          jobInformation: {
-            companyName: companyName,
-            jobTitle: jobTitle,
-          },
-          additionalInformation:{...additionalInfomations}
+          basicInformation: contactEdit || {}
         };
         const res = await _updateContactById(id, body);
         console.log("_updateContactById", res);
@@ -138,7 +106,7 @@ function ApplicationFormData() {
           setSwitchEditMode((switchEditMode) => !switchEditMode);
           getContactData(contactId);
         }
-      }
+      
     } catch (err) {
       console.log(err);
     }
@@ -151,27 +119,161 @@ function ApplicationFormData() {
 
   };
 
+  const handleChange = (param, event) => {
+    console.log(param, event)
+    //setError("");
+    switch (param) {
+      case "firstName": {
+        setContactEdit({ ...contactEdit, firstName: event.target.value });
+        break;
+      }
+      case "lastName": {
+        setContactEdit({ ...contactEdit, lastName: event.target.value });
+        break;
+      }
+      case "middleInitial": {
+        setContactEdit({ ...contactEdit, middleInitial: event.target.value });
+        break;
+      }
+      case "otherName": {
+        setContactEdit({ ...contactEdit, otherName: event.target.value });
+        break;
+      }
+      case "emailAddress": {
+        setContactEdit({ ...contactEdit, emailAddress: event.target.value });
+        break;
+      }
+      case "homePhoneNumber": {
+        setContactEdit({ ...contactEdit, homePhoneNumber: event.target.value });
+        break;
+      }
+      case "mobilePhoneNumber": {
+        setContactEdit({ ...contactEdit, mobilePhoneNumber: event.target.value });
+        break;
+      }
+      case "work": {
+        setContactEdit({ ...contactEdit, work: event.target.value });
+        break;
+      }
+      case "fax": {
+        setContactEdit({ ...contactEdit, fax: event.target.value });
+        break;
+      }
+      case "address1": {
+        setContactEdit({ ...contactEdit, address1: event.target.value });
+        break;
+      }
+      case 'address2': {
+        setContactEdit({ ...contactEdit, address2: event.target.value });
+        break;
+      }
+      case "cityOrState": {
+        setContactEdit({ ...contactEdit, cityOrState: event.target.value });
+        break;
+      }
+      case "Zip": {
+        setContactEdit({ ...contactEdit, Zip: event.target.value });
+        break;
+      }
+      case "primaryLanguage": {
+        setContactEdit({ ...contactEdit, primaryLanguage: event });
+        break;
+      }
+      case "bestTimeToCall": {
+        setContactEdit({ ...contactEdit, bestTimeToCall: event });
+        break;
+      }
+      case "timeZone": {
+        setContactEdit({ ...contactEdit, timeZone: event});
+        break;
+      }
+      case "creditScore": {
+        setContactEdit({ ...contactEdit, creditScore: event.target.value });
+        break;
+      }
+      case "date": {
+        setContactEdit({ ...contactEdit, date: event.target.value });
+        break;
+      }
+      case "creditReportType": {
+        setContactEdit({ ...contactEdit, creditReportType: event });
+        break;
+      }
+      case "dob": {
+        setContactEdit({ ...contactEdit, dob: event.target.value });
+        break;
+      }
+      case "ssn": {
+        setContactEdit({ ...contactEdit, ssn: event.target.value });
+        break;
+      }
+      case "dl": {
+        setContactEdit({ ...contactEdit, dl: event.target.value });
+        break;
+      }
+      case "state": {
+        setContactEdit({ ...contactEdit, state: event.target.value });
+        break;
+      }
+      case "employer": {
+        setContactEdit({ ...contactEdit, employer: event.target.value });
+        break;
+      }
+      case "occ": {
+        setContactEdit({ ...contactEdit, occ: event.target.value });
+        break;
+      }
+      case "empLengthY": {
+        setContactEdit({ ...contactEdit, empLengthY: event.target.value });
+        break;
+      }
+      case "empLengthM": {
+        setContactEdit({ ...contactEdit, empLengthM: event.target.value });
+        break;
+      }
+      case "mortgageBalance": {
+        setContactEdit({ ...contactEdit, mortgageBalance: event.target.value });
+        break;
+      }
+      case "homeValue": {
+        setContactEdit({ ...contactEdit, homeValue: event.target.value });
+        break;
+      }
+      case "maritalStatus": {
+        setContactEdit({ ...contactEdit, maritalStatus: event });
+        break;
+      }
+      case "state_": {
+        setContactEdit({ ...contactEdit, state_: event.target.value });
+        break;
+      }
+      case "employmentStatus": {
+        setContactEdit({ ...contactEdit, employmentStatus: event });
+        break;
+      }
+      case "mortgagePayment": {
+        setContactEdit({ ...contactEdit, mortgagePayment: event.target.value });
+        break;
+      }
+      case "doYouRentOrOwn": {
+        setContactEdit({ ...contactEdit, doYouRentOrOwn: event.target.value });
+        break;
+      }
+      default: {
+        setContactEdit({ ...contactEdit });
+        break;
+      }
+    }
+  };
+  
   const getContactData = async (id) => {
     try {
       if (id) {
         const res = await _fetchContactById(id);
         console.log("320_fetchContactById",res)
         if (res?.data?.Item && res.status == 200) {
-          setContactData(res?.data?.Item);
-          setPhoneNumber(res?.data?.Item?.basicInformation?.phone);
-          setFirstName(res?.data?.Item?.basicInformation?.firstName);
-          setLastName(res?.data?.Item?.basicInformation?.lastName);
-          setEmail(res?.data?.Item?.basicInformation?.email);
-          setDob(res?.data?.Item?.basicInformation?.dob);
-          setIdNumber(res?.data?.Item?.basicInformation?.idNumber);
-          setCity(res?.data?.Item?.basicInformation?.city);
-          setStreetAddress(res?.data?.Item?.basicInformation?.streetAddress);
-          setPostalCode(res?.data?.Item?.basicInformation?.postalCode);
-          setProvince(res?.data?.Item?.basicInformation?.state);
-          //setCountry(res?.data?.Item?.basicInformation?.country);
-          setCompanyName(res?.data?.Item?.jobInformation?.companyName);
-          setJobTitle(res?.data?.Item?.jobInformation?.jobTitle);
-          setAdditionalInfomations(res?.data?.Item?.additionalInformation)
+          setContact(res?.data?.Item);
+          setContactEdit(res?.data?.Item?.basicInformation)
         }
       }
     } catch (err) {
@@ -259,8 +361,8 @@ function ApplicationFormData() {
               <Stack direction="row" spacing={1}>
                 <Typography variant="h5">
                   <span style={{ fontSize: 20, fontWeight: 700 }}>
-                    {contactData?.basicInformation?.firstName || ""}{" "}
-                    {contactData?.basicInformation?.lastName || ""}
+                    {contact?.basicInformation?.firstName || ""}{" "}
+                    {contact?.basicInformation?.lastName || ""}
                   </span>{" "}
                 </Typography>
 
@@ -283,9 +385,12 @@ function ApplicationFormData() {
                     </Stack>
                   </Link>
                 ) : (
-                  <div style={{ marginBottom: 100, display: "flex", justifyContent: "left", margin: 20 }} >
-                    <Button variant="contained" onClick={() => { handelSubmitContact(contactData.PK)}} >
+                  <div>
+                    <Button variant="contained" style={{ marginRight:10 }} onClick={() => { handelSubmitContact(contact.PK)}} >
                       Save
+                    </Button>
+                    <Button variant="contained" onClick={() => {setSwitchEditMode((switchEditMode)=>!switchEditMode)}} >
+                      Cancel
                     </Button>
                   </div>
                 )}
@@ -297,58 +402,19 @@ function ApplicationFormData() {
                     <TableContainer style={{ backgroundColor: "transparent", marginTop:40 }}>
                       <Table aria-label="simple table">
                         <TableBody>
-                          <TableRow
-                            sx={{
-                              "&:last-child td, &:last-child th": { border: 0 },
-                            }}
-                          >
-                            <TableCell
-                              component="th"
-                              scope="row"
-                              style={{
-                                fontSize: 20,
-                                fontWeight: 400,
-                                color: "#393939",
-                              }}
-                            >
+                          <TableRow sx={{ "&:last-child td, &:last-child th": { border: 0 },}} >
+                            <TableCell component="th" scope="row" style={{fontSize: 20,fontWeight: 400, color: "#393939", }} >
                               {"Campaign"}
                             </TableCell>
-                            <TableCell
-                              align="left"
-                              style={{
-                                fontSize: 20,
-                                fontWeight: 600,
-                                color: "#393939",
-                              }}
-                            >
+                            <TableCell component="th" scope="row" style={{fontSize: 20, fontWeight: 600, color: "#393939",}} >
                             {loanType?.loanName || ""}
                             </TableCell>
                           </TableRow>
-
-                          <TableRow
-                            sx={{
-                              "&:last-child td, &:last-child th": { border: 0 },
-                            }}
-                          >
-                            <TableCell
-                              component="th"
-                              scope="row"
-                              style={{
-                                fontSize: 20,
-                                fontWeight: 400,
-                                color: "#393939",
-                              }}
-                            >
+                          <TableRow sx={{ "&:last-child td, &:last-child th": { border: 0 },}} >
+                          <TableCell component="th" scope="row" style={{fontSize: 20,fontWeight: 400, color: "#393939", }} >
                               {"Reservation/Offer Code"}
                             </TableCell>
-                            <TableCell
-                              align="left"
-                              style={{
-                                fontSize: 20,
-                                fontWeight: 600,
-                                color: "#393939",
-                              }}
-                            >
+                            <TableCell component="th" scope="row" style={{fontSize: 20,fontWeight: 400, color: "#393939", }} >
                               {""}
                             </TableCell>
                           </TableRow>
@@ -382,21 +448,20 @@ function ApplicationFormData() {
                                 color: "#393939",
                               }}
                             >
-                              {switchEditMode ?  <TextField
+                              {switchEditMode ? <TextField
                                   fullWidth
                                   size="small"
                                   margin="normal"
                                   id="outlined-basic"
                                   variant="outlined"
                                   placeholder="Text"
-                                  value={lastName}
-                                  onChange={(e) => {
-                                    setLastName(e.target.value);
-                                  }}
+                                  onChange = {(event) => handleChange("firstName", event)}
+                                  value = {contactEdit?.firstName}
                                   style={{ margin: 0 }}
-                                /> : contactData?.basicInformation?.firstName || ""}
+                                /> : contact?.basicInformation?.firstName || ""}
                             </TableCell>
                           </TableRow>
+                          {console.log("contact",contact)}
                           <TableRow
                             sx={{
                               "&:last-child td, &:last-child th": { border: 0 },
@@ -428,12 +493,10 @@ function ApplicationFormData() {
                                   id="outlined-basic"
                                   variant="outlined"
                                   placeholder="Text"
-                                  value={phoneNumber}
-                                  onChange={(e) => {
-                                    setPhoneNumber(e.target.value);
-                                  }}
+                                  onChange = {(event) => handleChange("lastName", event)}
+                                  value = {contactEdit?.lastName}
                                   style={{ margin: 0 }}
-                                /> : contactData?.basicInformation?.lastName || "" }
+                                /> : contact?.basicInformation?.lastName || "" }
                             </TableCell>
                           </TableRow>
                           <TableRow
@@ -460,14 +523,18 @@ function ApplicationFormData() {
                                 color: "#393939",
                               }}
                             >
-                              {/* {switchEditMode ? <MobileDatePicker
-                                inputFormat="MM/DD/YYYY"
-                                value={dob}
-                                onChange={(event) => {console.log(event) 
-                                  setDob(event)}}
-                                renderInput={(params) => <TextField size="small" fullWidth margin="normal" {...params} error={false} />}
-                              />:getDate(contactData?.basicInformation?.dob)  || "" } */}
-                              {contactData?.basicInformation?.middleInitial}
+                             
+                               {switchEditMode ? <TextField
+                                  fullWidth
+                                  size="small"
+                                  margin="normal"
+                                  id="outlined-basic"
+                                  variant="outlined"
+                                  placeholder="Text"
+                                  onChange = {(event) => handleChange("middleInitial", event)}
+                                  value = {contactEdit?.middleInitial}
+                                  style={{ margin: 0 }}
+                                /> : contact?.basicInformation?.middleInitial || "" }
                             </TableCell>
                           </TableRow>
 
@@ -495,19 +562,17 @@ function ApplicationFormData() {
                                 color: "#393939",
                               }}
                             >
-                              {switchEditMode ? <TextField
+                               {switchEditMode ? <TextField
                                   fullWidth
                                   size="small"
                                   margin="normal"
                                   id="outlined-basic"
                                   variant="outlined"
                                   placeholder="Text"
-                                  value={postalCode}
-                                  onChange={(e) => {
-                                    setPostalCode(e.target.value);
-                                  }}
+                                  onChange = {(event) => handleChange("otherName", event)}
+                                  value = {contactEdit?.otherName}
                                   style={{ margin: 0 }}
-                                /> : contactData?.basicInformation?.otherName || "" }
+                                /> : contact?.basicInformation?.otherName || "" }
                             </TableCell>
                           </TableRow>
                        
@@ -535,19 +600,17 @@ function ApplicationFormData() {
                                 color: "#393939",
                               }}
                             >
-                              {switchEditMode ? <TextField
+                               {switchEditMode ? <TextField
                                   fullWidth
                                   size="small"
                                   margin="normal"
                                   id="outlined-basic"
                                   variant="outlined"
                                   placeholder="Text"
-                                  value={firstName}
-                                  onChange={(e) => {
-                                    setFirstName(e.target.value);
-                                  }}
+                                  onChange = {(event) => handleChange("emailAddress", event)}
+                                  value = {contactEdit?.emailAddress}
                                   style={{ margin: 0 }}
-                                />:contactData?.basicInformation?.emailAddress || "" }
+                                /> : contact?.basicInformation?.emailAddress || "" }
                             </TableCell>
                           </TableRow>    
                           <TableRow
@@ -586,8 +649,32 @@ function ApplicationFormData() {
                                     setEmail(e.target.value);
                                   }}
                                   style={{ margin: 0 }}
-                                />:contactData?.basicInformation?.emailAddress || ""} */}
-                              {contactData?.basicInformation?.homePhoneNumber} /  {contactData?.basicInformation?.mobilePhoneNumber} 
+                                />:contact?.basicInformation?.emailAddress || ""} */}
+                                 {switchEditMode ? <div>
+                                  <TextField
+                                  fullWidth
+                                  size="small"
+                                  margin="normal"
+                                  id="outlined-basic"
+                                  variant="outlined"
+                                  placeholder="Text"
+                                  onChange = {(event) => handleChange("homePhoneNumber", event)}
+                                  value = {contactEdit?.homePhoneNumber}
+                                  style={{ margin: 0 }}
+                                /> 
+                                 <TextField
+                                  style={{ marginTop:10 }}
+                                  fullWidth
+                                  size="small"
+                                  margin="normal"
+                                  id="outlined-basic"
+                                  variant="outlined"
+                                  placeholder="Text"
+                                  onChange = {(event) => handleChange("mobilePhoneNumber", event)}
+                                  value = {contactEdit?.mobilePhoneNumber}
+                                 
+                                /> 
+                                 </div>: `${contact?.basicInformation?.homePhoneNumber} / ${contact?.basicInformation?.mobilePhoneNumber}` || "" }
                             </TableCell>
                           </TableRow>
 
@@ -627,7 +714,7 @@ function ApplicationFormData() {
                                     setIdNumber(e.target.value);
                                   }}
                                   style={{ margin: 0 }}
-                                /> : contactData?.basicInformation?.idNumber || ""}
+                                /> : contact?.basicInformation?.idNumber || ""}
                             </TableCell>
                           </TableRow> */}
                           <TableRow sx={{ "&:last-child td, &:last-child th": { border: 0 }, }} >
@@ -635,7 +722,17 @@ function ApplicationFormData() {
                               {"Best Time To Call"}
                             </TableCell>
                             <TableCell align="left"style={{ fontSize: 20, fontWeight: 600, color: "#393939", }} >
-                                {contactData?.basicInformation?.bestTimeToCall}
+                             { switchEditMode ? <div>
+                              <Autocomplete
+                                renderInput={(params) => ( <TextField  {...params} size="small" label="Select Best Time To Call" />)}
+                                value={contactEdit?.bestTimeToCall}
+                                onChange={(e, val) => {
+                                  handleChange("bestTimeToCall", val)
+                                  return val;
+                                }}
+                                options={bestTimes?.map((time) => time )}
+                              ></Autocomplete>
+                            </div> : contact?.basicInformation?.bestTimeToCall || ""}
                             </TableCell>
                           </TableRow>
 
@@ -644,7 +741,31 @@ function ApplicationFormData() {
                               {"Work / Fax"}
                             </TableCell>
                             <TableCell align="left"style={{ fontSize: 20, fontWeight: 600, color: "#393939", }} >
-                                {contactData?.basicInformation?.work} / {contactData?.basicInformation?.fax} 
+                                {switchEditMode ?  <div>
+                                  <TextField
+                                  fullWidth
+                                  size="small"
+                                  margin="normal"
+                                  id="outlined-basic"
+                                  variant="outlined"
+                                  placeholder="Text"
+                                  onChange = {(event) => handleChange("work", event)}
+                                  value = {contactEdit?.work}
+                                  style={{ margin: 0 }}
+                                /> 
+                                 <TextField
+                                  style={{ marginTop:10 }}
+                                  fullWidth
+                                  size="small"
+                                  margin="normal"
+                                  id="outlined-basic"
+                                  variant="outlined"
+                                  placeholder="Text"
+                                  onChange = {(event) => handleChange("fax", event)}
+                                  value = {contactEdit?.fax}
+                                 
+                                /> 
+                                 </div>:`${contact?.basicInformation?.work} / ${contact?.basicInformation?.fax}` || "" }
                             </TableCell>
                           </TableRow>
 
@@ -653,7 +774,18 @@ function ApplicationFormData() {
                               {"Address 1"}
                             </TableCell>
                             <TableCell align="left"style={{ fontSize: 20, fontWeight: 600, color: "#393939", }} >
-                               {contactData?.basicInformation?.address1} 
+                              {switchEditMode ?  <TextField
+                                  style={{ marginTop:10 }}
+                                  fullWidth
+                                  size="small"
+                                  margin="normal"
+                                  id="outlined-basic"
+                                  variant="outlined"
+                                  placeholder="Text"
+                                  onChange = {(event) => handleChange("address1", event)}
+                                  value = {contactEdit?.address1}
+                                 
+                                /> : contact?.basicInformation?.address1 || ""}
                             </TableCell>
                           </TableRow>
 
@@ -662,7 +794,18 @@ function ApplicationFormData() {
                               {"Address 2"}
                             </TableCell>
                             <TableCell align="left"style={{ fontSize: 20, fontWeight: 600, color: "#393939", }} >
-                                {contactData?.basicInformation?.address2} 
+                            {switchEditMode ?  <TextField
+                                  style={{ marginTop:10 }}
+                                  fullWidth
+                                  size="small"
+                                  margin="normal"
+                                  id="outlined-basic"
+                                  variant="outlined"
+                                  placeholder="Text"
+                                  onChange = {(event) => handleChange("address2", event)}
+                                  value = {contactEdit?.address2}
+                                 
+                                /> : contact?.basicInformation?.address2} 
                             </TableCell>
                           </TableRow>
 
@@ -671,7 +814,43 @@ function ApplicationFormData() {
                               {"City, State, Zip"}
                             </TableCell>
                             <TableCell align="left"style={{ fontSize: 20, fontWeight: 600, color: "#393939", }} >
-                                {contactData?.basicInformation?.cityOrState} / {contactData?.basicInformation?.state_} / {contactData?.basicInformation?.Zip} 
+                            {switchEditMode ? <div>
+                                  <TextField
+                                  fullWidth
+                                  size="small"
+                                  margin="normal"
+                                  id="outlined-basic"
+                                  variant="outlined"
+                                  placeholder="Text"
+                                  onChange = {(event) => handleChange("cityOrState", event)}
+                                  value = {contactEdit?.cityOrState}
+                                  style={{ margin: 0 }}
+                                /> 
+                                 <TextField
+                                  style={{ marginTop:10 }}
+                                  fullWidth
+                                  size="small"
+                                  margin="normal"
+                                  id="outlined-basic"
+                                  variant="outlined"
+                                  placeholder="Text"
+                                  onChange = {(event) => handleChange("state_", event)}
+                                  value = {contactEdit?.state_}
+                                 
+                                /> 
+                                <TextField
+                                  style={{ marginTop:10 }}
+                                  fullWidth
+                                  size="small"
+                                  margin="normal"
+                                  id="outlined-basic"
+                                  variant="outlined"
+                                  placeholder="Text"
+                                  onChange = {(event) => handleChange("Zip", event)}
+                                  value = {contactEdit?.Zip}
+                                 
+                                /> 
+                                 </div>: `${contact?.basicInformation?.cityOrState} / ${contact?.basicInformation?.state_} / ${contact?.basicInformation?.Zip}` || "" }
                             </TableCell>
                           </TableRow>
 
@@ -680,7 +859,22 @@ function ApplicationFormData() {
                               {"Primary Language"}
                             </TableCell>
                             <TableCell align="left"style={{ fontSize: 20, fontWeight: 600, color: "#393939", }} >
-                              {contactData?.basicInformation?.primaryLanguage} 
+                              {switchEditMode ?   <Autocomplete 
+                                    renderInput={(params) => (
+                                    <TextField
+                                      value={contactEdit?.primaryLanguage}
+                                      {...params}
+                                      size="small"
+                                      label="Select Primary Language"
+                                    />
+                                    )}
+                                    onChange={(e, val) => {
+                                    handleChange("primaryLanguage", val)
+                                    return val;
+                                    }}
+                                    options={languages?.map((language) => language )}
+                                  >
+                                </Autocomplete> : contact?.basicInformation?.primaryLanguage || ""}
                             </TableCell>
                           </TableRow>
                           
@@ -689,7 +883,31 @@ function ApplicationFormData() {
                               {"DL# / State"}
                             </TableCell>
                             <TableCell align="left"style={{ fontSize: 20, fontWeight: 600, color: "#393939", }} >
-                              {contactData?.basicInformation?.dl} /{contactData?.basicInformation?.state} 
+                            {switchEditMode ? <div>
+                                  <TextField
+                                  fullWidth
+                                  size="small"
+                                  margin="normal"
+                                  id="outlined-basic"
+                                  variant="outlined"
+                                  placeholder="Text"
+                                  onChange = {(event) => handleChange("dl", event)}
+                                  value = {contactEdit?.dl}
+                                  style={{ margin: 0 }}
+                                /> 
+                                 <TextField
+                                  style={{ marginTop:10 }}
+                                  fullWidth
+                                  size="small"
+                                  margin="normal"
+                                  id="outlined-basic"
+                                  variant="outlined"
+                                  placeholder="Text"
+                                  onChange = {(event) => handleChange("state", event)}
+                                  value = {contactEdit?.state}
+                                 
+                                /> 
+                                 </div>: `${contact?.basicInformation?.dl} / ${contact?.basicInformation?.state}` || "" }
                             </TableCell>
                           </TableRow>
                         </TableBody>
@@ -705,7 +923,31 @@ function ApplicationFormData() {
                               {"Employer / Occ"}
                             </TableCell>
                             <TableCell align="left"style={{ fontSize: 20, fontWeight: 600, color: "#393939", }} >
-                              {contactData?.basicInformation?.employer} /  {contactData?.basicInformation?.occ} 
+                              {switchEditMode ? <div>
+                                  <TextField
+                                  fullWidth
+                                  size="small"
+                                  margin="normal"
+                                  id="outlined-basic"
+                                  variant="outlined"
+                                  placeholder="Text"
+                                  onChange = {(event) => handleChange("employer", event)}
+                                  value = {contactEdit?.employer}
+                                  style={{ margin: 0 }}
+                                /> 
+                                 <TextField
+                                  style={{ marginTop:10 }}
+                                  fullWidth
+                                  size="small"
+                                  margin="normal"
+                                  id="outlined-basic"
+                                  variant="outlined"
+                                  placeholder="Text"
+                                  onChange = {(event) => handleChange("occ", event)}
+                                  value = {contactEdit?.occ}
+                                 
+                                /> 
+                                 </div>: `${contact?.basicInformation?.employer} / ${contact?.basicInformation?.occ}` || ""}
                             </TableCell>
                           </TableRow>
 
@@ -714,7 +956,22 @@ function ApplicationFormData() {
                               {"Employment status"}
                             </TableCell>
                             <TableCell align="left"style={{ fontSize: 20, fontWeight: 600, color: "#393939", }} >
-                              {contactData?.basicInformation?.employmentStatus} 
+                              {switchEditMode ? <Autocomplete 
+                                  renderInput={(params) => (
+                                  <TextField
+                                    value={contactEdit?.employmentStatus}
+                                    {...params}
+                                    size="small"
+                                    label="Select Primary Language"
+                                  />
+                                  )}
+                                  onChange={(e, val) => {
+                                  handleChange("employmentStatus", val)
+                                  return val;
+                                  }}
+                                  options={employmentStatusData?.map((language) => language )}
+                                >
+                              </Autocomplete> : contact?.basicInformation?.employmentStatus}
                             </TableCell>
                           </TableRow>
 
@@ -723,7 +980,31 @@ function ApplicationFormData() {
                               {"Emp Length Y/M"}
                             </TableCell>
                             <TableCell align="left"style={{ fontSize: 20, fontWeight: 600, color: "#393939", }} >
-                              {contactData?.basicInformation?.empLengthY} / {contactData?.basicInformation?.empLengthM} 
+                            {switchEditMode ? <div>
+                                  <TextField
+                                  fullWidth
+                                  size="small"
+                                  margin="normal"
+                                  id="outlined-basic"
+                                  variant="outlined"
+                                  placeholder="Text"
+                                  onChange = {(event) => handleChange("empLengthY", event)}
+                                  value = {contactEdit?.empLengthY}
+                                  style={{ margin: 0 }}
+                                /> 
+                                 <TextField
+                                  style={{ marginTop:10 }}
+                                  fullWidth
+                                  size="small"
+                                  margin="normal"
+                                  id="outlined-basic"
+                                  variant="outlined"
+                                  placeholder="Text"
+                                  onChange = {(event) => handleChange("empLengthM", event)}
+                                  value = {contactEdit?.empLengthM}
+                                 
+                                /> 
+                                 </div>: `${contact?.basicInformation?.empLengthY} / ${contact?.basicInformation?.empLengthM}` || "" }
                             </TableCell>
                           </TableRow>
 
@@ -732,7 +1013,18 @@ function ApplicationFormData() {
                               {"Mortgage payment"}
                             </TableCell>
                             <TableCell align="left"style={{ fontSize: 20, fontWeight: 600, color: "#393939", }} >
-                              {contactData?.basicInformation?.mortgagePayment} 
+                              {switchEditMode ?   <TextField
+                                  style={{ marginTop:10 }}
+                                  fullWidth
+                                  size="small"
+                                  margin="normal"
+                                  id="outlined-basic"
+                                  variant="outlined"
+                                  placeholder="Text"
+                                  onChange = {(event) => handleChange("mortgagePayment", event)}
+                                  value = {contactEdit?.mortgagePayment}
+                                 
+                                /> : contact?.basicInformation?.mortgagePayment || ""}
                             </TableCell>
                           </TableRow>
 
@@ -741,7 +1033,19 @@ function ApplicationFormData() {
                               {"Martgage Balance"}
                             </TableCell>
                             <TableCell align="left"style={{ fontSize: 20, fontWeight: 600, color: "#393939", }} >
-                              {contactData?.basicInformation?.mortgageBalance} 
+                              
+                            {switchEditMode ?   <TextField
+                                  style={{ marginTop:10 }}
+                                  fullWidth
+                                  size="small"
+                                  margin="normal"
+                                  id="outlined-basic"
+                                  variant="outlined"
+                                  placeholder="Text"
+                                  onChange = {(event) => handleChange("mortgageBalance", event)}
+                                  value = {contactEdit?.mortgageBalance}
+                                 
+                                /> : contact?.basicInformation?.mortgageBalance || "" } 
                             </TableCell>
                           </TableRow>
 
@@ -750,7 +1054,18 @@ function ApplicationFormData() {
                               {"Home Value"}
                             </TableCell>
                             <TableCell align="left"style={{ fontSize: 20, fontWeight: 600, color: "#393939", }} >
-                              {contactData?.basicInformation?.homeValue} 
+                            {switchEditMode ?   <TextField
+                                  style={{ marginTop:10 }}
+                                  fullWidth
+                                  size="small"
+                                  margin="normal"
+                                  id="outlined-basic"
+                                  variant="outlined"
+                                  placeholder="Text"
+                                  onChange = {(event) => handleChange("homeValue", event)}
+                                  value = {contactEdit?.homeValue}
+                                 
+                                /> :contact?.basicInformation?.homeValue || ""} 
                             </TableCell>
                           </TableRow>
                           
@@ -759,7 +1074,22 @@ function ApplicationFormData() {
                               {"Marital Status"}
                             </TableCell>
                             <TableCell align="left"style={{ fontSize: 20, fontWeight: 600, color: "#393939", }} >
-                              {contactData?.basicInformation?.maritalStatus} 
+                              {switchEditMode ? <Autocomplete 
+                                  renderInput={(params) => (
+                                  <TextField
+                                    value={contactEdit?.maritalStatus}
+                                    {...params}
+                                    size="small"
+                                    label="Select Marital Status"
+                                  />
+                                  )}
+                                  onChange={(e, val) => {
+                                  handleChange("maritalStatus", val)
+                                  return val;
+                                  }}
+                                  options={maritalStatusData?.map((state) => state )}
+                                >
+                              </Autocomplete> : contact?.basicInformation?.maritalStatus || "" }
                             </TableCell>
                           </TableRow>
 
@@ -768,7 +1098,19 @@ function ApplicationFormData() {
                               {"Do You Rent Or Own"}
                             </TableCell>
                             <TableCell align="left"style={{ fontSize: 20, fontWeight: 600, color: "#393939", }} >
-                              {contactData?.basicInformation?.doYouRentOrOwn} 
+
+                            {switchEditMode ?   <TextField
+                                  style={{ marginTop:10 }}
+                                  fullWidth
+                                  size="small"
+                                  margin="normal"
+                                  id="outlined-basic"
+                                  variant="outlined"
+                                  placeholder="Text"
+                                  onChange = {(event) => handleChange("doYouRentOrOwn", event)}
+                                  value = {contactEdit?.doYouRentOrOwn}
+                                 
+                                />: contact?.basicInformation?.doYouRentOrOwn || ""} 
                             </TableCell>
                           </TableRow>
 
@@ -777,7 +1119,22 @@ function ApplicationFormData() {
                               {"Time Zone"}
                             </TableCell>
                             <TableCell align="left"style={{ fontSize: 20, fontWeight: 600, color: "#393939", }} >
-                              {contactData?.basicInformation?.timeZone} 
+                            {switchEditMode ? <Autocomplete 
+                                  renderInput={(params) => (
+                                  <TextField
+                                    value={contactEdit?.maritalStatus}
+                                    {...params}
+                                    size="small"
+                                    label="Select Time Zone"
+                                  />
+                                  )}
+                                  onChange={(e, val) => {
+                                  handleChange("timeZone", val)
+                                  return val;
+                                  }}
+                                  options={timeZones?.map((state) => state )}
+                                >
+                              </Autocomplete> : contact?.basicInformation?.timeZone || ""} 
                             </TableCell>
                           </TableRow>
 
@@ -786,7 +1143,31 @@ function ApplicationFormData() {
                               {"Credit Score / Date"}
                             </TableCell>
                             <TableCell align="left"style={{ fontSize: 20, fontWeight: 600, color: "#393939", }} >
-                              {contactData?.basicInformation?.creditScore} / {contactData?.basicInformation?.date} 
+                            {switchEditMode ? <div>
+                                  <TextField
+                                  fullWidth
+                                  size="small"
+                                  margin="normal"
+                                  id="outlined-basic"
+                                  variant="outlined"
+                                  placeholder="Text"
+                                  onChange = {(event) => handleChange("creditScore", event)}
+                                  value = {contactEdit?.creditScore}
+                                  style={{ margin: 0 }}
+                                /> 
+                                 <TextField
+                                  style={{ marginTop:10 }}
+                                  fullWidth
+                                  size="small"
+                                  margin="normal"
+                                  id="outlined-basic"
+                                  variant="outlined"
+                                  placeholder="Text"
+                                  onChange = {(event) => handleChange("date", event)}
+                                  value = {contactEdit?.date}
+                                 
+                                /> 
+                                 </div>: `${contact?.basicInformation?.creditScore} / ${contact?.basicInformation?.date}` || "" }
                             </TableCell>
                           </TableRow>
 
@@ -795,7 +1176,22 @@ function ApplicationFormData() {
                               {"Credit Report Type"}
                             </TableCell>
                             <TableCell align="left"style={{ fontSize: 20, fontWeight: 600, color: "#393939", }} >
-                              {contactData?.basicInformation?.creditReportType} 
+                              {switchEditMode ? <Autocomplete 
+                                  renderInput={(params) => (
+                                  <TextField
+                                    value={contactEdit?.creditReportType}
+                                    {...params}
+                                    size="small"
+                                    label="Select Credit Report Type"
+                                  />
+                                  )}
+                                  onChange={(e, val) => {
+                                  handleChange("creditReportType", val)
+                                  return val;
+                                  }}
+                                  options={creditReportTypes?.map((state) => state )}
+                                >
+                              </Autocomplete> :contact?.basicInformation?.creditReportType || ""} 
                             </TableCell>
                           </TableRow>
 
@@ -804,7 +1200,31 @@ function ApplicationFormData() {
                               {"DOB / SSN"}
                             </TableCell>
                             <TableCell align="left"style={{ fontSize: 20, fontWeight: 600, color: "#393939", }} >
-                              {contactData?.basicInformation?.dob} / {contactData?.basicInformation?.ssn}
+                            {switchEditMode ? <div>
+                                  <TextField
+                                  fullWidth
+                                  size="small"
+                                  margin="normal"
+                                  id="outlined-basic"
+                                  variant="outlined"
+                                  placeholder="Text"
+                                  onChange = {(event) => handleChange("dob", event)}
+                                  value = {contactEdit?.dob}
+                                  style={{ margin: 0 }}
+                                /> 
+                                 <TextField
+                                  style={{ marginTop:10 }}
+                                  fullWidth
+                                  size="small"
+                                  margin="normal"
+                                  id="outlined-basic"
+                                  variant="outlined"
+                                  placeholder="Text"
+                                  onChange = {(event) => handleChange("ssn", event)}
+                                  value = {contactEdit?.ssn}
+                                 
+                                /> 
+                                 </div>: `${contact?.basicInformation?.dob} / ${contact?.basicInformation?.mobilePhoneNumber}` || "" }
                             </TableCell>
                           </TableRow>
                         </TableBody>
@@ -861,7 +1281,7 @@ function ApplicationFormData() {
                                     setCompanyName(e.target.value);
                                   }}
                                   style={{ margin: 0 }}
-                                /> : contactData?.jobInformation?.companyName || "" }
+                                /> : contact?.jobInformation?.companyName || "" }
                             </TableCell>
                           </TableRow>
                           <TableRow
@@ -900,7 +1320,7 @@ function ApplicationFormData() {
                                     setJobTitle(e.target.value);
                                   }}
                                   style={{ margin: 0 }}
-                                /> : contactData?.jobInformation?.jobTitle || "" }
+                                /> : contact?.jobInformation?.jobTitle || "" }
                             </TableCell>
                           </TableRow>
                         </TableBody>
@@ -965,7 +1385,7 @@ function ApplicationFormData() {
                                   value={additionalInfomations?.[variable?.systemName]}
                                   onChange={onChangeHandler}
                                   style={{ margin: 0 }}
-                                /> : contactData?.additionalInformation?.[variable?.systemName] || ""}
+                                /> : contact?.additionalInformation?.[variable?.systemName] || ""}
                               </TableCell>
                             </TableRow>
                             )

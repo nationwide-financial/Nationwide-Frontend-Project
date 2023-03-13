@@ -21,6 +21,7 @@ function ImportContacts() {
     const [fileData, setFileData] = useState([]);
     const [listData,setListData] = useState([]);
     const [error, setError] = useState()
+    const [listName, setListName] = useState();
     const handleChange = (file) => {
         setFile(file);
     };
@@ -151,7 +152,7 @@ function ImportContacts() {
     }
     
     const handleClickImport = async(formattedData) => {
-        const response = await _addBulkContacts({ contacts: formattedData });
+        const response = await _addBulkContacts({ contacts: formattedData, listName: listName });
         console.log("res ", response)
         setLoading(false);
         if (response?.status === 201) {
@@ -169,7 +170,7 @@ function ImportContacts() {
     console.log("DAta ", fileData)
     return (
         <>
-            {loading ? <CircularProgress /> : showMapping ? <ImportMapping setListData={setListData} data={fileData} onPressBack={onClickBackToMapping} onPressImport={handleClickImport} /> : 
+            {loading ? <CircularProgress /> : showMapping ? <ImportMapping setListData={setListData} listName={listName} data={fileData} onPressBack={onClickBackToMapping} onPressImport={handleClickImport} /> : 
             showHealth ? <ImportHealth listData={listData} data={healthData} onGoBack={onPressBack} /> : <Grid container spacing={2} m={2}>
                 <Grid item xs={12} mt={2}>
                     <h1>Upload List</h1>
@@ -193,7 +194,7 @@ function ImportContacts() {
                     >
                         <Stack spacing={2} sx={{ textAlign: 'left' }}>
                             <p><b>1. Name Your List</b></p>
-                            <TextField placeholder="Text" size="small" />
+                            <TextField placeholder="Text" size="small" value={listName} onChange={e => setListName(e.target.value)}  />
                             <FileUploader
                                 classes='nationwide-drag-drop'
                                 label='Drag and Drop Or Click Here to Upload Your File'

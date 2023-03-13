@@ -95,81 +95,81 @@ function AddNewContact() {
     let cocontactIds = []
 
     try{
-      const applicantData = {
-        basicInformation: applicant,
-      };
-      if(!selectedApplicant || selectedApplicant == "" || selectedApplicant == null || selectedApplicant == undefined){
-        const responseContact = await _addContact(applicantData);
-        contactIds.push(responseContact?.data?.ID)
-        console.log("responseContact",responseContact)
-      }else{
-        contactIds.push(selectedApplicant)
-      }
-      if(router.query.params[2] == "coEnabled"){
-        if(!selectedCoApplicant || selectedCoApplicant == "" || selectedCoApplicant == null || selectedCoApplicant == undefined){
-          const coApplicantData = {
-            basicInformation: coApplicant,
-          };
-          const responseCoContact = await _addContact(coApplicantData);
-          cocontactIds.push(responseCoContact?.data?.ID)
-        }else{
-          cocontactIds.push(selectedCoApplicant)
-        }
-      }
-
       if (!applicationMainData?.loanAmount || applicationMainData?.loanAmount == "" || applicationMainData?.loanAmount == null ) {
         setError('Amount can not be empty !')
       }else{
-        const auto_member = await _getAutoAssignMember();
-        const activeMember = auto_member?.data?.activeMember
-        let addmember = auto_member?.data?.members;
-
-        if (auto_member?.data?.type === 1) addmember = [state?.user?.info?.email];
-        if (auto_member?.data?.type === 2) {
-          const newActiveMember = activeMember !== null ? activeMember === addmember.length ? 0 : activeMember + 1 : 0
-          const body = {
-            activeMember: newActiveMember
-          }
-          _setActiveMember(body);
-          addmember = [addmember[newActiveMember]];
-        }
-
-        let body = {
-          productId: applicationProductId,
-          contactId: [...contactIds],
-          status_: "New Applications",
-          coContact: [...cocontactIds],
-          members: addmember || [],
-          applicationBasicInfo:{
-            loan_amount : applicationMainData?.loanAmount,
-            referralSource: applicationMainData?.ref,
-            //offerCode:offerCode, 
-          },
-          aditionalInfo:{}
-        }
-        console.log("body",body)
-        const res = await _addApplication(body)
-        console.log("_addApplication",res?.response?.status == 400)
-        if(res?.status == 200){
-          let history = {
-            action: "Application Created",
-            description: `The application for ${applicantData?.firstName} ${applicantData?.lastName} was created`,
-            applicationId: res?.data?.applicationId
-          }
-          const resHistory = await _addHistory(history)
-          console.log("resHistory",resHistory)
-          if(res?.status == 200 && resHistory?.status == 200){
-            setError('')
-            router.push(`/application/application-form-data?cocontact=${cocontactIds[0]}&contact=${contactIds[0]}&compaign=${applicationProductId}&applicationId=${res?.data?.applicationId}`);
-          }
-        }else if(res?.response?.status == 400){
-          setError(`${res?.response?.data?.message}`)
+        const applicantData = {
+          basicInformation: applicant,
+        };
+        if(!selectedApplicant || selectedApplicant == "" || selectedApplicant == null || selectedApplicant == undefined){
+          const responseContact = await _addContact(applicantData);
+          contactIds.push(responseContact?.data?.ID)
+          console.log("responseContact",responseContact)
         }else{
-          setError('Application creation is failed')
+          contactIds.push(selectedApplicant)
         }
-
+        if(router.query.params[2] == "coEnabled"){
+          if(!selectedCoApplicant || selectedCoApplicant == "" || selectedCoApplicant == null || selectedCoApplicant == undefined){
+            const coApplicantData = {
+              basicInformation: coApplicant,
+            };
+            const responseCoContact = await _addContact(coApplicantData);
+            cocontactIds.push(responseCoContact?.data?.ID)
+          }else{
+            cocontactIds.push(selectedCoApplicant)
+          }
+        }
+  
+    
+       
+          const auto_member = await _getAutoAssignMember();
+          const activeMember = auto_member?.data?.activeMember
+          let addmember = auto_member?.data?.members;
+  
+          if (auto_member?.data?.type === 1) addmember = [state?.user?.info?.email];
+          if (auto_member?.data?.type === 2) {
+            const newActiveMember = activeMember !== null ? activeMember === addmember.length ? 0 : activeMember + 1 : 0
+            const body = {
+              activeMember: newActiveMember
+            }
+            _setActiveMember(body);
+            addmember = [addmember[newActiveMember]];
+          }
+  
+          let body = {
+            productId: applicationProductId,
+            contactId: [...contactIds],
+            status_: "New Applications",
+            coContact: [...cocontactIds],
+            members: addmember || [],
+            applicationBasicInfo:{
+              loan_amount : applicationMainData?.loanAmount,
+              referralSource: applicationMainData?.ref,
+              //offerCode:offerCode, 
+            },
+            aditionalInfo:{}
+          }
+          console.log("body",body)
+          const res = await _addApplication(body)
+          console.log("_addApplication",res?.response?.status == 400)
+          if(res?.status == 200){
+            let history = {
+              action: "Application Created",
+              description: `The application for ${applicantData?.firstName} ${applicantData?.lastName} was created`,
+              applicationId: res?.data?.applicationId
+            }
+            const resHistory = await _addHistory(history)
+            console.log("resHistory",resHistory)
+            if(res?.status == 200 && resHistory?.status == 200){
+              setError('')
+              router.push(`/application/application-form-data?cocontact=${cocontactIds[0]}&contact=${contactIds[0]}&compaign=${applicationProductId}&applicationId=${res?.data?.applicationId}`);
+            }
+          }else if(res?.response?.status == 400){
+            setError(`${res?.response?.data?.message}`)
+          }else{
+            setError('Application creation is failed')
+          }
       }
-      
     }catch(err){
       console.log(err)
     }

@@ -76,8 +76,8 @@ function ApplicantFields({addApplicationFlag, setContactData, contactList, setSe
           setContact({ ...contact, address2: event.target.value });
           break;
         }
-        case "cityOrState": {
-          setContact({ ...contact, cityOrState: event.target.value });
+        case "city": {
+          setContact({ ...contact, city: event.target.value });
           break;
         }
         case "Zip": {
@@ -592,8 +592,8 @@ function ApplicantFields({addApplicationFlag, setContactData, contactList, setSe
             <Grid item xs={3} pl={1}>
               <TextField
                 fullWidth
-                onChange={(event) => handleChange("cityOrState", event)}
-                value={contact?.cityOrState}
+                onChange={(event) => handleChange("city", event)}
+                value={contact?.city}
                 size="small"
                 margin="normal"
                 id="outlined-basic"

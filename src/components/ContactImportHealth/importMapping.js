@@ -10,11 +10,13 @@ const appHeaders = [
     { label: 'Email', field: 'emailAddress' },
     { label: 'Home Phone', field: 'homePhoneNumber' },
     { label: 'Mobile Phone', field: 'mobilePhoneNumber' },
+    { label: 'best Time To Call', field: 'bestTimeToCall' },
     { label: 'Work Phone', field: 'work' },
     { label: 'Fax', field: 'fax' },
     { label: 'Address 1', field: 'address1' },
     { label: 'Address 2', field: 'address2' },
-    { label: 'City or State', field: 'cityOrState' },
+    { label: 'City', field: 'city' },
+    { label: 'State', field: 'state' },
     { label: 'Zip', field: 'Zip' },
     { label: 'primary Language', field: 'primaryLanguage' },
     { label: 'Marital Status', field: 'maritalStatus' },
@@ -22,10 +24,11 @@ const appHeaders = [
     { label: 'Time Zone', field: 'timeZone' },
     { label: 'Credit Score', field: 'creditScore' },
     { label: 'date', field: 'date' },
+    { label: 'credit Report Type', field: 'creditReportType' },
     { label: 'dob', field: 'dob' },
     { label: 'ssn', field: 'ssn' },
     { label: 'dl', field: 'dl' },
-    { label: 'state', field: 'state' },
+    { label: 'state_', field: 'state_' },
     { label: 'employer', field: 'employer' },
     { label: 'occ', field: 'occ' },
     { label: 'employment Status', field: 'employmentStatus' },
@@ -34,15 +37,11 @@ const appHeaders = [
     { label: 'mortgage Payment', field: 'mortgagePayment' },
     { label: 'mortgage Balance', field: 'mortgageBalance' },
     { label: 'home Value', field: 'homeValue' },
-    { label: 'best Time To Call', field: 'bestTimeToCall' },
-    { label: 'credit Report Type', field: 'creditReportType' },
-    { label: 'state', field: 'state_' }
 ]
 
-function ImportMapping({ data, onPressBack, onPressImport,setListData }) {
+function ImportMapping({ data, onPressBack, onPressImport, setListData, listName }) {
     const [appHeaderState, setAppHeaderState] = useState([]);
     const [error, setError] = useState();
-    console.log("App State ", appHeaderState, appHeaderState[32]);
 
     const renderTableHead = () => {
         const tableHead = [<TableCell key="hd1" sx={{ minWidth: 150 }}><b>APP HEADERS</b></TableCell>];
@@ -80,7 +79,7 @@ function ImportMapping({ data, onPressBack, onPressImport,setListData }) {
         data && data[0] && data.length > 0 && Object.entries(data[0]).forEach(([key, item]) => {
             console.log("Data ", key, item)
             fileHeaders.push(
-                <TableCell key={"k"+key}>
+                <TableCell key={"k" + key}>
                     {item}
                 </TableCell>
             )
@@ -93,7 +92,7 @@ function ImportMapping({ data, onPressBack, onPressImport,setListData }) {
         data && data[0] && data.length > 0 && Object.entries(data).forEach(([key, item]) => {
             if (key != 0) {
                 tableData.push(
-                    <TableRow key={"dt"+key}>
+                    <TableRow key={"dt" + key}>
                         <TableCell><b>Your Data</b></TableCell>
                         <TableCell>{item.row1}</TableCell>
                         <TableCell>{item.row2}</TableCell>
@@ -159,30 +158,30 @@ function ImportMapping({ data, onPressBack, onPressImport,setListData }) {
                             [appHeaderState[7].field]: contact.row8,
                             [appHeaderState[8].field]: contact.row9,
                             [appHeaderState[9].field]: contact.row10,
-                            [appHeaderState[11].field]: contact.row11,
-                            [appHeaderState[12].field]: contact.row12,
-                            [appHeaderState[13].field]: contact.row13,
-                            [appHeaderState[14].field]: contact.row14,
-                            [appHeaderState[15].field]: contact.row15,
-                            [appHeaderState[16].field]: contact.row16,
-                            [appHeaderState[17].field]: contact.row17,
-                            [appHeaderState[18].field]: contact.row18,
-                            [appHeaderState[19].field]: contact.row19,
-                            [appHeaderState[20].field]: contact.row20,
-                            [appHeaderState[21].field]: contact.row21,
-                            [appHeaderState[22].field]: contact.row22,
-                            [appHeaderState[23].field]: contact.row23,
-                            [appHeaderState[24].field]: contact.row24,
-                            [appHeaderState[25].field]: contact.row25,
-                            [appHeaderState[26].field]: contact.row26,
-                            [appHeaderState[27].field]: contact.row27,
-                            [appHeaderState[28].field]: contact.row28,
-                            [appHeaderState[29].field]: contact.row29,
-                            [appHeaderState[30].field]: contact.row30,
-                            [appHeaderState[31].field]: contact.row31,
-                            [appHeaderState[32].field]: contact.row32,
-                            [appHeaderState[33].field]: contact.row33,
-                            [appHeaderState[34].field]: contact.row34,
+                            [appHeaderState[10].field]: contact.row11,
+                            [appHeaderState[11].field]: contact.row12,
+                            [appHeaderState[12].field]: contact.row13,
+                            [appHeaderState[13].field]: contact.row14,
+                            [appHeaderState[14].field]: contact.row15,
+                            [appHeaderState[15].field]: contact.row16,
+                            [appHeaderState[16].field]: contact.row17,
+                            [appHeaderState[17].field]: contact.row18,
+                            [appHeaderState[18].field]: contact.row19,
+                            [appHeaderState[19].field]: contact.row20,
+                            [appHeaderState[20].field]: contact.row21,
+                            [appHeaderState[21].field]: contact.row22,
+                            [appHeaderState[22].field]: contact.row23,
+                            [appHeaderState[23].field]: contact.row24,
+                            [appHeaderState[24].field]: contact.row25,
+                            [appHeaderState[25].field]: contact.row26,
+                            [appHeaderState[26].field]: contact.row27,
+                            [appHeaderState[27].field]: contact.row28,
+                            [appHeaderState[28].field]: contact.row29,
+                            [appHeaderState[29].field]: contact.row30,
+                            [appHeaderState[30].field]: contact.row31,
+                            [appHeaderState[31].field]: contact.row32,
+                            [appHeaderState[32].field]: contact.row33,
+
                         }
                     })
                 }

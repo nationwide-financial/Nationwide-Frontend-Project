@@ -354,8 +354,7 @@ function ApplicationDate() {
   const [note, setNote] = useState("");
   const [formError, setformError] = useState("");
   const [emaildatarows, setEmaildatarows] = useState([]);
-  const [emailFiterOptions,setEmailFiterOptions] = useState(["support@lunnaloans.com"]);
-  let emailFiterOptionsArr = []
+  const [emailFiterOptions,setEmailFiterOptions] = useState([]);
   
 
   const addApplicationNotes = async (id) => {
@@ -476,9 +475,6 @@ function ApplicationDate() {
       setApplicationData(res?.data?.data?.Items[0]);
       setTeamMembers(res?.data?.data?.Items[0]?.members);
       console.log("res?.data?.data?.Items[0]?.members",res?.data?.data?.Items[0]?.members)
-      //let emailMembers = res?.data?.data?.Items[0]?.members
-      //setEmailFiterOptions([...emailFiterOptions,...emailMembers])
-      console.log("480",emailFiterOptions)
       let appDt = res?.data?.data?.Items[0]?.applicationData;
       setAppDtStandardIncome(appDt?.financialDetails?.standardIncome);
       setAppDtJobTitle(appDt?.financialDetails?.jobTitle);
@@ -508,16 +504,13 @@ function ApplicationDate() {
       );
       setContactData(resContact?.data?.Item);
       //console.log("resContact?.data?.Item",resContact?.data?.Item?.basicInformation?.emailAddress)
-      setEmailFiterOptions([...emailFiterOptions,resContact?.data?.Item?.basicInformation?.emailAddress])
-      console.log("511",emailFiterOptions)
+      setEmailFiterOptions([resContact?.data?.Item?.basicInformation?.emailAddress])
       let coContactTemp = [];
       for (let i = 0; i < res?.data?.data?.Items[0].coContact.length; i++) {
         const resCoContact = await _fetchSingleContacts(
           res?.data?.data?.Items[0].coContact[i]
         );
         await coContactTemp.push(resCoContact?.data?.Item);
-      //  console.log("resCoContact?.data?.Item?.basicInformation?.emailAddress",resCoContact?.data?.Item?.basicInformation?.emailAddress)
-       // if(resCoContact?.status == 200) setEmailFiterOptions([...emailFiterOptions,resCoContact?.data?.Item?.basicInformation?.emailAddress])
       }
 
       console.log("coContactTemp*****", coContactTemp);
@@ -2048,9 +2041,10 @@ function ApplicationDate() {
                                 </TableRow>
                               </TableHead>
                               <TableBody>
-                                {console.log("[...new Set(emailFiterOptions)]",[...new Set([...emailFiterOptions,...teamMembers || []])])}
+                                {console.log("emaildatarows",emaildatarows)}
                                 {emaildatarows?.filter((data)=>{
-                                  if([...new Set([...emailFiterOptions,...teamMembers || []])]?.includes(data.sender.emailAddress.address)) return data;
+                                  if([...emailFiterOptions || []]?.includes(data?.sender?.emailAddress?.address)) return data;
+                                  if([...emailFiterOptions || []]?.includes(data?.toRecipients[0]?.emailAddress?.address)) return data;
                                 })?.map((row, i) => (
                                   <TableRow
                                     key={i}
@@ -2059,6 +2053,8 @@ function ApplicationDate() {
                                         border: 0,
                                       },
                                     }}
+                                    hover
+                                    onClick={()=> router.push(`/email/email-document-requested?id=${row?.id?.substring(0, row?.id.length-1)}`) }
                                   >
                                     <TableCell component="th" scope="row">
                                       {row.createdDateTime}
